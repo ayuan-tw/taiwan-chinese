@@ -1,44 +1,38 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>あゆあん台湾華語</title>
 <style>
-body{
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-    background:#FFF8EE;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    margin:0;
-}
-.card{
-    background:white;
-    padding:40px;
-    border-radius:20px;
-    box-shadow:0 10px 30px rgba(0,0,0,.08);
-    text-align:center;
-}
-h1{
-    margin:0;
-}
-p{
-    color:#666;
-}
-</style>
-</head>
-
-<body>
-
-<div class="card">
-<h1>🇹🇼 あゆあん台湾華語</h1>
-
-<p>Powered by Noa ❤️</p>
-
-<p>Coming Soon...</p>
-
-</div>
-
-</body>
-</html>
+:root{--bg:#fff8ed;--card:#fff;--ink:#2d2926;--muted:#766a5f;--line:#eadbc8;--accent:#d97706;--accent2:#0f766e;--soft:#fff3d6;}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#fff8ed,#fffdf8);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Noto Sans JP","PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;line-height:1.7}
+.zy{font-family:"Bopomofo Ruby","Noto Sans Bopomofo","PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;color:var(--accent2);letter-spacing:.04em}
+header{position:sticky;top:0;background:rgba(255,248,237,.95);border-bottom:1px solid var(--line);z-index:2}.inner{max-width:980px;margin:auto;padding:14px 16px}
+h1{margin:0;font-size:24px}.sub{margin:4px 0 12px;color:var(--muted);font-size:13px}
+.search{display:flex;gap:8px}input{width:100%;border:1px solid var(--line);border-radius:16px;padding:12px 14px;font-size:16px}button{border:1px solid var(--line);border-radius:999px;background:white;padding:8px 12px}
+main{max-width:980px;margin:auto;padding:16px}.hero{background:white;border:1px solid var(--line);border-radius:24px;padding:18px;margin:12px 0 16px;box-shadow:0 8px 24px rgba(92,64,28,.08)}.hero h2{margin:0 0 8px;font-size:20px}.hero p{color:var(--muted)}
+.nav{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px}.nav button.active{background:var(--accent);color:white;border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{background:white;border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 4px 18px rgba(92,64,28,.06)}.card[hidden]{display:none}
+.head{width:100%;border:0;border-radius:0;background:white;text-align:left;padding:16px;display:grid;grid-template-columns:1fr auto;gap:8px}.word{font-size:26px;font-weight:850}.level{color:var(--accent);font-size:13px}.meaning{color:var(--muted);font-size:14px;margin-top:6px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.tag{font-size:11px;background:#eef8f6;color:var(--accent2);border-radius:999px;padding:3px 8px}
+.body{display:none;border-top:1px solid var(--line);padding:14px 16px 18px}.card.open .body{display:block}.core{background:var(--soft);border-radius:14px;padding:10px 12px;margin-bottom:12px}h3{font-size:15px;color:var(--muted);margin:14px 0 8px}
+.ex{background:#fbfbfb;border-left:4px solid var(--accent);border-radius:12px;padding:10px 12px;margin:10px 0}.ex .zh{font-size:18px;font-weight:700}.ex .jp{color:var(--muted);font-size:14px}
+.memo{background:#f7fbfa;border:1px solid #d8ede8;border-radius:14px;padding:10px 12px;margin-top:12px}.empty{display:none;background:white;border:1px dashed var(--line);border-radius:20px;padding:24px;text-align:center;color:var(--muted)}footer{text-align:center;color:var(--muted);font-size:12px;padding:24px}
+@media(max-width:720px){.grid{grid-template-columns:1fr}}@media(max-width:520px){h1{font-size:21px}.inner,main{padding-left:12px;padding-right:12px}.word{font-size:25px}}
+</style></head><body>
+<header><div class="inner"><h1>🇹🇼 あゆあん台湾華語</h1><p class="sub">繁體字・注音・日本語メモつき。検索して、タップして開く。</p><div class="search"><input id="q" placeholder="検索：還、ㄏㄞˊ、まだ、ゲーム…"><button id="openAll">全部開く</button></div></div></header>
+<main><section class="hero"><h2>Ver.0.1｜まずは頻出表現から</h2><p>あゆあんが実際に「これ何？」ってなった表現を、のあメモ付きで育てていく学習サイト。</p></section>
+<nav class="nav"><button class="active" data-f="all">全部</button><button data-f="副詞">副詞</button><button data-f="比較">比較</button><button data-f="型">型</button><button data-f="動詞表現">動詞表現</button><button data-f="ゲーム">ゲーム</button></nav>
+<p id="count" class="sub"></p><section id="cards" class="grid"></section><section id="empty" class="empty">該当する項目が見つからなかったよ。</section></main>
+<footer>あゆあん専用 台湾華語ノート Ver.0.1 / Powered by Noa</footer>
+<script>
+const entries=[{"w": "還", "z": "ㄏㄞˊ", "c": "副詞", "t": ["副詞", "頻出", "ゲーム"], "m": "まだ／依然として／さらに", "core": "基本イメージは「まだその状態が続いている」。", "lv": "★★★★★", "ex": [["我還在工作。", "ㄨㄛˇ ㄏㄞˊ ㄗㄞˋ ㄍㄨㄥ ㄗㄨㄛˋ。", "まだ仕事中。"], ["你還在嗎？", "ㄋㄧˇ ㄏㄞˊ ㄗㄞˋ ㄇㄚ˙？", "まだいる？／まだオンライン？"]], "memo": "還好・還在・還沒 をセットで覚える。"}, {"w": "還好", "z": "ㄏㄞˊ ㄏㄠˇ", "c": "副詞", "t": ["副詞", "口語"], "m": "まあまあ／大丈夫／～でよかった", "core": "状況によって「まあまあ」「セーフ」「助かった」になる。", "lv": "★★★★★", "ex": [["還好我有帶雨傘。", "ㄏㄞˊ ㄏㄠˇ ㄨㄛˇ ㄧㄡˇ ㄉㄞˋ ㄩˇ ㄙㄢˇ。", "傘持ってきててよかった。"], ["還好啦。", "ㄏㄞˊ ㄏㄠˇ ㄌㄚ。", "まあ大丈夫／そこまでじゃないよ。"]], "memo": "まずは「まあ大丈夫」で覚えると使いやすい。"}, {"w": "去找", "z": "ㄑㄩˋ ㄓㄠˇ", "c": "動詞表現", "t": ["動詞", "ゲーム", "頻出"], "m": "探しに行く／会いに行く／訪ねる", "core": "去找＋人 は「会いに行く」「その人のところへ行く」と考えると自然。", "lv": "★★★★★", "ex": [["我去找你。", "ㄨㄛˇ ㄑㄩˋ ㄓㄠˇ ㄋㄧˇ。", "そっち行くね。"], ["她去找老朋友了。", "ㄊㄚ ㄑㄩˋ ㄓㄠˇ ㄌㄠˇ ㄆㄥˊ ㄧㄡˇ ㄌㄜ˙。", "彼女は旧友に会いに行った。"]], "memo": "「探す」だけで考えない。去找朋友＝友達に会いに行く。"}, {"w": "很難不～", "z": "ㄏㄣˇ ㄋㄢˊ ㄅㄨˋ～", "c": "型", "t": ["型", "SNS"], "m": "～しないのは難しい／～せずにはいられない", "core": "避けようとしても自然にそうなってしまう感じ。", "lv": "★★★★☆", "ex": [["很好笑，很難不笑。", "ㄏㄣˇ ㄏㄠˇ ㄒㄧㄠˋ，ㄏㄣˇ ㄋㄢˊ ㄅㄨˋ ㄒㄧㄠˋ。", "面白くて笑わずにはいられない。"], ["雨太大，維持時間又長，很難不淹。", "ㄩˇ ㄊㄞˋ ㄉㄚˋ，ㄨㄟˊ ㄔˊ ㄕˊ ㄐㄧㄢ ㄧㄡˋ ㄔㄤˊ，ㄏㄣˇ ㄋㄢˊ ㄅㄨˋ ㄧㄢ。", "浸水しないほうが難しい。"]], "memo": "SNSやチャットで見たらこの型。"}, {"w": "剛好", "z": "ㄍㄤ ㄏㄠˇ", "c": "副詞", "t": ["副詞", "頻出"], "m": "ちょうど／ぴったり", "core": "数量・時間・タイミングがぴったり合う感じ。", "lv": "★★★★★", "ex": [["時間剛好。", "ㄕˊ ㄐㄧㄢ ㄍㄤ ㄏㄠˇ。", "時間がちょうどいい。"], ["我剛好也想問你。", "ㄨㄛˇ ㄍㄤ ㄏㄠˇ ㄧㄝˇ ㄒㄧㄤˇ ㄨㄣˋ ㄋㄧˇ。", "私もちょうど聞こうと思ってた。"]], "memo": "差不多＝だいたい、剛好＝ぴったり。"}, {"w": "差不多", "z": "ㄔㄚ ㄅㄨˋ ㄉㄨㄛ", "c": "副詞", "t": ["副詞", "ゲーム"], "m": "だいたい／ほぼ／そろそろ", "core": "きっちりではなく、おおよそ合っている感じ。", "lv": "★★★★★", "ex": [["差不多到了。", "ㄔㄚ ㄅㄨˋ ㄉㄨㄛ ㄉㄠˋ ㄌㄜ˙。", "もうすぐ着く。"], ["差不多滿了。", "ㄔㄚ ㄅㄨˋ ㄉㄨㄛ ㄇㄢˇ ㄌㄜ˙。", "だいたい埋まった。"]], "memo": "ゲームの「差不多滿」は実用度高い。"}, {"w": "至少", "z": "ㄓˋ ㄕㄠˇ", "c": "副詞", "t": ["副詞"], "m": "少なくとも", "core": "最低ラインを言うときに使う。", "lv": "★★★★☆", "ex": [["至少要三十分鐘。", "ㄓˋ ㄕㄠˇ ㄧㄠˋ ㄙㄢ ㄕˊ ㄈㄣ ㄓㄨㄥ。", "少なくとも30分かかる。"]], "memo": "「最低でも」で固定。"}, {"w": "幾乎", "z": "ㄐㄧ ㄏㄨ", "c": "副詞", "t": ["副詞"], "m": "ほとんど／ほぼ", "core": "全部ではないけど、かなり近い。", "lv": "★★★★☆", "ex": [["我幾乎每天喝咖啡。", "ㄨㄛˇ ㄐㄧ ㄏㄨ ㄇㄟˇ ㄊㄧㄢ ㄏㄜ ㄎㄚ ㄈㄟ。", "ほぼ毎日コーヒーを飲む。"]], "memo": "似乎とは意味が全然違う。"}, {"w": "又／再", "z": "ㄧㄡˋ／ㄗㄞˋ", "c": "比較", "t": ["比較", "副詞"], "m": "又＝もう起きた／追加。再＝これからまた。", "core": "又は過去・追加。再は未来・次回。", "lv": "★★★★★", "ex": [["你又忘了。", "ㄋㄧˇ ㄧㄡˋ ㄨㄤˋ ㄌㄜ˙。", "また忘れたね。"], ["明天再說。", "ㄇㄧㄥˊ ㄊㄧㄢ ㄗㄞˋ ㄕㄨㄛ。", "また明日話そう。"]], "memo": "もう起きた＝又、これから＝再。"}, {"w": "就／才", "z": "ㄐㄧㄡˋ／ㄘㄞˊ", "c": "比較", "t": ["比較", "副詞"], "m": "就＝早い・すぐ。才＝やっと・遅い。", "core": "時間感覚が逆になりやすい。", "lv": "★★★★★", "ex": [["我現在就去。", "ㄨㄛˇ ㄒㄧㄢˋ ㄗㄞˋ ㄐㄧㄡˋ ㄑㄩˋ。", "今すぐ行く。"], ["我昨天才知道。", "ㄨㄛˇ ㄗㄨㄛˊ ㄊㄧㄢ ㄘㄞˊ ㄓ ㄉㄠˋ。", "昨日やっと知った。"]], "memo": "就＝早い、才＝遅い。"}];let filter='all',expanded=false;
+const root=document.getElementById('cards'),q=document.getElementById('q'),count=document.getElementById('count'),empty=document.getElementById('empty');
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+root.innerHTML=entries.map(e=>`<article class="card" data-cat="${esc(e.c)}" data-tags="${esc(e.t.join(' '))}" data-key="${esc([e.w,e.z,e.c,e.m,e.core,e.memo,e.lv,...e.t,...e.ex.flat()].join(' ').toLowerCase())}">
+<button class="head"><div><div class="word">${esc(e.w)}</div><div class="zy">${esc(e.z)}</div><div class="meaning">${esc(e.m)}</div><div class="tags">${e.t.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></div><div class="level">${esc(e.lv)}<br>⌄</div></button>
+<div class="body"><div class="core"><b>基本イメージ：</b>${esc(e.core)}</div><h3>例文</h3>${e.ex.map(x=>`<div class="ex"><div class="zh">${esc(x[0])}</div><div class="zy">${esc(x[1])}</div><div class="jp">${esc(x[2])}</div></div>`).join('')}<div class="memo"><b>🌱 のあメモ：</b>${esc(e.memo)}</div></div></article>`).join('');
+document.querySelectorAll('.card .head').forEach(b=>b.onclick=()=>b.closest('.card').classList.toggle('open'));
+function apply(){let s=q.value.toLowerCase().trim(),n=0;document.querySelectorAll('.card').forEach(c=>{let ok=(filter==='all'||c.dataset.cat===filter||c.dataset.tags.includes(filter))&&(!s||c.dataset.key.includes(s));c.hidden=!ok;if(ok)n++;});count.textContent=n+'件表示中';empty.style.display=n?'none':'block'}
+q.oninput=apply;document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');filter=b.dataset.f;apply()});
+document.getElementById('openAll').onclick=()=>{expanded=!expanded;document.querySelectorAll('.card:not([hidden])').forEach(c=>c.classList.toggle('open',expanded));document.getElementById('openAll').textContent=expanded?'全部閉じる':'全部開く'};
+apply();
+</script></body></html>
