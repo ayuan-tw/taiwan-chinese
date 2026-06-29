@@ -39,9 +39,10 @@
       <h2 class="section-title">🌱 今天的3個單字</h2>
       <div class="button-row">
         <button onclick="pickWords()">今日の3單字を出す</button>
+        <button class="secondary" onclick="pickPriorityWords()">復習優先3單字</button>
         <button class="secondary" onclick="clearTodayWords()">消す</button>
       </div>
-      <p class="hint">サイトを開いた時にも自動で3語出ます。</p>
+      <p class="hint">復習優先は、間違えた回数・お気に入りを少し重めに出します。</p>
       <div id="todayWords" class="cards result-area"></div>
     </section>
 
@@ -70,11 +71,18 @@
     </section>
 
     <section class="panel">
+      <h2 class="section-title">🗣️ あゆあん語録</h2>
+      <p class="hint">そのまま会話で使えそうな文だけ集めたコーナー。</p>
+      <div id="phraseList" class="phrase-list"></div>
+    </section>
+
+    <section class="panel">
       <h2 class="section-title">📘 單字一覧</h2>
       <div class="button-row category-buttons" id="categoryButtons"></div>
       <div class="button-row">
         <button class="secondary" onclick="showFavorites()">⭐ お気に入りだけ</button>
         <button class="secondary" onclick="showWeakWords()">🔁 苦手單字だけ</button>
+        <button class="secondary" onclick="showPriorityWords()">🔥 復習優先順</button>
         <button class="secondary" onclick="clearWeakWords()">苦手リストを消す</button>
         <button class="secondary" onclick="renderWordList(words)">全部表示</button>
       </div>
@@ -83,7 +91,7 @@
   </main>
 
   <footer>
-    Ver.1.0｜お気に入り・クイズ・苦手單字・学習記録｜あゆあん台湾華語ノート
+    Ver.1.1｜単語増量・復習優先度・あゆあん語録｜あゆあん台湾華語ノート
   </footer>
 
   <script src="words.js"></script>

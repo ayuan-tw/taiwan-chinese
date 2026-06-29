@@ -306,3 +306,10 @@ footer {
   font-size: 0.8rem;
   padding: 30px 10px;
 }
+
+.priority { display: inline-block; margin-top: 8px; color: #d87941; font-size: 0.82rem; }
+.phrase-list { display: grid; gap: 12px; margin-top: 16px; }
+.phrase-card { max-width: none; background: white; border-radius: 18px; padding: 20px; box-shadow: 0 4px 12px var(--shadow); }
+.phrase-main { font-size: 1.12rem; color: var(--main-dark); font-weight: bold; }
+.phrase-sub { margin-top: 4px; color: var(--muted); }
+.phrase-meaning { margin-top: 8px; }

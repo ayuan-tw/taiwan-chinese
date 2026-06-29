@@ -29,5 +29,42 @@ const words = [
   { category: "ゲーム", word: "滿了", zhuyin: "ㄇㄢˇ ㄌㄜ˙", meaning: "満員になった、いっぱいになった", note: "集結や枠が埋まった時に便利。", example: "已經滿了。", exampleZhuyin: "ㄧˇ ㄐㄧㄥ ㄇㄢˇ ㄌㄜ˙" },
   { category: "ゲーム", word: "自行前往", zhuyin: "ㄗˋ ㄒㄧㄥˊ ㄑㄧㄢˊ ㄨㄤˇ", meaning: "各自で向かう", note: "やや書き言葉寄りだけどゲーム告知で見る。", example: "工程站自行前往拜訪。", exampleZhuyin: "ㄍㄨㄥ ㄔㄥˊ ㄓㄢˋ ㄗˋ ㄒㄧㄥˊ ㄑㄧㄢˊ ㄨㄤˇ ㄅㄞˋ ㄈㄤˇ" },
   { category: "天気", word: "颱風假", zhuyin: "ㄊㄞˊ ㄈㄥ ㄐㄧㄚˋ", meaning: "台風休み", note: "台湾らしい話題。日本には基本ないやつ。", example: "日本沒有放颱風假。", exampleZhuyin: "ㄖˋ ㄅㄣˇ ㄇㄟˊ ㄧㄡˇ ㄈㄤˋ ㄊㄞˊ ㄈㄥ ㄐㄧㄚˋ" },
-  { category: "天気", word: "涼快", zhuyin: "ㄌㄧㄤˊ ㄎㄨㄞˋ", meaning: "涼しい", note: "冷は寒い寄り。涼快は気持ちいい涼しさ。", example: "明天好像會比較涼快。", exampleZhuyin: "ㄇㄧㄥˊ ㄊㄧㄢ ㄏㄠˇ ㄒㄧㄤˋ ㄏㄨㄟˋ ㄅㄧˇ ㄐㄧㄠˋ ㄌㄧㄤˊ ㄎㄨㄞˋ" }
+  { category: "天気", word: "涼快", zhuyin: "ㄌㄧㄤˊ ㄎㄨㄞˋ", meaning: "涼しい", note: "冷は寒い寄り。涼快は気持ちいい涼しさ。", example: "明天好像會比較涼快。", exampleZhuyin: "ㄇㄧㄥˊ ㄊㄧㄢ ㄏㄠˇ ㄒㄧㄤˋ ㄏㄨㄟˋ ㄅㄧˇ ㄐㄧㄠˋ ㄌㄧㄤˊ ㄎㄨㄞˋ" },
+
+  { category: "副詞", word: "原本", zhuyin: "ㄩㄢˊ ㄅㄣˇ", meaning: "もともと", note: "予定や状態がもともとそうだった時。", example: "我原本想去夜市。", exampleZhuyin: "ㄨㄛˇ ㄩㄢˊ ㄅㄣˇ ㄒㄧㄤˇ ㄑㄩˋ ㄧㄝˋ ㄕˋ" },
+  { category: "副詞", word: "本來", zhuyin: "ㄅㄣˇ ㄌㄞˊ", meaning: "もともと、本来", note: "原本に近い。口語でもよく使う。", example: "我本來就知道。", exampleZhuyin: "ㄨㄛˇ ㄅㄣˇ ㄌㄞˊ ㄐㄧㄡˋ ㄓ ㄉㄠˋ" },
+  { category: "副詞", word: "後來", zhuyin: "ㄏㄡˋ ㄌㄞˊ", meaning: "その後、結局", note: "時間が進んだ後の展開。", example: "後來我還是去了。", exampleZhuyin: "ㄏㄡˋ ㄌㄞˊ ㄨㄛˇ ㄏㄞˊ ㄕˋ ㄑㄩˋ ㄌㄜ˙" },
+  { category: "接続", word: "然後", zhuyin: "ㄖㄢˊ ㄏㄡˋ", meaning: "それから、そして", note: "話をつなぐ口語の定番。", example: "然後我就回家了。", exampleZhuyin: "ㄖㄢˊ ㄏㄡˋ ㄨㄛˇ ㄐㄧㄡˋ ㄏㄨㄟˊ ㄐㄧㄚ ㄌㄜ˙" },
+  { category: "接続", word: "之後", zhuyin: "ㄓ ㄏㄡˋ", meaning: "〜の後で", note: "出来事の後を言う。", example: "吃完飯之後，我想散步。", exampleZhuyin: "ㄔ ㄨㄢˊ ㄈㄢˋ ㄓ ㄏㄡˋ，ㄨㄛˇ ㄒㄧㄤˇ ㄙㄢˋ ㄅㄨˋ" },
+  { category: "接続", word: "以後", zhuyin: "ㄧˇ ㄏㄡˋ", meaning: "これから、以後", note: "今後の話にも使える。", example: "以後我會記得。", exampleZhuyin: "ㄧˇ ㄏㄡˋ ㄨㄛˇ ㄏㄨㄟˋ ㄐㄧˋ ㄉㄜ˙" },
+  { category: "副詞", word: "剛剛", zhuyin: "ㄍㄤ ㄍㄤ", meaning: "さっき、たった今", note: "少し前のこと。", example: "我剛剛吃藥了。", exampleZhuyin: "ㄨㄛˇ ㄍㄤ ㄍㄤ ㄔ ㄧㄠˋ ㄌㄜ˙" },
+  { category: "副詞", word: "現在才", zhuyin: "ㄒㄧㄢˋ ㄗㄞˋ ㄘㄞˊ", meaning: "今やっと", note: "遅れてやっと、の感じ。", example: "我現在才洗澡。", exampleZhuyin: "ㄨㄛˇ ㄒㄧㄢˋ ㄗㄞˋ ㄘㄞˊ ㄒㄧˇ ㄗㄠˇ" },
+  { category: "副詞", word: "應該", zhuyin: "ㄧㄥ ㄍㄞ", meaning: "たぶん〜はず、〜すべき", note: "推測にも義務にも使う。", example: "我應該要上班。", exampleZhuyin: "ㄨㄛˇ ㄧㄥ ㄍㄞ ㄧㄠˋ ㄕㄤˋ ㄅㄢ" },
+  { category: "副詞", word: "還是", zhuyin: "ㄏㄞˊ ㄕˋ", meaning: "やっぱり、それとも", note: "文脈で意味が変わりやすい要注意語。", example: "我還是想吃潤餅。", exampleZhuyin: "ㄨㄛˇ ㄏㄞˊ ㄕˋ ㄒㄧㄤˇ ㄔ ㄖㄨㄣˋ ㄅㄧㄥˇ" },
+  { category: "会話", word: "不就好了", zhuyin: "ㄅㄨˊ ㄐㄧㄡˋ ㄏㄠˇ ㄌㄜ˙", meaning: "〜すればいいじゃん", note: "少し軽く解決案を出す感じ。", example: "吃蛋糕不就好了。", exampleZhuyin: "ㄔ ㄉㄢˋ ㄍㄠ ㄅㄨˊ ㄐㄧㄡˋ ㄏㄠˇ ㄌㄜ˙" },
+  { category: "会話", word: "想退游", zhuyin: "ㄒㄧㄤˇ ㄊㄨㄟˋ ㄧㄡˊ", meaning: "ゲームを辞めたい", note: "退游＝ゲーム界隈で引退する感じ。", example: "我有點想退游。", exampleZhuyin: "ㄨㄛˇ ㄧㄡˇ ㄉㄧㄢˇ ㄒㄧㄤˇ ㄊㄨㄟˋ ㄧㄡˊ" },
+  { category: "会話", word: "忙翻了", zhuyin: "ㄇㄤˊ ㄈㄢ ㄌㄜ˙", meaning: "めちゃくちゃ忙しい", note: "口語でかなり忙しい感じ。", example: "最近工作忙翻了。", exampleZhuyin: "ㄗㄨㄟˋ ㄐㄧㄣˋ ㄍㄨㄥ ㄗㄨㄛˋ ㄇㄤˊ ㄈㄢ ㄌㄜ˙" },
+  { category: "会話", word: "搞錯", zhuyin: "ㄍㄠˇ ㄘㄨㄛˋ", meaning: "間違える、勘違いする", note: "カジュアルな勘違い。", example: "我好像搞錯了。", exampleZhuyin: "ㄨㄛˇ ㄏㄠˇ ㄒㄧㄤˋ ㄍㄠˇ ㄘㄨㄛˋ ㄌㄜ˙" },
+  { category: "買い物", word: "多一點", zhuyin: "ㄉㄨㄛ ㄧˋ ㄉㄧㄢˇ", meaning: "少し多め", note: "注文でめちゃ使える。", example: "香菜多一點。", exampleZhuyin: "ㄒㄧㄤ ㄘㄞˋ ㄉㄨㄛ ㄧˋ ㄉㄧㄢˇ" },
+  { category: "買い物", word: "去冰", zhuyin: "ㄑㄩˋ ㄅㄧㄥ", meaning: "氷なし", note: "台湾ドリンク注文の必須語。", example: "我要一杯去冰。", exampleZhuyin: "ㄨㄛˇ ㄧㄠˋ ㄧˋ ㄅㄟ ㄑㄩˋ ㄅㄧㄥ" },
+  { category: "買い物", word: "微糖", zhuyin: "ㄨㄟˊ ㄊㄤˊ", meaning: "微糖、少し甘い", note: "ドリンク注文の甘さ指定。", example: "我要微糖去冰。", exampleZhuyin: "ㄨㄛˇ ㄧㄠˋ ㄨㄟˊ ㄊㄤˊ ㄑㄩˋ ㄅㄧㄥ" },
+  { category: "旅行", word: "這裡有人嗎", zhuyin: "ㄓㄜˋ ㄌㄧˇ ㄧㄡˇ ㄖㄣˊ ㄇㄚ˙", meaning: "ここ誰かいますか", note: "席が空いているか聞く自然表現。", example: "不好意思，這裡有人嗎？", exampleZhuyin: "ㄅㄨˋ ㄏㄠˇ ㄧˋ ㄙ˙，ㄓㄜˋ ㄌㄧˇ ㄧㄡˇ ㄖㄣˊ ㄇㄚ˙" },
+  { category: "リアクション", word: "太誇張了", zhuyin: "ㄊㄞˋ ㄎㄨㄚ ㄓㄤ ㄌㄜ˙", meaning: "大げさ、やばすぎ", note: "驚いた時に使える台湾っぽい反応。", example: "這也太誇張了吧。", exampleZhuyin: "ㄓㄜˋ ㄧㄝˇ ㄊㄞˋ ㄎㄨㄚ ㄓㄤ ㄌㄜ˙ ㄅㄚ" },
+  { category: "リアクション", word: "什麼鬼", zhuyin: "ㄕㄣˊ ㄇㄜ˙ ㄍㄨㄟˇ", meaning: "何これ、なんだこれ", note: "ツッコミ。カジュアル強め。", example: "這是什麼鬼啦？", exampleZhuyin: "ㄓㄜˋ ㄕˋ ㄕㄣˊ ㄇㄜ˙ ㄍㄨㄟˇ ㄌㄚ" },
+  { category: "リアクション", word: "懂了懂了", zhuyin: "ㄉㄨㄥˇ ㄌㄜ˙ ㄉㄨㄥˇ ㄌㄜ˙", meaning: "わかったわかった", note: "軽い反応。言い方次第でかわいい。", example: "懂了懂了，謝啦。", exampleZhuyin: "ㄉㄨㄥˇ ㄌㄜ˙ ㄉㄨㄥˇ ㄌㄜ˙，ㄒㄧㄝˋ ㄌㄚ" }
+];
+
+
+const phrases = [
+  { text: "原來是這樣啊。", zhuyin: "ㄩㄢˊ ㄌㄞˊ ㄕˋ ㄓㄜˋ ㄧㄤˋ ㄚ", meaning: "なるほど、そういうことか。" },
+  { text: "我好像懂一點了。", zhuyin: "ㄨㄛˇ ㄏㄠˇ ㄒㄧㄤˋ ㄉㄨㄥˇ ㄧˋ ㄉㄧㄢˇ ㄌㄜ˙", meaning: "ちょっとわかった気がする。" },
+  { text: "我想不起來那個字。", zhuyin: "ㄨㄛˇ ㄒㄧㄤˇ ㄅㄨˋ ㄑㄧˇ ㄌㄞˊ ㄋㄚˋ ㄍㄜ˙ ㄗˋ", meaning: "その字が思い出せない。" },
+  { text: "我想不出來怎麼說。", zhuyin: "ㄨㄛˇ ㄒㄧㄤˇ ㄅㄨˋ ㄔㄨ ㄌㄞˊ ㄗㄣˇ ㄇㄜ˙ ㄕㄨㄛ", meaning: "なんて言えばいいか思いつかない。" },
+  { text: "等一下，我看一下。", zhuyin: "ㄉㄥˇ ㄧˊ ㄒㄧㄚˋ，ㄨㄛˇ ㄎㄢˋ ㄧˊ ㄒㄧㄚˋ", meaning: "ちょっと待って、確認する。" },
+  { text: "不好意思，這裡有人嗎？", zhuyin: "ㄅㄨˋ ㄏㄠˇ ㄧˋ ㄙ˙，ㄓㄜˋ ㄌㄧˇ ㄧㄡˇ ㄖㄣˊ ㄇㄚ˙", meaning: "すみません、ここ誰かいますか？" },
+  { text: "我想吃吃看潤餅。", zhuyin: "ㄨㄛˇ ㄒㄧㄤˇ ㄔ ㄔ ㄎㄢˋ ㄖㄨㄣˋ ㄅㄧㄥˇ", meaning: "潤餅を食べてみたい。" },
+  { text: "日本沒有放颱風假。", zhuyin: "ㄖˋ ㄅㄣˇ ㄇㄟˊ ㄧㄡˇ ㄈㄤˋ ㄊㄞˊ ㄈㄥ ㄐㄧㄚˋ", meaning: "日本には台風休みがない。" },
+  { text: "最近工作忙翻了。", zhuyin: "ㄗㄨㄟˋ ㄐㄧㄣˋ ㄍㄨㄥ ㄗㄨㄛˋ ㄇㄤˊ ㄈㄢ ㄌㄜ˙", meaning: "最近仕事がめちゃくちゃ忙しい。" },
+  { text: "記得開泡泡。", zhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄎㄞ ㄆㄠˋ ㄆㄠˋ", meaning: "シールド張るの忘れないで。" },
+  { text: "我可能會晚一點到。", zhuyin: "ㄨㄛˇ ㄎㄜˇ ㄋㄥˊ ㄏㄨㄟˋ ㄨㄢˇ ㄧˋ ㄉㄧㄢˇ ㄉㄠˋ", meaning: "少し遅れるかも。" }
 ];

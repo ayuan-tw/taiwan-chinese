@@ -1,5 +1,6 @@
 let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
 let weakWords = JSON.parse(localStorage.getItem("weakWords") || "[]");
+let mistakeCounts = JSON.parse(localStorage.getItem("mistakeCounts") || "{}");
 let quizCount = Number(localStorage.getItem("quizCount") || "0");
 let currentQuiz = null;
 
@@ -10,6 +11,7 @@ function saveFavorites() {
 
 function saveWeakWords() {
   localStorage.setItem("weakWords", JSON.stringify(weakWords));
+  localStorage.setItem("mistakeCounts", JSON.stringify(mistakeCounts));
   updateStats();
 }
 
@@ -25,6 +27,13 @@ function updateStats() {
   document.getElementById("quizCount").textContent = quizCount;
 }
 
+function getPriorityScore(item) {
+  const mistakes = mistakeCounts[item.word] || 0;
+  const fav = favorites.includes(item.word) ? 1 : 0;
+  const weak = weakWords.includes(item.word) ? 2 : 0;
+  return mistakes * 3 + fav + weak;
+}
+
 function toggleFavorite(word) {
   if (favorites.includes(word)) {
     favorites = favorites.filter(item => item !== word);
@@ -38,6 +47,8 @@ function toggleFavorite(word) {
 
 function createWordCard(item) {
   const star = favorites.includes(item.word) ? "★" : "☆";
+  const mistakes = mistakeCounts[item.word] || 0;
+  const priority = getPriorityScore(item);
 
   return `
     <div class="card">
@@ -51,7 +62,8 @@ function createWordCard(item) {
       <div class="example">
         ${item.example}<br>
         <span style="color:#666;">${item.exampleZhuyin}</span><br>
-        <span class="note">${item.note}</span>
+        <span class="note">${item.note}</span><br>
+        <span class="priority">復習優先度：${priority} / 忘れた回数：${mistakes}</span>
       </div>
     </div>
   `;
@@ -69,6 +81,13 @@ function pickWords() {
   const selected = shuffled.slice(0, 3);
   document.getElementById("todayWords").innerHTML =
     selected.map(createWordCard).join("");
+}
+
+function pickPriorityWords() {
+  const sorted = [...words].sort((a, b) => getPriorityScore(b) - getPriorityScore(a));
+  const top = sorted.filter(item => getPriorityScore(item) > 0).slice(0, 3);
+  const selected = top.length >= 3 ? top : [...top, ...words.filter(w => !top.includes(w)).sort(() => Math.random() - 0.5)].slice(0, 3);
+  document.getElementById("todayWords").innerHTML = selected.map(createWordCard).join("");
 }
 
 function clearTodayWords() {
@@ -128,15 +147,24 @@ function showWeakWords() {
   renderWordList(words.filter(item => weakWords.includes(item.word)));
 }
 
+function showPriorityWords() {
+  const sorted = [...words].sort((a, b) => getPriorityScore(b) - getPriorityScore(a));
+  renderWordList(sorted);
+}
+
 function clearWeakWords() {
   if (!confirm("苦手單字リストを消す？")) return;
   weakWords = [];
+  mistakeCounts = {};
   saveWeakWords();
   renderWordList(words);
 }
 
 function startQuiz() {
-  const question = words[Math.floor(Math.random() * words.length)];
+  const pool = [...words].sort((a, b) => (getPriorityScore(b) - getPriorityScore(a)) || (Math.random() - 0.5));
+  const question = Math.random() < 0.45 && pool.some(w => getPriorityScore(w) > 0)
+    ? pool.find(w => getPriorityScore(w) > 0)
+    : words[Math.floor(Math.random() * words.length)];
   const answers = [question.meaning];
 
   while (answers.length < 4) {
@@ -181,8 +209,9 @@ function checkAnswer(answer) {
   } else {
     if (!weakWords.includes(currentQuiz.word)) {
       weakWords.push(currentQuiz.word);
-      saveWeakWords();
     }
+    mistakeCounts[currentQuiz.word] = (mistakeCounts[currentQuiz.word] || 0) + 1;
+    saveWeakWords();
 
     result.innerHTML = `
       <div class="quiz-result">
@@ -216,9 +245,20 @@ function refreshVisibleAreas() {
   }
 }
 
+function renderPhrases() {
+  document.getElementById("phraseList").innerHTML = phrases.map(item => `
+    <div class="phrase-card">
+      <div class="phrase-main">${item.text}</div>
+      <div class="phrase-sub">${item.zhuyin}</div>
+      <div class="phrase-meaning">${item.meaning}</div>
+    </div>
+  `).join("");
+}
+
 window.addEventListener("load", () => {
   renderCategoryButtons();
   renderWordList();
+  renderPhrases();
   pickWords();
   updateStats();
 });
