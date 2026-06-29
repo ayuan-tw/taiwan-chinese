@@ -96,6 +96,21 @@
   </header>
 
   <main>
+    <div style="text-align:center; margin-bottom:30px;">
+  <button onclick="pickWords()" style="
+    background:#4f9fbd;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:10px;
+    font-size:1rem;
+    cursor:pointer;
+  ">
+    今天的3個單字
+  </button>
+
+  <div id="todayWords" style="margin-top:20px;"></div>
+</div>
     <h2 class="section-title">よく忘れる副詞・会話表現</h2>
 
     <div class="cards">
@@ -174,5 +189,45 @@
   <footer>
     Ver.0.3｜あゆあん台湾華語ノート
   </footer>
+  <script>
+const words = [
+  { word: "至少", zhuyin: "ㄓˋ ㄕㄠˇ", meaning: "少なくとも" },
+  { word: "划算", zhuyin: "ㄏㄨㄚˊ ㄙㄨㄢˋ", meaning: "お得" },
+  { word: "剛好", zhuyin: "ㄍㄤ ㄏㄠˇ", meaning: "ちょうど" },
+  { word: "差不多", zhuyin: "ㄔㄚ ㄅㄨˋ ㄉㄨㄛ", meaning: "だいたい" },
+  { word: "幾乎", zhuyin: "ㄐㄧ ㄏㄨ", meaning: "ほとんど" },
+  { word: "原來", zhuyin: "ㄩㄢˊ ㄌㄞˊ", meaning: "なるほど" },
+  { word: "竟然", zhuyin: "ㄐㄧㄥˋ ㄖㄢˊ", meaning: "まさか" },
+  { word: "說不定", zhuyin: "ㄕㄨㄛ ㄅㄨˊ ㄉㄧㄥˋ", meaning: "もしかしたら" },
+  { word: "想不出來", zhuyin: "ㄒㄧㄤˇ ㄅㄨˋ ㄔㄨ ㄌㄞˊ", meaning: "思いつかない" },
+  { word: "記得要", zhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄧㄠˋ", meaning: "忘れずに～してね" }
+];
+
+function pickWords() {
+  const shuffled = [...words].sort(() => Math.random() - 0.5);
+  const selected = shuffled.slice(0, 3);
+
+  let html = "<h3>🌱 今天的單字</h3>";
+
+  selected.forEach(item => {
+    html += `
+      <div style="
+        background:white;
+        padding:12px;
+        margin:10px auto;
+        max-width:300px;
+        border-radius:10px;
+        box-shadow:0 2px 8px rgba(0,0,0,0.1);
+      ">
+        <div style="font-size:1.4rem;font-weight:bold;">${item.word}</div>
+        <div>${item.zhuyin}</div>
+        <div>${item.meaning}</div>
+      </div>
+    `;
+  });
+
+  document.getElementById("todayWords").innerHTML = html;
+}
+</script>
 </body>
 </html>
