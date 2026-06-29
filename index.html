@@ -184,6 +184,25 @@
         <div class="example">記得要開泡泡。<br>ㄐㄧˋ ㄉㄜ˙ ㄧㄠˋ ㄎㄞ ㄆㄠˋ ㄆㄠˋ</div>
       </div>
     </div>
+    <h2 class="section-title">單字搜尋</h2>
+
+<div style="text-align:center; margin-bottom:30px;">
+  <input
+    id="searchInput"
+    type="text"
+    placeholder="輸入單字..."
+    oninput="searchWords()"
+    style="
+      width:300px;
+      padding:10px;
+      border-radius:10px;
+      border:1px solid #ccc;
+      font-size:1rem;
+    "
+  >
+
+  <div id="searchResults"></div>
+</div>
   </main>
 
   <footer>
@@ -217,7 +236,47 @@ const words = [
 function pickWords() {
   const shuffled = [...words].sort(() => Math.random() - 0.5);
   const selected = shuffled.slice(0, 3);
+function searchWords() {
+  const keyword =
+    document.getElementById("searchInput")
+      .value
+      .trim();
 
+  const results =
+    document.getElementById("searchResults");
+
+  if (!keyword) {
+    results.innerHTML = "";
+    return;
+  }
+
+  const matched = words.filter(item =>
+    item.word.includes(keyword) ||
+    item.meaning.includes(keyword)
+  );
+
+  let html = "";
+
+  matched.forEach(item => {
+    html += `
+      <div style="
+        background:white;
+        padding:10px;
+        margin:10px auto;
+        max-width:320px;
+        border-radius:10px;
+        box-shadow:0 2px 8px rgba(0,0,0,0.1);
+      ">
+        <strong>${item.word}</strong><br>
+        ${item.zhuyin}<br>
+        ${item.meaning}
+      </div>
+    `;
+  });
+
+  results.innerHTML =
+    html || "找不到🥲";
+}
   let html = "<h3>🌱 今天的單字</h3>";
 
   selected.forEach(item => {
