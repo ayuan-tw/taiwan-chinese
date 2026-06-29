@@ -220,7 +220,7 @@ const words = [
   {
     word: "划算",
     zhuyin: "ㄏㄨㄚˊ ㄙㄨㄢˋ",
-    meaning: "お得",
+    meaning: "お得、コスパがいい",
     example: "這個很划算耶。",
     exampleZhuyin: "ㄓㄜˋ ㄍㄜ˙ ㄏㄣˇ ㄏㄨㄚˊ ㄙㄨㄢˋ ㄧㄝ"
   },
@@ -230,20 +230,94 @@ const words = [
     meaning: "ちょうど",
     example: "時間剛好。",
     exampleZhuyin: "ㄕˊ ㄐㄧㄢ ㄍㄤ ㄏㄠˇ"
+  },
+  {
+    word: "差不多",
+    zhuyin: "ㄔㄚ ㄅㄨˋ ㄉㄨㄛ",
+    meaning: "だいたい、そろそろ",
+    example: "差不多滿了。",
+    exampleZhuyin: "ㄔㄚ ㄅㄨˋ ㄉㄨㄛ ㄇㄢˇ ㄌㄜ˙"
+  },
+  {
+    word: "幾乎",
+    zhuyin: "ㄐㄧ ㄏㄨ",
+    meaning: "ほとんど",
+    example: "我幾乎每天都用。",
+    exampleZhuyin: "ㄨㄛˇ ㄐㄧ ㄏㄨ ㄇㄟˇ ㄊㄧㄢ ㄉㄡ ㄩㄥˋ"
+  },
+  {
+    word: "原來",
+    zhuyin: "ㄩㄢˊ ㄌㄞˊ",
+    meaning: "なんだ、そうだったんだ",
+    example: "原來是這樣啊。",
+    exampleZhuyin: "ㄩㄢˊ ㄌㄞˊ ㄕˋ ㄓㄜˋ ㄧㄤˋ ㄚ"
+  },
+  {
+    word: "竟然",
+    zhuyin: "ㄐㄧㄥˋ ㄖㄢˊ",
+    meaning: "まさか、意外にも",
+    example: "你竟然不知道！",
+    exampleZhuyin: "ㄋㄧˇ ㄐㄧㄥˋ ㄖㄢˊ ㄅㄨˋ ㄓ ㄉㄠˋ"
+  },
+  {
+    word: "說不定",
+    zhuyin: "ㄕㄨㄛ ㄅㄨˊ ㄉㄧㄥˋ",
+    meaning: "もしかしたら",
+    example: "說不定明天會下雨。",
+    exampleZhuyin: "ㄕㄨㄛ ㄅㄨˊ ㄉㄧㄥˋ ㄇㄧㄥˊ ㄊㄧㄢ ㄏㄨㄟˋ ㄒㄧㄚˋ ㄩˇ"
+  },
+  {
+    word: "想不出來",
+    zhuyin: "ㄒㄧㄤˇ ㄅㄨˋ ㄔㄨ ㄌㄞˊ",
+    meaning: "思いつかない",
+    example: "我想不出來。",
+    exampleZhuyin: "ㄨㄛˇ ㄒㄧㄤˇ ㄅㄨˋ ㄔㄨ ㄌㄞˊ"
+  },
+  {
+    word: "記得要",
+    zhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄧㄠˋ",
+    meaning: "忘れずに〜してね",
+    example: "記得要開泡泡。",
+    exampleZhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄧㄠˋ ㄎㄞ ㄆㄠˋ ㄆㄠˋ"
   }
 ];
 
 function pickWords() {
   const shuffled = [...words].sort(() => Math.random() - 0.5);
   const selected = shuffled.slice(0, 3);
-function searchWords() {
-  const keyword =
-    document.getElementById("searchInput")
-      .value
-      .trim();
 
-  const results =
-    document.getElementById("searchResults");
+  let html = "<h3>🌱 今天的單字</h3>";
+
+  selected.forEach(item => {
+    html += `
+      <div style="
+        background:white;
+        padding:12px;
+        margin:10px auto;
+        max-width:320px;
+        border-radius:10px;
+        box-shadow:0 2px 8px rgba(0,0,0,0.1);
+      ">
+        <div style="font-size:1.4rem;font-weight:bold;">
+          ${item.word}
+        </div>
+        <div>${item.zhuyin}</div>
+        <div>${item.meaning}</div>
+        <hr>
+        <div>${item.example}</div>
+        <div style="color:#666;">
+          ${item.exampleZhuyin}
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById("todayWords").innerHTML = html;
+}
+
+function searchWords() {
+  const keyword = document.getElementById("searchInput").value.trim();
+  const results = document.getElementById("searchResults");
 
   if (!keyword) {
     results.innerHTML = "";
@@ -252,7 +326,10 @@ function searchWords() {
 
   const matched = words.filter(item =>
     item.word.includes(keyword) ||
-    item.meaning.includes(keyword)
+    item.zhuyin.includes(keyword) ||
+    item.meaning.includes(keyword) ||
+    item.example.includes(keyword) ||
+    item.exampleZhuyin.includes(keyword)
   );
 
   let html = "";
@@ -261,52 +338,28 @@ function searchWords() {
     html += `
       <div style="
         background:white;
-        padding:10px;
+        padding:12px;
         margin:10px auto;
-        max-width:320px;
+        max-width:360px;
         border-radius:10px;
         box-shadow:0 2px 8px rgba(0,0,0,0.1);
+        text-align:left;
       ">
-        <strong>${item.word}</strong><br>
+        <strong style="font-size:1.3rem;color:#236b86;">
+          ${item.word}
+        </strong><br>
         ${item.zhuyin}<br>
         ${item.meaning}
+        <hr>
+        ${item.example}<br>
+        <span style="color:#666;">
+          ${item.exampleZhuyin}
+        </span>
       </div>
     `;
   });
 
-  results.innerHTML =
-    html || "找不到🥲";
-}
-  let html = "<h3>🌱 今天的單字</h3>";
-
-  selected.forEach(item => {
-  html += `
-  <div style="
-    background:white;
-    padding:12px;
-    margin:10px auto;
-    max-width:320px;
-    border-radius:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
-  ">
-    <div style="font-size:1.4rem;font-weight:bold;">
-      ${item.word}
-    </div>
-
-    <div>${item.zhuyin}</div>
-    <div>${item.meaning}</div>
-
-    <hr>
-
-    <div>${item.example}</div>
-    <div style="color:#666;">
-      ${item.exampleZhuyin}
-    </div>
-  </div>
-`;
-  });
-
-  document.getElementById("todayWords").innerHTML = html;
+  results.innerHTML = html || "找不到🥲";
 }
 </script>
 </body>
