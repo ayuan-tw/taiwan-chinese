@@ -1,227 +1,33 @@
 const words = [
-  {
-    category: "副詞",
-    word: "至少",
-    zhuyin: "ㄓˋ ㄕㄠˇ",
-    meaning: "少なくとも",
-    note: "最低ラインを言うときに便利。",
-    example: "至少要等一下。",
-    exampleZhuyin: "ㄓˋ ㄕㄠˇ ㄧㄠˋ ㄉㄥˇ ㄧˊ ㄒㄧㄚˋ"
-  },
-  {
-    category: "買い物",
-    word: "划算",
-    zhuyin: "ㄏㄨㄚˊ ㄙㄨㄢˋ",
-    meaning: "お得、コスパがいい",
-    note: "夜市・買い物でかなり使える。",
-    example: "這個很划算耶。",
-    exampleZhuyin: "ㄓㄜˋ ㄍㄜ˙ ㄏㄣˇ ㄏㄨㄚˊ ㄙㄨㄢˋ ㄧㄝ"
-  },
-  {
-    category: "副詞",
-    word: "剛好",
-    zhuyin: "ㄍㄤ ㄏㄠˇ",
-    meaning: "ちょうど",
-    note: "時間・量・タイミングがぴったり。",
-    example: "時間剛好。",
-    exampleZhuyin: "ㄕˊ ㄐㄧㄢ ㄍㄤ ㄏㄠˇ"
-  },
-  {
-    category: "副詞",
-    word: "差不多",
-    zhuyin: "ㄔㄚ ㄅㄨˋ ㄉㄨㄛ",
-    meaning: "だいたい、そろそろ",
-    note: "ざっくり感。ゲームでも日常でも強い。",
-    example: "差不多滿了。",
-    exampleZhuyin: "ㄔㄚ ㄅㄨˋ ㄉㄨㄛ ㄇㄢˇ ㄌㄜ˙"
-  },
-  {
-    category: "副詞",
-    word: "幾乎",
-    zhuyin: "ㄐㄧ ㄏㄨ",
-    meaning: "ほとんど",
-    note: "幾乎每天＝ほとんど毎日。",
-    example: "我幾乎每天都用。",
-    exampleZhuyin: "ㄨㄛˇ ㄐㄧ ㄏㄨ ㄇㄟˇ ㄊㄧㄢ ㄉㄡ ㄩㄥˋ"
-  },
-  {
-    category: "リアクション",
-    word: "原來",
-    zhuyin: "ㄩㄢˊ ㄌㄞˊ",
-    meaning: "なんだ、そうだったんだ",
-    note: "新しく事情がわかった時の「なるほど」。",
-    example: "原來是這樣啊。",
-    exampleZhuyin: "ㄩㄢˊ ㄌㄞˊ ㄕˋ ㄓㄜˋ ㄧㄤˋ ㄚ"
-  },
-  {
-    category: "リアクション",
-    word: "竟然",
-    zhuyin: "ㄐㄧㄥˋ ㄖㄢˊ",
-    meaning: "まさか、意外にも",
-    note: "びっくり・予想外の感じ。",
-    example: "你竟然不知道！",
-    exampleZhuyin: "ㄋㄧˇ ㄐㄧㄥˋ ㄖㄢˊ ㄅㄨˋ ㄓ ㄉㄠˋ"
-  },
-  {
-    category: "推量",
-    word: "說不定",
-    zhuyin: "ㄕㄨㄛ ㄅㄨˊ ㄉㄧㄥˋ",
-    meaning: "もしかしたら",
-    note: "可能より少し口語っぽく、軽い推測。",
-    example: "說不定明天會下雨。",
-    exampleZhuyin: "ㄕㄨㄛ ㄅㄨˊ ㄉㄧㄥˋ ㄇㄧㄥˊ ㄊㄧㄢ ㄏㄨㄟˋ ㄒㄧㄚˋ ㄩˇ"
-  },
-  {
-    category: "会話",
-    word: "想不出來",
-    zhuyin: "ㄒㄧㄤˇ ㄅㄨˋ ㄔㄨ ㄌㄞˊ",
-    meaning: "思いつかない",
-    note: "言いたい言葉が出てこない時にも使える。",
-    example: "我想不出來。",
-    exampleZhuyin: "ㄨㄛˇ ㄒㄧㄤˇ ㄅㄨˋ ㄔㄨ ㄌㄞˊ"
-  },
-  {
-    category: "ゲーム",
-    word: "記得要",
-    zhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄧㄠˋ",
-    meaning: "忘れずに〜してね",
-    note: "口語では「要」が省略されることもある。",
-    example: "記得要開泡泡。",
-    exampleZhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄧㄠˋ ㄎㄞ ㄆㄠˋ ㄆㄠˋ"
-  },
-  {
-    category: "会話",
-    word: "還好",
-    zhuyin: "ㄏㄞˊ ㄏㄠˇ",
-    meaning: "まあまあ、大丈夫、幸いにも",
-    note: "返事にも状況説明にも使える万能語。",
-    example: "還好我有帶傘。",
-    exampleZhuyin: "ㄏㄞˊ ㄏㄠˇ ㄨㄛˇ ㄧㄡˇ ㄉㄞˋ ㄙㄢˇ"
-  },
-  {
-    category: "副詞",
-    word: "其實",
-    zhuyin: "ㄑㄧˊ ㄕˊ",
-    meaning: "実は、本当は",
-    note: "話を少し補足・修正するときに便利。",
-    example: "其實我也不知道。",
-    exampleZhuyin: "ㄑㄧˊ ㄕˊ ㄨㄛˇ ㄧㄝˇ ㄅㄨˋ ㄓ ㄉㄠˋ"
-  },
-  {
-    category: "副詞",
-    word: "好像",
-    zhuyin: "ㄏㄠˇ ㄒㄧㄤˋ",
-    meaning: "〜みたい、〜のようだ",
-    note: "ㄏㄠˇは3声、ㄒㄧㄤˋは4声。覚え直し枠。",
-    example: "我好像懂一點了。",
-    exampleZhuyin: "ㄨㄛˇ ㄏㄠˇ ㄒㄧㄤˋ ㄉㄨㄥˇ ㄧˋ ㄉㄧㄢˇ ㄌㄜ˙"
-  },
-  {
-    category: "副詞",
-    word: "可能",
-    zhuyin: "ㄎㄜˇ ㄋㄥˊ",
-    meaning: "たぶん、可能性がある",
-    note: "會と一緒に使うと「〜するかも」。",
-    example: "我可能會晚一點到。",
-    exampleZhuyin: "ㄨㄛˇ ㄎㄜˇ ㄋㄥˊ ㄏㄨㄟˋ ㄨㄢˇ ㄧˋ ㄉㄧㄢˇ ㄉㄠˋ"
-  },
-  {
-    category: "会話",
-    word: "想不起來",
-    zhuyin: "ㄒㄧㄤˇ ㄅㄨˋ ㄑㄧˇ ㄌㄞˊ",
-    meaning: "思い出せない",
-    note: "記憶にあるはずのものが出てこない時。",
-    example: "我想不起來那個字。",
-    exampleZhuyin: "ㄨㄛˇ ㄒㄧㄤˇ ㄅㄨˋ ㄑㄧˇ ㄌㄞˊ ㄋㄚˋ ㄍㄜ˙ ㄗˋ"
-  },
-  {
-    category: "会話",
-    word: "沒關係",
-    zhuyin: "ㄇㄟˊ ㄍㄨㄢ ㄒㄧˋ",
-    meaning: "大丈夫、気にしないで",
-    note: "謝られた時の返事に自然。",
-    example: "沒關係，不用擔心。",
-    exampleZhuyin: "ㄇㄟˊ ㄍㄨㄢ ㄒㄧˋ，ㄅㄨˊ ㄩㄥˋ ㄉㄢ ㄒㄧㄣ"
-  },
-  {
-    category: "会話",
-    word: "不會不會",
-    zhuyin: "ㄅㄨˊ ㄏㄨㄟˋ ㄅㄨˊ ㄏㄨㄟˋ",
-    meaning: "いえいえ、大丈夫です",
-    note: "謝罪やお礼への軽い返し。",
-    example: "不會不會，沒事啦。",
-    exampleZhuyin: "ㄅㄨˊ ㄏㄨㄟˋ ㄅㄨˊ ㄏㄨㄟˋ，ㄇㄟˊ ㄕˋ ㄌㄚ"
-  },
-  {
-    category: "会話",
-    word: "沒事",
-    zhuyin: "ㄇㄟˊ ㄕˋ",
-    meaning: "大丈夫、何でもない",
-    note: "カジュアルで使いやすい。",
-    example: "我沒事，謝謝。",
-    exampleZhuyin: "ㄨㄛˇ ㄇㄟˊ ㄕˋ，ㄒㄧㄝˋ ㄒㄧㄝ˙"
-  },
-  {
-    category: "会話",
-    word: "等一下",
-    zhuyin: "ㄉㄥˇ ㄧˊ ㄒㄧㄚˋ",
-    meaning: "ちょっと待って",
-    note: "一下はここでは軽くする感じ。",
-    example: "等一下，我看一下。",
-    exampleZhuyin: "ㄉㄥˇ ㄧˊ ㄒㄧㄚˋ，ㄨㄛˇ ㄎㄢˋ ㄧˊ ㄒㄧㄚˋ"
-  },
-  {
-    category: "会話",
-    word: "看一下",
-    zhuyin: "ㄎㄢˋ ㄧˊ ㄒㄧㄚˋ",
-    meaning: "ちょっと見る、確認する",
-    note: "看看より少し一回確認する感じ。",
-    example: "我先看一下。",
-    exampleZhuyin: "ㄨㄛˇ ㄒㄧㄢ ㄎㄢˋ ㄧˊ ㄒㄧㄚˋ"
-  },
-  {
-    category: "会話",
-    word: "吃吃看",
-    zhuyin: "ㄔ ㄔ ㄎㄢˋ",
-    meaning: "食べてみる",
-    note: "V V 看＝ちょっと〜してみる。",
-    example: "我想吃吃看潤餅。",
-    exampleZhuyin: "ㄨㄛˇ ㄒㄧㄤˇ ㄔ ㄔ ㄎㄢˋ ㄖㄨㄣˋ ㄅㄧㄥˇ"
-  },
-  {
-    category: "会話",
-    word: "用看看",
-    zhuyin: "ㄩㄥˋ ㄎㄢˋ ㄎㄢˋ",
-    meaning: "使ってみる",
-    note: "台湾でよく聞く自然な言い方。",
-    example: "你可以用看看。",
-    exampleZhuyin: "ㄋㄧˇ ㄎㄜˇ ㄧˇ ㄩㄥˋ ㄎㄢˋ ㄎㄢˋ"
-  },
-  {
-    category: "ゲーム",
-    word: "開泡泡",
-    zhuyin: "ㄎㄞ ㄆㄠˋ ㄆㄠˋ",
-    meaning: "シールドを張る",
-    note: "ゲーム内の口語表現としてメモ。",
-    example: "記得開泡泡。",
-    exampleZhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄎㄞ ㄆㄠˋ ㄆㄠˋ"
-  },
-  {
-    category: "ゲーム",
-    word: "滿了",
-    zhuyin: "ㄇㄢˇ ㄌㄜ˙",
-    meaning: "満員になった、いっぱいになった",
-    note: "集結や枠が埋まった時に便利。",
-    example: "已經滿了。",
-    exampleZhuyin: "ㄧˇ ㄐㄧㄥ ㄇㄢˇ ㄌㄜ˙"
-  },
-  {
-    category: "ゲーム",
-    word: "自行前往",
-    zhuyin: "ㄗˋ ㄒㄧㄥˊ ㄑㄧㄢˊ ㄨㄤˇ",
-    meaning: "各自で向かう",
-    note: "やや書き言葉寄りだけどゲーム告知で見る。",
-    example: "工程站自行前往拜訪。",
-    exampleZhuyin: "ㄍㄨㄥ ㄔㄥˊ ㄓㄢˋ ㄗˋ ㄒㄧㄥˊ ㄑㄧㄢˊ ㄨㄤˇ ㄅㄞˋ ㄈㄤˇ"
-  }
+  { category: "副詞", word: "至少", zhuyin: "ㄓˋ ㄕㄠˇ", meaning: "少なくとも", note: "最低ラインを言うときに便利。", example: "至少要等一下。", exampleZhuyin: "ㄓˋ ㄕㄠˇ ㄧㄠˋ ㄉㄥˇ ㄧˊ ㄒㄧㄚˋ" },
+  { category: "買い物", word: "划算", zhuyin: "ㄏㄨㄚˊ ㄙㄨㄢˋ", meaning: "お得、コスパがいい", note: "夜市・買い物でかなり使える。", example: "這個很划算耶。", exampleZhuyin: "ㄓㄜˋ ㄍㄜ˙ ㄏㄣˇ ㄏㄨㄚˊ ㄙㄨㄢˋ ㄧㄝ" },
+  { category: "副詞", word: "剛好", zhuyin: "ㄍㄤ ㄏㄠˇ", meaning: "ちょうど", note: "時間・量・タイミングがぴったり。", example: "時間剛好。", exampleZhuyin: "ㄕˊ ㄐㄧㄢ ㄍㄤ ㄏㄠˇ" },
+  { category: "副詞", word: "差不多", zhuyin: "ㄔㄚ ㄅㄨˋ ㄉㄨㄛ", meaning: "だいたい、そろそろ", note: "ざっくり感。ゲームでも日常でも強い。", example: "差不多滿了。", exampleZhuyin: "ㄔㄚ ㄅㄨˋ ㄉㄨㄛ ㄇㄢˇ ㄌㄜ˙" },
+  { category: "副詞", word: "幾乎", zhuyin: "ㄐㄧ ㄏㄨ", meaning: "ほとんど", note: "幾乎每天＝ほとんど毎日。", example: "我幾乎每天都用。", exampleZhuyin: "ㄨㄛˇ ㄐㄧ ㄏㄨ ㄇㄟˇ ㄊㄧㄢ ㄉㄡ ㄩㄥˋ" },
+  { category: "リアクション", word: "原來", zhuyin: "ㄩㄢˊ ㄌㄞˊ", meaning: "なんだ、そうだったんだ", note: "新しく事情がわかった時の「なるほど」。", example: "原來是這樣啊。", exampleZhuyin: "ㄩㄢˊ ㄌㄞˊ ㄕˋ ㄓㄜˋ ㄧㄤˋ ㄚ" },
+  { category: "リアクション", word: "竟然", zhuyin: "ㄐㄧㄥˋ ㄖㄢˊ", meaning: "まさか、意外にも", note: "びっくり・予想外の感じ。", example: "你竟然不知道！", exampleZhuyin: "ㄋㄧˇ ㄐㄧㄥˋ ㄖㄢˊ ㄅㄨˋ ㄓ ㄉㄠˋ" },
+  { category: "推量", word: "說不定", zhuyin: "ㄕㄨㄛ ㄅㄨˊ ㄉㄧㄥˋ", meaning: "もしかしたら", note: "可能より少し口語っぽく、軽い推測。", example: "說不定明天會下雨。", exampleZhuyin: "ㄕㄨㄛ ㄅㄨˊ ㄉㄧㄥˋ ㄇㄧㄥˊ ㄊㄧㄢ ㄏㄨㄟˋ ㄒㄧㄚˋ ㄩˇ" },
+  { category: "会話", word: "想不出來", zhuyin: "ㄒㄧㄤˇ ㄅㄨˋ ㄔㄨ ㄌㄞˊ", meaning: "思いつかない", note: "言いたい言葉が出てこない時にも使える。", example: "我想不出來。", exampleZhuyin: "ㄨㄛˇ ㄒㄧㄤˇ ㄅㄨˋ ㄔㄨ ㄌㄞˊ" },
+  { category: "会話", word: "想不起來", zhuyin: "ㄒㄧㄤˇ ㄅㄨˋ ㄑㄧˇ ㄌㄞˊ", meaning: "思い出せない", note: "記憶にあるはずのものが出てこない時。", example: "我想不起來那個字。", exampleZhuyin: "ㄨㄛˇ ㄒㄧㄤˇ ㄅㄨˋ ㄑㄧˇ ㄌㄞˊ ㄋㄚˋ ㄍㄜ˙ ㄗˋ" },
+  { category: "ゲーム", word: "記得要", zhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄧㄠˋ", meaning: "忘れずに〜してね", note: "口語では「要」が省略されることもある。", example: "記得要開泡泡。", exampleZhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄧㄠˋ ㄎㄞ ㄆㄠˋ ㄆㄠˋ" },
+  { category: "会話", word: "還好", zhuyin: "ㄏㄞˊ ㄏㄠˇ", meaning: "まあまあ、大丈夫、幸いにも", note: "返事にも状況説明にも使える万能語。", example: "還好我有帶傘。", exampleZhuyin: "ㄏㄞˊ ㄏㄠˇ ㄨㄛˇ ㄧㄡˇ ㄉㄞˋ ㄙㄢˇ" },
+  { category: "副詞", word: "其實", zhuyin: "ㄑㄧˊ ㄕˊ", meaning: "実は、本当は", note: "話を少し補足・修正するときに便利。", example: "其實我也不知道。", exampleZhuyin: "ㄑㄧˊ ㄕˊ ㄨㄛˇ ㄧㄝˇ ㄅㄨˋ ㄓ ㄉㄠˋ" },
+  { category: "副詞", word: "好像", zhuyin: "ㄏㄠˇ ㄒㄧㄤˋ", meaning: "〜みたい、〜のようだ", note: "ㄏㄠˇは3声、ㄒㄧㄤˋは4声。覚え直し枠。", example: "我好像懂一點了。", exampleZhuyin: "ㄨㄛˇ ㄏㄠˇ ㄒㄧㄤˋ ㄉㄨㄥˇ ㄧˋ ㄉㄧㄢˇ ㄌㄜ˙" },
+  { category: "副詞", word: "可能", zhuyin: "ㄎㄜˇ ㄋㄥˊ", meaning: "たぶん、可能性がある", note: "會と一緒に使うと「〜するかも」。", example: "我可能會晚一點到。", exampleZhuyin: "ㄨㄛˇ ㄎㄜˇ ㄋㄥˊ ㄏㄨㄟˋ ㄨㄢˇ ㄧˋ ㄉㄧㄢˇ ㄉㄠˋ" },
+  { category: "会話", word: "沒關係", zhuyin: "ㄇㄟˊ ㄍㄨㄢ ㄒㄧˋ", meaning: "大丈夫、気にしないで", note: "謝られた時の返事に自然。", example: "沒關係，不用擔心。", exampleZhuyin: "ㄇㄟˊ ㄍㄨㄢ ㄒㄧˋ，ㄅㄨˊ ㄩㄥˋ ㄉㄢ ㄒㄧㄣ" },
+  { category: "会話", word: "不會不會", zhuyin: "ㄅㄨˊ ㄏㄨㄟˋ ㄅㄨˊ ㄏㄨㄟˋ", meaning: "いえいえ、大丈夫です", note: "謝罪やお礼への軽い返し。", example: "不會不會，沒事啦。", exampleZhuyin: "ㄅㄨˊ ㄏㄨㄟˋ ㄅㄨˊ ㄏㄨㄟˋ，ㄇㄟˊ ㄕˋ ㄌㄚ" },
+  { category: "会話", word: "沒事", zhuyin: "ㄇㄟˊ ㄕˋ", meaning: "大丈夫、何でもない", note: "カジュアルで使いやすい。", example: "我沒事，謝謝。", exampleZhuyin: "ㄨㄛˇ ㄇㄟˊ ㄕˋ，ㄒㄧㄝˋ ㄒㄧㄝ˙" },
+  { category: "会話", word: "等一下", zhuyin: "ㄉㄥˇ ㄧˊ ㄒㄧㄚˋ", meaning: "ちょっと待って", note: "一下はここでは軽くする感じ。", example: "等一下，我看一下。", exampleZhuyin: "ㄉㄥˇ ㄧˊ ㄒㄧㄚˋ，ㄨㄛˇ ㄎㄢˋ ㄧˊ ㄒㄧㄚˋ" },
+  { category: "会話", word: "看一下", zhuyin: "ㄎㄢˋ ㄧˊ ㄒㄧㄚˋ", meaning: "ちょっと見る、確認する", note: "看看より少し一回確認する感じ。", example: "我先看一下。", exampleZhuyin: "ㄨㄛˇ ㄒㄧㄢ ㄎㄢˋ ㄧˊ ㄒㄧㄚˋ" },
+  { category: "会話", word: "吃吃看", zhuyin: "ㄔ ㄔ ㄎㄢˋ", meaning: "食べてみる", note: "V V 看＝ちょっと〜してみる。", example: "我想吃吃看潤餅。", exampleZhuyin: "ㄨㄛˇ ㄒㄧㄤˇ ㄔ ㄔ ㄎㄢˋ ㄖㄨㄣˋ ㄅㄧㄥˇ" },
+  { category: "会話", word: "用看看", zhuyin: "ㄩㄥˋ ㄎㄢˋ ㄎㄢˋ", meaning: "使ってみる", note: "台湾でよく聞く自然な言い方。", example: "你可以用看看。", exampleZhuyin: "ㄋㄧˇ ㄎㄜˇ ㄧˇ ㄩㄥˋ ㄎㄢˋ ㄎㄢˋ" },
+  { category: "会話", word: "只能", zhuyin: "ㄓˇ ㄋㄥˊ", meaning: "〜するしかない", note: "選択肢がない感じ。", example: "我只能習慣了。", exampleZhuyin: "ㄨㄛˇ ㄓˇ ㄋㄥˊ ㄒㄧˊ ㄍㄨㄢˋ ㄌㄜ˙" },
+  { category: "会話", word: "難怪", zhuyin: "ㄋㄢˊ ㄍㄨㄞˋ", meaning: "どうりで、なるほどそれで", note: "理由がわかって納得した時。", example: "難怪你這麼累。", exampleZhuyin: "ㄋㄢˊ ㄍㄨㄞˋ ㄋㄧˇ ㄓㄜˋ ㄇㄜ˙ ㄌㄟˋ" },
+  { category: "リアクション", word: "真的假的", zhuyin: "ㄓㄣ ㄉㄜ˙ ㄐㄧㄚˇ ㄉㄜ˙", meaning: "本当に？マジで？", note: "台湾の会話でよく使う驚き表現。", example: "真的假的？太誇張了吧。", exampleZhuyin: "ㄓㄣ ㄉㄜ˙ ㄐㄧㄚˇ ㄉㄜ˙？ㄊㄞˋ ㄎㄨㄚ ㄓㄤ ㄌㄜ˙ ㄅㄚ" },
+  { category: "リアクション", word: "蛤", zhuyin: "ㄏㄚˊ", meaning: "え？は？", note: "驚き・聞き返し。強く言うときつく聞こえる。", example: "蛤？怎麼會這樣？", exampleZhuyin: "ㄏㄚˊ？ㄗㄣˇ ㄇㄜ˙ ㄏㄨㄟˋ ㄓㄜˋ ㄧㄤˋ" },
+  { category: "ゲーム", word: "開泡泡", zhuyin: "ㄎㄞ ㄆㄠˋ ㄆㄠˋ", meaning: "シールドを張る", note: "ゲーム内の口語表現としてメモ。", example: "記得開泡泡。", exampleZhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄎㄞ ㄆㄠˋ ㄆㄠˋ" },
+  { category: "ゲーム", word: "滿了", zhuyin: "ㄇㄢˇ ㄌㄜ˙", meaning: "満員になった、いっぱいになった", note: "集結や枠が埋まった時に便利。", example: "已經滿了。", exampleZhuyin: "ㄧˇ ㄐㄧㄥ ㄇㄢˇ ㄌㄜ˙" },
+  { category: "ゲーム", word: "自行前往", zhuyin: "ㄗˋ ㄒㄧㄥˊ ㄑㄧㄢˊ ㄨㄤˇ", meaning: "各自で向かう", note: "やや書き言葉寄りだけどゲーム告知で見る。", example: "工程站自行前往拜訪。", exampleZhuyin: "ㄍㄨㄥ ㄔㄥˊ ㄓㄢˋ ㄗˋ ㄒㄧㄥˊ ㄑㄧㄢˊ ㄨㄤˇ ㄅㄞˋ ㄈㄤˇ" },
+  { category: "天気", word: "颱風假", zhuyin: "ㄊㄞˊ ㄈㄥ ㄐㄧㄚˋ", meaning: "台風休み", note: "台湾らしい話題。日本には基本ないやつ。", example: "日本沒有放颱風假。", exampleZhuyin: "ㄖˋ ㄅㄣˇ ㄇㄟˊ ㄧㄡˇ ㄈㄤˋ ㄊㄞˊ ㄈㄥ ㄐㄧㄚˋ" },
+  { category: "天気", word: "涼快", zhuyin: "ㄌㄧㄤˊ ㄎㄨㄞˋ", meaning: "涼しい", note: "冷は寒い寄り。涼快は気持ちいい涼しさ。", example: "明天好像會比較涼快。", exampleZhuyin: "ㄇㄧㄥˊ ㄊㄧㄢ ㄏㄠˇ ㄒㄧㄤˋ ㄏㄨㄟˋ ㄅㄧˇ ㄐㄧㄠˋ ㄌㄧㄤˊ ㄎㄨㄞˋ" }
 ];

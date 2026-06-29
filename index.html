@@ -8,11 +8,33 @@
 </head>
 <body>
   <header>
-    <h1>澄詞｜あゆあん台湾華語</h1>
-    <p>忘れやすい単語を、少しずつ澄ませていくノート</p>
+    <div class="header-inner">
+      <p class="eyebrow">あゆあん台湾華語ノート</p>
+      <h1>澄詞</h1>
+      <p>忘れやすい単語を、少しずつ澄ませていく単語アプリ</p>
+    </div>
   </header>
 
   <main>
+    <section class="dashboard">
+      <div class="stat-card">
+        <span id="totalCount">0</span>
+        <p>登録單字</p>
+      </div>
+      <div class="stat-card">
+        <span id="favoriteCount">0</span>
+        <p>お気に入り</p>
+      </div>
+      <div class="stat-card">
+        <span id="weakCount">0</span>
+        <p>苦手單字</p>
+      </div>
+      <div class="stat-card">
+        <span id="quizCount">0</span>
+        <p>クイズ回数</p>
+      </div>
+    </section>
+
     <section class="panel">
       <h2 class="section-title">🌱 今天的3個單字</h2>
       <div class="button-row">
@@ -38,14 +60,30 @@
     </section>
 
     <section class="panel">
+      <h2 class="section-title">📝 ランダムクイズ</h2>
+      <div class="button-row">
+        <button onclick="startQuiz()">クイズを出す</button>
+        <button class="secondary" onclick="clearQuiz()">消す</button>
+      </div>
+      <p class="hint">間違えた単語は自動で「苦手單字」に入ります。</p>
+      <div id="quizArea" class="quiz-area"></div>
+    </section>
+
+    <section class="panel">
       <h2 class="section-title">📘 單字一覧</h2>
       <div class="button-row category-buttons" id="categoryButtons"></div>
+      <div class="button-row">
+        <button class="secondary" onclick="showFavorites()">⭐ お気に入りだけ</button>
+        <button class="secondary" onclick="showWeakWords()">🔁 苦手單字だけ</button>
+        <button class="secondary" onclick="clearWeakWords()">苦手リストを消す</button>
+        <button class="secondary" onclick="renderWordList(words)">全部表示</button>
+      </div>
       <div id="wordList" class="cards"></div>
     </section>
   </main>
 
   <footer>
-    Ver.0.8｜CSS・JS分離｜あゆあん台湾華語ノート
+    Ver.1.0｜お気に入り・クイズ・苦手單字・学習記録｜あゆあん台湾華語ノート
   </footer>
 
   <script src="words.js"></script>
