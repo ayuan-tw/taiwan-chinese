@@ -191,16 +191,27 @@
   </footer>
   <script>
 const words = [
-  { word: "至少", zhuyin: "ㄓˋ ㄕㄠˇ", meaning: "少なくとも" },
-  { word: "划算", zhuyin: "ㄏㄨㄚˊ ㄙㄨㄢˋ", meaning: "お得" },
-  { word: "剛好", zhuyin: "ㄍㄤ ㄏㄠˇ", meaning: "ちょうど" },
-  { word: "差不多", zhuyin: "ㄔㄚ ㄅㄨˋ ㄉㄨㄛ", meaning: "だいたい" },
-  { word: "幾乎", zhuyin: "ㄐㄧ ㄏㄨ", meaning: "ほとんど" },
-  { word: "原來", zhuyin: "ㄩㄢˊ ㄌㄞˊ", meaning: "なるほど" },
-  { word: "竟然", zhuyin: "ㄐㄧㄥˋ ㄖㄢˊ", meaning: "まさか" },
-  { word: "說不定", zhuyin: "ㄕㄨㄛ ㄅㄨˊ ㄉㄧㄥˋ", meaning: "もしかしたら" },
-  { word: "想不出來", zhuyin: "ㄒㄧㄤˇ ㄅㄨˋ ㄔㄨ ㄌㄞˊ", meaning: "思いつかない" },
-  { word: "記得要", zhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄧㄠˋ", meaning: "忘れずに～してね" }
+  {
+    word: "至少",
+    zhuyin: "ㄓˋ ㄕㄠˇ",
+    meaning: "少なくとも",
+    example: "至少要等一下。",
+    exampleZhuyin: "ㄓˋ ㄕㄠˇ ㄧㄠˋ ㄉㄥˇ ㄧˊ ㄒㄧㄚˋ"
+  },
+  {
+    word: "划算",
+    zhuyin: "ㄏㄨㄚˊ ㄙㄨㄢˋ",
+    meaning: "お得",
+    example: "這個很划算耶。",
+    exampleZhuyin: "ㄓㄜˋ ㄍㄜ˙ ㄏㄣˇ ㄏㄨㄚˊ ㄙㄨㄢˋ ㄧㄝ"
+  },
+  {
+    word: "剛好",
+    zhuyin: "ㄍㄤ ㄏㄠˇ",
+    meaning: "ちょうど",
+    example: "時間剛好。",
+    exampleZhuyin: "ㄕˊ ㄐㄧㄢ ㄍㄤ ㄏㄠˇ"
+  }
 ];
 
 function pickWords() {
@@ -210,20 +221,30 @@ function pickWords() {
   let html = "<h3>🌱 今天的單字</h3>";
 
   selected.forEach(item => {
-    html += `
-      <div style="
-        background:white;
-        padding:12px;
-        margin:10px auto;
-        max-width:300px;
-        border-radius:10px;
-        box-shadow:0 2px 8px rgba(0,0,0,0.1);
-      ">
-        <div style="font-size:1.4rem;font-weight:bold;">${item.word}</div>
-        <div>${item.zhuyin}</div>
-        <div>${item.meaning}</div>
-      </div>
-    `;
+  html += `
+  <div style="
+    background:white;
+    padding:12px;
+    margin:10px auto;
+    max-width:320px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  ">
+    <div style="font-size:1.4rem;font-weight:bold;">
+      ${item.word}
+    </div>
+
+    <div>${item.zhuyin}</div>
+    <div>${item.meaning}</div>
+
+    <hr>
+
+    <div>${item.example}</div>
+    <div style="color:#666;">
+      ${item.exampleZhuyin}
+    </div>
+  </div>
+`;
   });
 
   document.getElementById("todayWords").innerHTML = html;
