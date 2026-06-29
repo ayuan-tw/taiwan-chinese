@@ -1,21 +1,35 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>澄詞｜あゆあん台湾華語</title>
   <style>
+    :root {
+      --bg: #eef7fb;
+      --ink: #1f3f4f;
+      --main: #4f9fbd;
+      --main-dark: #236b86;
+      --sub: #7fc7d9;
+      --card: #ffffff;
+      --line: #b8d8e3;
+      --muted: #5b8796;
+      --shadow: rgba(58, 103, 119, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
-      background: #eef7fb;
-      color: #1f3f4f;
+      font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans TC", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
     }
 
     header {
-      background: linear-gradient(135deg, #7fc7d9, #4f9fbd);
+      background: linear-gradient(135deg, var(--sub), var(--main));
       color: white;
-      padding: 40px 20px;
+      padding: 42px 20px;
       text-align: center;
     }
 
@@ -26,45 +40,105 @@
     }
 
     header p {
-      margin-top: 10px;
+      margin: 12px 0 0;
       font-size: 0.95rem;
+      opacity: 0.95;
     }
 
     main {
-      max-width: 900px;
+      max-width: 980px;
       margin: 30px auto;
       padding: 0 16px;
     }
 
+    .panel {
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(184,216,227,0.75);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 14px var(--shadow);
+      margin-bottom: 26px;
+    }
+
     .section-title {
-      font-size: 1.3rem;
-      border-left: 6px solid #4f9fbd;
+      font-size: 1.25rem;
+      border-left: 6px solid var(--main);
       padding-left: 10px;
-      margin-bottom: 18px;
+      margin: 0 0 18px;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    button {
+      background: var(--main);
+      color: white;
+      border: none;
+      padding: 11px 18px;
+      border-radius: 999px;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(35,107,134,0.18);
+    }
+
+    button:hover { background: var(--main-dark); }
+
+    button.secondary {
+      background: white;
+      color: var(--main-dark);
+      border: 1px solid var(--line);
+    }
+
+    input {
+      width: min(100%, 460px);
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      font-size: 1rem;
+      background: white;
+      color: var(--ink);
+    }
+
+    .hint {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin: 8px 0 0;
     }
 
     .cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
       gap: 16px;
     }
 
     .card {
-      background: white;
+      background: var(--card);
       border-radius: 16px;
       padding: 18px;
-      box-shadow: 0 4px 12px rgba(58, 103, 119, 0.12);
+      box-shadow: 0 4px 12px var(--shadow);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 16px rgba(58, 103, 119, 0.18);
     }
 
     .word {
-      font-size: 1.6rem;
+      font-size: 1.55rem;
       font-weight: bold;
-      color: #236b86;
+      color: var(--main-dark);
     }
 
     .zhuyin {
       margin-top: 4px;
-      color: #5b8796;
+      color: var(--muted);
       font-size: 0.95rem;
     }
 
@@ -76,9 +150,25 @@
     .example {
       margin-top: 12px;
       padding-top: 10px;
-      border-top: 1px dashed #b8d8e3;
+      border-top: 1px dashed var(--line);
       font-size: 0.95rem;
-      line-height: 1.6;
+      line-height: 1.65;
+    }
+
+    .tag {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: #e3f3f8;
+      color: var(--main-dark);
+      font-size: 0.78rem;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 18px;
     }
 
     footer {
@@ -96,271 +186,112 @@
   </header>
 
   <main>
-    <div style="text-align:center; margin-bottom:30px;">
-  <button onclick="pickWords()" style="
-    background:#4f9fbd;
-    color:white;
-    border:none;
-    padding:12px 20px;
-    border-radius:10px;
-    font-size:1rem;
-    cursor:pointer;
-  ">
-    今天的3個單字
-  </button>
-
-  <div id="todayWords" style="margin-top:20px;"></div>
-</div>
-    <h2 class="section-title">よく忘れる副詞・会話表現</h2>
-
-    <div class="cards">
-      <div class="card">
-        <div class="word">至少</div>
-        <div class="zhuyin">ㄓˋ ㄕㄠˇ</div>
-        <div class="meaning">少なくとも</div>
-        <div class="example">至少要等一下。<br>ㄓˋ ㄕㄠˇ ㄧㄠˋ ㄉㄥˇ ㄧˊ ㄒㄧㄚˋ</div>
+    <section class="panel">
+      <h2 class="section-title">🌱 今天的3個單字</h2>
+      <div class="button-row">
+        <button onclick="pickWords()">今日の3單字を出す</button>
+        <button class="secondary" onclick="clearTodayWords()">消す</button>
       </div>
+      <p class="hint">サイトを開いた時にも自動で3語出ます。</p>
+      <div id="todayWords" class="cards" style="margin-top:18px;"></div>
+    </section>
 
-      <div class="card">
-        <div class="word">划算</div>
-        <div class="zhuyin">ㄏㄨㄚˊ ㄙㄨㄢˋ</div>
-        <div class="meaning">お得、コスパがいい</div>
-        <div class="example">這個很划算耶。<br>ㄓㄜˋ ㄍㄜ˙ ㄏㄣˇ ㄏㄨㄚˊ ㄙㄨㄢˋ ㄧㄝ</div>
+    <section class="panel">
+      <h2 class="section-title">🔍 單字搜尋</h2>
+      <div style="text-align:center;">
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="例：剛好 / ㄍㄤ / ちょうど / 等一下"
+          oninput="searchWords()"
+        />
       </div>
+      <p class="hint">単語・注音・意味・例文から検索できます。</p>
+      <div id="searchResults" class="cards" style="margin-top:18px;"></div>
+    </section>
 
-      <div class="card">
-        <div class="word">剛好</div>
-        <div class="zhuyin">ㄍㄤ ㄏㄠˇ</div>
-        <div class="meaning">ちょうど</div>
-        <div class="example">時間剛好。<br>ㄕˊ ㄐㄧㄢ ㄍㄤ ㄏㄠˇ</div>
-      </div>
-
-      <div class="card">
-        <div class="word">差不多</div>
-        <div class="zhuyin">ㄔㄚ ㄅㄨˋ ㄉㄨㄛ</div>
-        <div class="meaning">だいたい、そろそろ</div>
-        <div class="example">差不多滿了。<br>ㄔㄚ ㄅㄨˋ ㄉㄨㄛ ㄇㄢˇ ㄌㄜ˙</div>
-      </div>
-
-      <div class="card">
-        <div class="word">幾乎</div>
-        <div class="zhuyin">ㄐㄧ ㄏㄨ</div>
-        <div class="meaning">ほとんど</div>
-        <div class="example">我幾乎每天都用。<br>ㄨㄛˇ ㄐㄧ ㄏㄨ ㄇㄟˇ ㄊㄧㄢ ㄉㄡ ㄩㄥˋ</div>
-      </div>
-
-      <div class="card">
-        <div class="word">原來</div>
-        <div class="zhuyin">ㄩㄢˊ ㄌㄞˊ</div>
-        <div class="meaning">なんだ、そうだったんだ</div>
-        <div class="example">原來是這樣啊。<br>ㄩㄢˊ ㄌㄞˊ ㄕˋ ㄓㄜˋ ㄧㄤˋ ㄚ</div>
-      </div>
-
-      <div class="card">
-        <div class="word">竟然</div>
-        <div class="zhuyin">ㄐㄧㄥˋ ㄖㄢˊ</div>
-        <div class="meaning">まさか、意外にも</div>
-        <div class="example">你竟然不知道！<br>ㄋㄧˇ ㄐㄧㄥˋ ㄖㄢˊ ㄅㄨˋ ㄓ ㄉㄠˋ</div>
-      </div>
-
-      <div class="card">
-        <div class="word">說不定</div>
-        <div class="zhuyin">ㄕㄨㄛ ㄅㄨˊ ㄉㄧㄥˋ</div>
-        <div class="meaning">もしかしたら</div>
-        <div class="example">說不定明天會下雨。<br>ㄕㄨㄛ ㄅㄨˊ ㄉㄧㄥˋ ㄇㄧㄥˊ ㄊㄧㄢ ㄏㄨㄟˋ ㄒㄧㄚˋ ㄩˇ</div>
-      </div>
-
-      <div class="card">
-        <div class="word">想不出來</div>
-        <div class="zhuyin">ㄒㄧㄤˇ ㄅㄨˋ ㄔㄨ ㄌㄞˊ</div>
-        <div class="meaning">思いつかない</div>
-        <div class="example">我想不出來。<br>ㄨㄛˇ ㄒㄧㄤˇ ㄅㄨˋ ㄔㄨ ㄌㄞˊ</div>
-      </div>
-
-      <div class="card">
-        <div class="word">記得要</div>
-        <div class="zhuyin">ㄐㄧˋ ㄉㄜ˙ ㄧㄠˋ</div>
-        <div class="meaning">忘れずに〜してね</div>
-        <div class="example">記得要開泡泡。<br>ㄐㄧˋ ㄉㄜ˙ ㄧㄠˋ ㄎㄞ ㄆㄠˋ ㄆㄠˋ</div>
-      </div>
-    </div>
-    <h2 class="section-title">單字搜尋</h2>
-
-<div style="text-align:center; margin-bottom:30px;">
-  <input
-    id="searchInput"
-    type="text"
-    placeholder="輸入單字..."
-    oninput="searchWords()"
-    style="
-      width:300px;
-      padding:10px;
-      border-radius:10px;
-      border:1px solid #ccc;
-      font-size:1rem;
-    "
-  >
-
-  <div id="searchResults"></div>
-</div>
+    <section class="panel">
+      <h2 class="section-title">📘 よく忘れる副詞・会話表現</h2>
+      <div id="wordList" class="cards"></div>
+    </section>
   </main>
 
   <footer>
-    Ver.0.3｜あゆあん台湾華語ノート
+    Ver.0.7｜自動生成・検索・今日の3單字｜あゆあん台湾華語ノート
   </footer>
+
   <script>
-const words = [
-  {
-    word: "至少",
-    zhuyin: "ㄓˋ ㄕㄠˇ",
-    meaning: "少なくとも",
-    example: "至少要等一下。",
-    exampleZhuyin: "ㄓˋ ㄕㄠˇ ㄧㄠˋ ㄉㄥˇ ㄧˊ ㄒㄧㄚˋ"
-  },
-  {
-    word: "划算",
-    zhuyin: "ㄏㄨㄚˊ ㄙㄨㄢˋ",
-    meaning: "お得、コスパがいい",
-    example: "這個很划算耶。",
-    exampleZhuyin: "ㄓㄜˋ ㄍㄜ˙ ㄏㄣˇ ㄏㄨㄚˊ ㄙㄨㄢˋ ㄧㄝ"
-  },
-  {
-    word: "剛好",
-    zhuyin: "ㄍㄤ ㄏㄠˇ",
-    meaning: "ちょうど",
-    example: "時間剛好。",
-    exampleZhuyin: "ㄕˊ ㄐㄧㄢ ㄍㄤ ㄏㄠˇ"
-  },
-  {
-    word: "差不多",
-    zhuyin: "ㄔㄚ ㄅㄨˋ ㄉㄨㄛ",
-    meaning: "だいたい、そろそろ",
-    example: "差不多滿了。",
-    exampleZhuyin: "ㄔㄚ ㄅㄨˋ ㄉㄨㄛ ㄇㄢˇ ㄌㄜ˙"
-  },
-  {
-    word: "幾乎",
-    zhuyin: "ㄐㄧ ㄏㄨ",
-    meaning: "ほとんど",
-    example: "我幾乎每天都用。",
-    exampleZhuyin: "ㄨㄛˇ ㄐㄧ ㄏㄨ ㄇㄟˇ ㄊㄧㄢ ㄉㄡ ㄩㄥˋ"
-  },
-  {
-    word: "原來",
-    zhuyin: "ㄩㄢˊ ㄌㄞˊ",
-    meaning: "なんだ、そうだったんだ",
-    example: "原來是這樣啊。",
-    exampleZhuyin: "ㄩㄢˊ ㄌㄞˊ ㄕˋ ㄓㄜˋ ㄧㄤˋ ㄚ"
-  },
-  {
-    word: "竟然",
-    zhuyin: "ㄐㄧㄥˋ ㄖㄢˊ",
-    meaning: "まさか、意外にも",
-    example: "你竟然不知道！",
-    exampleZhuyin: "ㄋㄧˇ ㄐㄧㄥˋ ㄖㄢˊ ㄅㄨˋ ㄓ ㄉㄠˋ"
-  },
-  {
-    word: "說不定",
-    zhuyin: "ㄕㄨㄛ ㄅㄨˊ ㄉㄧㄥˋ",
-    meaning: "もしかしたら",
-    example: "說不定明天會下雨。",
-    exampleZhuyin: "ㄕㄨㄛ ㄅㄨˊ ㄉㄧㄥˋ ㄇㄧㄥˊ ㄊㄧㄢ ㄏㄨㄟˋ ㄒㄧㄚˋ ㄩˇ"
-  },
-  {
-    word: "想不出來",
-    zhuyin: "ㄒㄧㄤˇ ㄅㄨˋ ㄔㄨ ㄌㄞˊ",
-    meaning: "思いつかない",
-    example: "我想不出來。",
-    exampleZhuyin: "ㄨㄛˇ ㄒㄧㄤˇ ㄅㄨˋ ㄔㄨ ㄌㄞˊ"
-  },
-  {
-    word: "記得要",
-    zhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄧㄠˋ",
-    meaning: "忘れずに〜してね",
-    example: "記得要開泡泡。",
-    exampleZhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄧㄠˋ ㄎㄞ ㄆㄠˋ ㄆㄠˋ"
-  }
-];
+    const words = [
+      { category: "副詞", word: "至少", zhuyin: "ㄓˋ ㄕㄠˇ", meaning: "少なくとも", note: "最低ラインを言うときに便利。", example: "至少要等一下。", exampleZhuyin: "ㄓˋ ㄕㄠˇ ㄧㄠˋ ㄉㄥˇ ㄧˊ ㄒㄧㄚˋ" },
+      { category: "買い物", word: "划算", zhuyin: "ㄏㄨㄚˊ ㄙㄨㄢˋ", meaning: "お得、コスパがいい", note: "夜市・買い物でかなり使える。", example: "這個很划算耶。", exampleZhuyin: "ㄓㄜˋ ㄍㄜ˙ ㄏㄣˇ ㄏㄨㄚˊ ㄙㄨㄢˋ ㄧㄝ" },
+      { category: "副詞", word: "剛好", zhuyin: "ㄍㄤ ㄏㄠˇ", meaning: "ちょうど", note: "時間・量・タイミングがぴったり。", example: "時間剛好。", exampleZhuyin: "ㄕˊ ㄐㄧㄢ ㄍㄤ ㄏㄠˇ" },
+      { category: "副詞", word: "差不多", zhuyin: "ㄔㄚ ㄅㄨˋ ㄉㄨㄛ", meaning: "だいたい、そろそろ", note: "ざっくり感。ゲームでも日常でも強い。", example: "差不多滿了。", exampleZhuyin: "ㄔㄚ ㄅㄨˋ ㄉㄨㄛ ㄇㄢˇ ㄌㄜ˙" },
+      { category: "副詞", word: "幾乎", zhuyin: "ㄐㄧ ㄏㄨ", meaning: "ほとんど", note: "幾乎每天＝ほとんど毎日。", example: "我幾乎每天都用。", exampleZhuyin: "ㄨㄛˇ ㄐㄧ ㄏㄨ ㄇㄟˇ ㄊㄧㄢ ㄉㄡ ㄩㄥˋ" },
+      { category: "リアクション", word: "原來", zhuyin: "ㄩㄢˊ ㄌㄞˊ", meaning: "なんだ、そうだったんだ", note: "新しく事情がわかった時の「なるほど」。", example: "原來是這樣啊。", exampleZhuyin: "ㄩㄢˊ ㄌㄞˊ ㄕˋ ㄓㄜˋ ㄧㄤˋ ㄚ" },
+      { category: "リアクション", word: "竟然", zhuyin: "ㄐㄧㄥˋ ㄖㄢˊ", meaning: "まさか、意外にも", note: "びっくり・予想外の感じ。", example: "你竟然不知道！", exampleZhuyin: "ㄋㄧˇ ㄐㄧㄥˋ ㄖㄢˊ ㄅㄨˋ ㄓ ㄉㄠˋ" },
+      { category: "推量", word: "說不定", zhuyin: "ㄕㄨㄛ ㄅㄨˊ ㄉㄧㄥˋ", meaning: "もしかしたら", note: "可能より少し口語っぽく、軽い推測。", example: "說不定明天會下雨。", exampleZhuyin: "ㄕㄨㄛ ㄅㄨˊ ㄉㄧㄥˋ ㄇㄧㄥˊ ㄊㄧㄢ ㄏㄨㄟˋ ㄒㄧㄚˋ ㄩˇ" },
+      { category: "会話", word: "想不出來", zhuyin: "ㄒㄧㄤˇ ㄅㄨˋ ㄔㄨ ㄌㄞˊ", meaning: "思いつかない", note: "言いたい言葉が出てこない時にも使える。", example: "我想不出來。", exampleZhuyin: "ㄨㄛˇ ㄒㄧㄤˇ ㄅㄨˋ ㄔㄨ ㄌㄞˊ" },
+      { category: "ゲーム", word: "記得要", zhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄧㄠˋ", meaning: "忘れずに〜してね", note: "口語では「要」が省略されることもある。", example: "記得要開泡泡。", exampleZhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄧㄠˋ ㄎㄞ ㄆㄠˋ ㄆㄠˋ" }
+    ];
 
-function pickWords() {
-  const shuffled = [...words].sort(() => Math.random() - 0.5);
-  const selected = shuffled.slice(0, 3);
-
-  let html = "<h3>🌱 今天的單字</h3>";
-
-  selected.forEach(item => {
-    html += `
-      <div style="
-        background:white;
-        padding:12px;
-        margin:10px auto;
-        max-width:320px;
-        border-radius:10px;
-        box-shadow:0 2px 8px rgba(0,0,0,0.1);
-      ">
-        <div style="font-size:1.4rem;font-weight:bold;">
-          ${item.word}
+    function createWordCard(item) {
+      return `
+        <div class="card">
+          <div class="tag">${item.category}</div>
+          <div class="word">${item.word}</div>
+          <div class="zhuyin">${item.zhuyin}</div>
+          <div class="meaning">${item.meaning}</div>
+          <div class="example">
+            ${item.example}<br>
+            <span style="color:#666;">${item.exampleZhuyin}</span><br>
+            <span style="color:#5b8796;">${item.note}</span>
+          </div>
         </div>
-        <div>${item.zhuyin}</div>
-        <div>${item.meaning}</div>
-        <hr>
-        <div>${item.example}</div>
-        <div style="color:#666;">
-          ${item.exampleZhuyin}
-        </div>
-      </div>
-    `;
-  });
+      `;
+    }
 
-  document.getElementById("todayWords").innerHTML = html;
-}
+    function renderWordList() {
+      document.getElementById("wordList").innerHTML = words.map(createWordCard).join("");
+    }
 
-function searchWords() {
-  const keyword = document.getElementById("searchInput").value.trim();
-  const results = document.getElementById("searchResults");
+    function pickWords() {
+      const shuffled = [...words].sort(() => Math.random() - 0.5);
+      const selected = shuffled.slice(0, 3);
+      document.getElementById("todayWords").innerHTML = selected.map(createWordCard).join("");
+    }
 
-  if (!keyword) {
-    results.innerHTML = "";
-    return;
-  }
+    function clearTodayWords() {
+      document.getElementById("todayWords").innerHTML = "";
+    }
 
-  const matched = words.filter(item =>
-    item.word.includes(keyword) ||
-    item.zhuyin.includes(keyword) ||
-    item.meaning.includes(keyword) ||
-    item.example.includes(keyword) ||
-    item.exampleZhuyin.includes(keyword)
-  );
+    function searchWords() {
+      const keyword = document.getElementById("searchInput").value.trim();
+      const results = document.getElementById("searchResults");
 
-  let html = "";
+      if (!keyword) {
+        results.innerHTML = "";
+        return;
+      }
 
-  matched.forEach(item => {
-    html += `
-      <div style="
-        background:white;
-        padding:12px;
-        margin:10px auto;
-        max-width:360px;
-        border-radius:10px;
-        box-shadow:0 2px 8px rgba(0,0,0,0.1);
-        text-align:left;
-      ">
-        <strong style="font-size:1.3rem;color:#236b86;">
-          ${item.word}
-        </strong><br>
-        ${item.zhuyin}<br>
-        ${item.meaning}
-        <hr>
-        ${item.example}<br>
-        <span style="color:#666;">
-          ${item.exampleZhuyin}
-        </span>
-      </div>
-    `;
-  });
+      const matched = words.filter(item =>
+        item.category.includes(keyword) ||
+        item.word.includes(keyword) ||
+        item.zhuyin.includes(keyword) ||
+        item.meaning.includes(keyword) ||
+        item.note.includes(keyword) ||
+        item.example.includes(keyword) ||
+        item.exampleZhuyin.includes(keyword)
+      );
 
-  results.innerHTML = html || "找不到🥲";
-}
-</script>
+      results.innerHTML = matched.length > 0
+        ? matched.map(createWordCard).join("")
+        : '<div class="empty">找不到耶 🥲</div>';
+    }
+
+    window.addEventListener("load", () => {
+      renderWordList();
+      pickWords();
+    });
+  </script>
 </body>
 </html>
