@@ -4,180 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>澄詞｜あゆあん台湾華語</title>
-  <style>
-    :root {
-      --bg: #eef7fb;
-      --ink: #1f3f4f;
-      --main: #4f9fbd;
-      --main-dark: #236b86;
-      --sub: #7fc7d9;
-      --card: #ffffff;
-      --line: #b8d8e3;
-      --muted: #5b8796;
-      --shadow: rgba(58, 103, 119, 0.14);
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans TC", sans-serif;
-      background: var(--bg);
-      color: var(--ink);
-    }
-
-    header {
-      background: linear-gradient(135deg, var(--sub), var(--main));
-      color: white;
-      padding: 42px 20px;
-      text-align: center;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-      letter-spacing: 0.08em;
-    }
-
-    header p {
-      margin: 12px 0 0;
-      font-size: 0.95rem;
-      opacity: 0.95;
-    }
-
-    main {
-      max-width: 980px;
-      margin: 30px auto;
-      padding: 0 16px;
-    }
-
-    .panel {
-      background: rgba(255,255,255,0.72);
-      border: 1px solid rgba(184,216,227,0.75);
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 4px 14px var(--shadow);
-      margin-bottom: 26px;
-    }
-
-    .section-title {
-      font-size: 1.25rem;
-      border-left: 6px solid var(--main);
-      padding-left: 10px;
-      margin: 0 0 18px;
-    }
-
-    .button-row {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-
-    button {
-      background: var(--main);
-      color: white;
-      border: none;
-      padding: 11px 18px;
-      border-radius: 999px;
-      font-size: 1rem;
-      cursor: pointer;
-      box-shadow: 0 3px 8px rgba(35,107,134,0.18);
-    }
-
-    button:hover { background: var(--main-dark); }
-
-    button.secondary {
-      background: white;
-      color: var(--main-dark);
-      border: 1px solid var(--line);
-    }
-
-    input {
-      width: min(100%, 460px);
-      padding: 12px 14px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      font-size: 1rem;
-      background: white;
-      color: var(--ink);
-    }
-
-    .hint {
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.88rem;
-      margin: 8px 0 0;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: 16px;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 18px;
-      box-shadow: 0 4px 12px var(--shadow);
-      transition: transform 0.12s ease, box-shadow 0.12s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 7px 16px rgba(58, 103, 119, 0.18);
-    }
-
-    .word {
-      font-size: 1.55rem;
-      font-weight: bold;
-      color: var(--main-dark);
-    }
-
-    .zhuyin {
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .meaning {
-      margin-top: 10px;
-      font-size: 1rem;
-    }
-
-    .example {
-      margin-top: 12px;
-      padding-top: 10px;
-      border-top: 1px dashed var(--line);
-      font-size: 0.95rem;
-      line-height: 1.65;
-    }
-
-    .tag {
-      display: inline-block;
-      margin-bottom: 10px;
-      padding: 3px 9px;
-      border-radius: 999px;
-      background: #e3f3f8;
-      color: var(--main-dark);
-      font-size: 0.78rem;
-    }
-
-    .empty {
-      text-align: center;
-      color: var(--muted);
-      padding: 18px;
-    }
-
-    footer {
-      text-align: center;
-      color: #6f8f9b;
-      font-size: 0.8rem;
-      padding: 30px 10px;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
@@ -193,105 +20,35 @@
         <button class="secondary" onclick="clearTodayWords()">消す</button>
       </div>
       <p class="hint">サイトを開いた時にも自動で3語出ます。</p>
-      <div id="todayWords" class="cards" style="margin-top:18px;"></div>
+      <div id="todayWords" class="cards result-area"></div>
     </section>
 
     <section class="panel">
       <h2 class="section-title">🔍 單字搜尋</h2>
-      <div style="text-align:center;">
+      <div class="search-box">
         <input
           id="searchInput"
           type="text"
-          placeholder="例：剛好 / ㄍㄤ / ちょうど / 等一下"
+          placeholder="例：剛好 / ㄍㄤ / ちょうど / 等一下 / ゲーム"
           oninput="searchWords()"
         />
       </div>
-      <p class="hint">単語・注音・意味・例文から検索できます。</p>
-      <div id="searchResults" class="cards" style="margin-top:18px;"></div>
+      <p class="hint">単語・注音・意味・例文・メモ・カテゴリから検索できます。</p>
+      <div id="searchResults" class="cards result-area"></div>
     </section>
 
     <section class="panel">
-      <h2 class="section-title">📘 よく忘れる副詞・会話表現</h2>
+      <h2 class="section-title">📘 單字一覧</h2>
+      <div class="button-row category-buttons" id="categoryButtons"></div>
       <div id="wordList" class="cards"></div>
     </section>
   </main>
 
   <footer>
-    Ver.0.7｜自動生成・検索・今日の3單字｜あゆあん台湾華語ノート
+    Ver.0.8｜CSS・JS分離｜あゆあん台湾華語ノート
   </footer>
 
-  <script>
-    const words = [
-      { category: "副詞", word: "至少", zhuyin: "ㄓˋ ㄕㄠˇ", meaning: "少なくとも", note: "最低ラインを言うときに便利。", example: "至少要等一下。", exampleZhuyin: "ㄓˋ ㄕㄠˇ ㄧㄠˋ ㄉㄥˇ ㄧˊ ㄒㄧㄚˋ" },
-      { category: "買い物", word: "划算", zhuyin: "ㄏㄨㄚˊ ㄙㄨㄢˋ", meaning: "お得、コスパがいい", note: "夜市・買い物でかなり使える。", example: "這個很划算耶。", exampleZhuyin: "ㄓㄜˋ ㄍㄜ˙ ㄏㄣˇ ㄏㄨㄚˊ ㄙㄨㄢˋ ㄧㄝ" },
-      { category: "副詞", word: "剛好", zhuyin: "ㄍㄤ ㄏㄠˇ", meaning: "ちょうど", note: "時間・量・タイミングがぴったり。", example: "時間剛好。", exampleZhuyin: "ㄕˊ ㄐㄧㄢ ㄍㄤ ㄏㄠˇ" },
-      { category: "副詞", word: "差不多", zhuyin: "ㄔㄚ ㄅㄨˋ ㄉㄨㄛ", meaning: "だいたい、そろそろ", note: "ざっくり感。ゲームでも日常でも強い。", example: "差不多滿了。", exampleZhuyin: "ㄔㄚ ㄅㄨˋ ㄉㄨㄛ ㄇㄢˇ ㄌㄜ˙" },
-      { category: "副詞", word: "幾乎", zhuyin: "ㄐㄧ ㄏㄨ", meaning: "ほとんど", note: "幾乎每天＝ほとんど毎日。", example: "我幾乎每天都用。", exampleZhuyin: "ㄨㄛˇ ㄐㄧ ㄏㄨ ㄇㄟˇ ㄊㄧㄢ ㄉㄡ ㄩㄥˋ" },
-      { category: "リアクション", word: "原來", zhuyin: "ㄩㄢˊ ㄌㄞˊ", meaning: "なんだ、そうだったんだ", note: "新しく事情がわかった時の「なるほど」。", example: "原來是這樣啊。", exampleZhuyin: "ㄩㄢˊ ㄌㄞˊ ㄕˋ ㄓㄜˋ ㄧㄤˋ ㄚ" },
-      { category: "リアクション", word: "竟然", zhuyin: "ㄐㄧㄥˋ ㄖㄢˊ", meaning: "まさか、意外にも", note: "びっくり・予想外の感じ。", example: "你竟然不知道！", exampleZhuyin: "ㄋㄧˇ ㄐㄧㄥˋ ㄖㄢˊ ㄅㄨˋ ㄓ ㄉㄠˋ" },
-      { category: "推量", word: "說不定", zhuyin: "ㄕㄨㄛ ㄅㄨˊ ㄉㄧㄥˋ", meaning: "もしかしたら", note: "可能より少し口語っぽく、軽い推測。", example: "說不定明天會下雨。", exampleZhuyin: "ㄕㄨㄛ ㄅㄨˊ ㄉㄧㄥˋ ㄇㄧㄥˊ ㄊㄧㄢ ㄏㄨㄟˋ ㄒㄧㄚˋ ㄩˇ" },
-      { category: "会話", word: "想不出來", zhuyin: "ㄒㄧㄤˇ ㄅㄨˋ ㄔㄨ ㄌㄞˊ", meaning: "思いつかない", note: "言いたい言葉が出てこない時にも使える。", example: "我想不出來。", exampleZhuyin: "ㄨㄛˇ ㄒㄧㄤˇ ㄅㄨˋ ㄔㄨ ㄌㄞˊ" },
-      { category: "ゲーム", word: "記得要", zhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄧㄠˋ", meaning: "忘れずに〜してね", note: "口語では「要」が省略されることもある。", example: "記得要開泡泡。", exampleZhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄧㄠˋ ㄎㄞ ㄆㄠˋ ㄆㄠˋ" }
-    ];
-
-    function createWordCard(item) {
-      return `
-        <div class="card">
-          <div class="tag">${item.category}</div>
-          <div class="word">${item.word}</div>
-          <div class="zhuyin">${item.zhuyin}</div>
-          <div class="meaning">${item.meaning}</div>
-          <div class="example">
-            ${item.example}<br>
-            <span style="color:#666;">${item.exampleZhuyin}</span><br>
-            <span style="color:#5b8796;">${item.note}</span>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderWordList() {
-      document.getElementById("wordList").innerHTML = words.map(createWordCard).join("");
-    }
-
-    function pickWords() {
-      const shuffled = [...words].sort(() => Math.random() - 0.5);
-      const selected = shuffled.slice(0, 3);
-      document.getElementById("todayWords").innerHTML = selected.map(createWordCard).join("");
-    }
-
-    function clearTodayWords() {
-      document.getElementById("todayWords").innerHTML = "";
-    }
-
-    function searchWords() {
-      const keyword = document.getElementById("searchInput").value.trim();
-      const results = document.getElementById("searchResults");
-
-      if (!keyword) {
-        results.innerHTML = "";
-        return;
-      }
-
-      const matched = words.filter(item =>
-        item.category.includes(keyword) ||
-        item.word.includes(keyword) ||
-        item.zhuyin.includes(keyword) ||
-        item.meaning.includes(keyword) ||
-        item.note.includes(keyword) ||
-        item.example.includes(keyword) ||
-        item.exampleZhuyin.includes(keyword)
-      );
-
-      results.innerHTML = matched.length > 0
-        ? matched.map(createWordCard).join("")
-        : '<div class="empty">找不到耶 🥲</div>';
-    }
-
-    window.addEventListener("load", () => {
-      renderWordList();
-      pickWords();
-    });
-  </script>
+  <script src="words.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

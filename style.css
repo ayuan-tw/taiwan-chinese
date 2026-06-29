@@ -1,0 +1,196 @@
+:root {
+  --bg: #eef7fb;
+  --ink: #1f3f4f;
+  --main: #4f9fbd;
+  --main-dark: #236b86;
+  --sub: #7fc7d9;
+  --card: #ffffff;
+  --line: #b8d8e3;
+  --muted: #5b8796;
+  --shadow: rgba(58, 103, 119, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans TC", sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+header {
+  background: linear-gradient(135deg, var(--sub), var(--main));
+  color: white;
+  padding: 42px 20px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: 0.08em;
+}
+
+header p {
+  margin: 12px 0 0;
+  font-size: 0.95rem;
+  opacity: 0.95;
+}
+
+main {
+  max-width: 980px;
+  margin: 30px auto;
+  padding: 0 16px;
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(184, 216, 227, 0.75);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 14px var(--shadow);
+  margin-bottom: 26px;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  border-left: 6px solid var(--main);
+  padding-left: 10px;
+  margin: 0 0 18px;
+}
+
+.button-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+button {
+  background: var(--main);
+  color: white;
+  border: none;
+  padding: 11px 18px;
+  border-radius: 999px;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(35, 107, 134, 0.18);
+}
+
+button:hover {
+  background: var(--main-dark);
+}
+
+button.secondary {
+  background: white;
+  color: var(--main-dark);
+  border: 1px solid var(--line);
+}
+
+button.small {
+  padding: 8px 13px;
+  font-size: 0.9rem;
+}
+
+.search-box {
+  text-align: center;
+}
+
+input {
+  width: min(100%, 520px);
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-size: 1rem;
+  background: white;
+  color: var(--ink);
+}
+
+.hint {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.88rem;
+  margin: 8px 0 0;
+}
+
+.result-area {
+  margin-top: 18px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 4px 12px var(--shadow);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 16px rgba(58, 103, 119, 0.18);
+}
+
+.word {
+  font-size: 1.55rem;
+  font-weight: bold;
+  color: var(--main-dark);
+}
+
+.zhuyin {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.meaning {
+  margin-top: 10px;
+  font-size: 1rem;
+}
+
+.example {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.note {
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+.tag {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #e3f3f8;
+  color: var(--main-dark);
+  font-size: 0.78rem;
+}
+
+.empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--muted);
+  padding: 18px;
+}
+
+footer {
+  text-align: center;
+  color: #6f8f9b;
+  font-size: 0.8rem;
+  padding: 30px 10px;
+}
