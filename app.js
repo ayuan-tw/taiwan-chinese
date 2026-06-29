@@ -1,264 +1,29 @@
-let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-let weakWords = JSON.parse(localStorage.getItem("weakWords") || "[]");
-let mistakeCounts = JSON.parse(localStorage.getItem("mistakeCounts") || "{}");
-let quizCount = Number(localStorage.getItem("quizCount") || "0");
-let currentQuiz = null;
-
-function saveFavorites() {
-  localStorage.setItem("favorites", JSON.stringify(favorites));
-  updateStats();
-}
-
-function saveWeakWords() {
-  localStorage.setItem("weakWords", JSON.stringify(weakWords));
-  localStorage.setItem("mistakeCounts", JSON.stringify(mistakeCounts));
-  updateStats();
-}
-
-function saveQuizCount() {
-  localStorage.setItem("quizCount", String(quizCount));
-  updateStats();
-}
-
-function updateStats() {
-  document.getElementById("totalCount").textContent = words.length;
-  document.getElementById("favoriteCount").textContent = favorites.length;
-  document.getElementById("weakCount").textContent = weakWords.length;
-  document.getElementById("quizCount").textContent = quizCount;
-}
-
-function getPriorityScore(item) {
-  const mistakes = mistakeCounts[item.word] || 0;
-  const fav = favorites.includes(item.word) ? 1 : 0;
-  const weak = weakWords.includes(item.word) ? 2 : 0;
-  return mistakes * 3 + fav + weak;
-}
-
-function toggleFavorite(word) {
-  if (favorites.includes(word)) {
-    favorites = favorites.filter(item => item !== word);
-  } else {
-    favorites.push(word);
-  }
-
-  saveFavorites();
-  refreshVisibleAreas();
-}
-
-function createWordCard(item) {
-  const star = favorites.includes(item.word) ? "★" : "☆";
-  const mistakes = mistakeCounts[item.word] || 0;
-  const priority = getPriorityScore(item);
-
-  return `
-    <div class="card">
-      <div class="card-top">
-        <div class="tag">${item.category}</div>
-        <button class="small star" onclick="toggleFavorite('${item.word}')">${star}</button>
-      </div>
-      <div class="word">${item.word}</div>
-      <div class="zhuyin">${item.zhuyin}</div>
-      <div class="meaning">${item.meaning}</div>
-      <div class="example">
-        ${item.example}<br>
-        <span style="color:#666;">${item.exampleZhuyin}</span><br>
-        <span class="note">${item.note}</span><br>
-        <span class="priority">復習優先度：${priority} / 忘れた回数：${mistakes}</span>
-      </div>
-    </div>
-  `;
-}
-
-function renderWordList(targetWords = words) {
-  document.getElementById("wordList").innerHTML =
-    targetWords.length > 0
-      ? targetWords.map(createWordCard).join("")
-      : '<div class="empty">找不到耶 🥲</div>';
-}
-
-function pickWords() {
-  const shuffled = [...words].sort(() => Math.random() - 0.5);
-  const selected = shuffled.slice(0, 3);
-  document.getElementById("todayWords").innerHTML =
-    selected.map(createWordCard).join("");
-}
-
-function pickPriorityWords() {
-  const sorted = [...words].sort((a, b) => getPriorityScore(b) - getPriorityScore(a));
-  const top = sorted.filter(item => getPriorityScore(item) > 0).slice(0, 3);
-  const selected = top.length >= 3 ? top : [...top, ...words.filter(w => !top.includes(w)).sort(() => Math.random() - 0.5)].slice(0, 3);
-  document.getElementById("todayWords").innerHTML = selected.map(createWordCard).join("");
-}
-
-function clearTodayWords() {
-  document.getElementById("todayWords").innerHTML = "";
-}
-
-function searchWords() {
-  const keyword = document.getElementById("searchInput").value.trim();
-  const results = document.getElementById("searchResults");
-
-  if (!keyword) {
-    results.innerHTML = "";
-    return;
-  }
-
-  const matched = words.filter(item =>
-    item.category.includes(keyword) ||
-    item.word.includes(keyword) ||
-    item.zhuyin.includes(keyword) ||
-    item.meaning.includes(keyword) ||
-    item.note.includes(keyword) ||
-    item.example.includes(keyword) ||
-    item.exampleZhuyin.includes(keyword)
-  );
-
-  results.innerHTML =
-    matched.length > 0
-      ? matched.map(createWordCard).join("")
-      : '<div class="empty">找不到耶 🥲</div>';
-}
-
-function renderCategoryButtons() {
-  const categories = ["全部", ...new Set(words.map(item => item.category))];
-
-  document.getElementById("categoryButtons").innerHTML =
-    categories.map(category => `
-      <button class="secondary small" onclick="filterByCategory('${category}')">
-        ${category}
-      </button>
-    `).join("");
-}
-
-function filterByCategory(category) {
-  if (category === "全部") {
-    renderWordList(words);
-    return;
-  }
-
-  renderWordList(words.filter(item => item.category === category));
-}
-
-function showFavorites() {
-  renderWordList(words.filter(item => favorites.includes(item.word)));
-}
-
-function showWeakWords() {
-  renderWordList(words.filter(item => weakWords.includes(item.word)));
-}
-
-function showPriorityWords() {
-  const sorted = [...words].sort((a, b) => getPriorityScore(b) - getPriorityScore(a));
-  renderWordList(sorted);
-}
-
-function clearWeakWords() {
-  if (!confirm("苦手單字リストを消す？")) return;
-  weakWords = [];
-  mistakeCounts = {};
-  saveWeakWords();
-  renderWordList(words);
-}
-
-function startQuiz() {
-  const pool = [...words].sort((a, b) => (getPriorityScore(b) - getPriorityScore(a)) || (Math.random() - 0.5));
-  const question = Math.random() < 0.45 && pool.some(w => getPriorityScore(w) > 0)
-    ? pool.find(w => getPriorityScore(w) > 0)
-    : words[Math.floor(Math.random() * words.length)];
-  const answers = [question.meaning];
-
-  while (answers.length < 4) {
-    const randomMeaning = words[Math.floor(Math.random() * words.length)].meaning;
-    if (!answers.includes(randomMeaning)) answers.push(randomMeaning);
-  }
-
-  answers.sort(() => Math.random() - 0.5);
-  currentQuiz = question;
-  quizCount += 1;
-  saveQuizCount();
-
-  document.getElementById("quizArea").innerHTML = `
-    <div class="quiz-card">
-      <div class="tag">${question.category}</div>
-      <div class="word">${question.word}</div>
-      <div class="zhuyin">${question.zhuyin}</div>
-      <p class="hint">この意味はどれ？</p>
-      <div class="quiz-options">
-        ${answers.map(answer => `
-          <button onclick="checkAnswer('${escapeText(answer)}')">${answer}</button>
-        `).join("")}
-      </div>
-      <div id="quizResult"></div>
-    </div>
-  `;
-}
-
-function checkAnswer(answer) {
-  if (!currentQuiz) return;
-
-  const result = document.getElementById("quizResult");
-
-  if (answer === currentQuiz.meaning) {
-    result.innerHTML = `
-      <div class="quiz-result">
-        <span class="correct">⭕ 正解！</span><br>
-        ${currentQuiz.example}<br>
-        ${currentQuiz.exampleZhuyin}
-      </div>
-    `;
-  } else {
-    if (!weakWords.includes(currentQuiz.word)) {
-      weakWords.push(currentQuiz.word);
-    }
-    mistakeCounts[currentQuiz.word] = (mistakeCounts[currentQuiz.word] || 0) + 1;
-    saveWeakWords();
-
-    result.innerHTML = `
-      <div class="quiz-result">
-        <span class="wrong">❌ 不正解</span><br>
-        正解：${currentQuiz.meaning}<br>
-        ${currentQuiz.example}<br>
-        ${currentQuiz.exampleZhuyin}
-      </div>
-    `;
-  }
-}
-
-function clearQuiz() {
-  document.getElementById("quizArea").innerHTML = "";
-  currentQuiz = null;
-}
-
-function escapeText(text) {
-  return text.replace(/'/g, "\\'");
-}
-
-function refreshVisibleAreas() {
-  renderWordList(words);
-  searchWords();
-
-  const todayArea = document.getElementById("todayWords");
-  if (todayArea.innerHTML.trim() !== "") {
-    const todayWords = [...todayArea.querySelectorAll(".word")].map(el => el.textContent);
-    const items = words.filter(item => todayWords.includes(item.word));
-    todayArea.innerHTML = items.map(createWordCard).join("");
-  }
-}
-
-function renderPhrases() {
-  document.getElementById("phraseList").innerHTML = phrases.map(item => `
-    <div class="phrase-card">
-      <div class="phrase-main">${item.text}</div>
-      <div class="phrase-sub">${item.zhuyin}</div>
-      <div class="phrase-meaning">${item.meaning}</div>
-    </div>
-  `).join("");
-}
-
-window.addEventListener("load", () => {
-  renderCategoryButtons();
-  renderWordList();
-  renderPhrases();
-  pickWords();
-  updateStats();
-});
+let favorites=JSON.parse(localStorage.getItem("favorites")||"[]");
+let weakWords=JSON.parse(localStorage.getItem("weakWords")||"[]");
+let mistakeCounts=JSON.parse(localStorage.getItem("mistakeCounts")||"{}");
+let quizRuns=Number(localStorage.getItem("quizRuns")||localStorage.getItem("quizCount")||"0");
+let currentQuiz=null;
+function saveAll(){localStorage.setItem("favorites",JSON.stringify(favorites));localStorage.setItem("weakWords",JSON.stringify(weakWords));localStorage.setItem("mistakeCounts",JSON.stringify(mistakeCounts));localStorage.setItem("quizRuns",String(quizRuns));updateStats();}
+function updateStats(){document.getElementById("totalCount").textContent=words.length;document.getElementById("favoriteCount").textContent=favorites.length;document.getElementById("weakCount").textContent=weakWords.length;document.getElementById("quizCount").textContent=quizRuns;}
+function score(item){return (mistakeCounts[item.word]||0)*3+(weakWords.includes(item.word)?2:0)+(favorites.includes(item.word)?1:0);}
+function toggleFavorite(word){favorites=favorites.includes(word)?favorites.filter(w=>w!==word):[...favorites,word];saveAll();refresh();}
+function createWordCard(item){const star=favorites.includes(item.word)?"★":"☆";const tags=(item.tags||[]).map(t=>`<span class="tag hot">#${t}</span>`).join("");return `<div class="card"><div class="card-top"><div class="tag">${item.category}</div><button class="small star" onclick="toggleFavorite('${item.word}')">${star}</button></div><div class="word">${item.word}</div><div class="zhuyin">${item.zhuyin}</div><div class="meaning">${item.meaning}</div><div class="example">${item.example}<br><span style="color:#666">${item.exampleZhuyin}</span><br><span class="note">${item.note}</span></div><div class="confuse">⚠️ ${item.confuse||item.note}</div><div class="tag-row">${tags}</div><span class="priority">復習優先度：${score(item)} / 忘れた回数：${mistakeCounts[item.word]||0}</span></div>`;}
+function renderWordList(list=words){document.getElementById("wordList").innerHTML=list.length?list.map(createWordCard).join(""):'<div class="empty">找不到耶 🥲</div>';}
+function pickWords(){document.getElementById("todayWords").innerHTML=[...words].sort(()=>Math.random()-.5).slice(0,3).map(createWordCard).join("");}
+function pickPriorityWords(){let sorted=[...words].sort((a,b)=>score(b)-score(a));let top=sorted.filter(w=>score(w)>0).slice(0,3);let selected=(top.length>=3?top:[...top,...words.filter(w=>!top.includes(w)).sort(()=>Math.random()-.5)]).slice(0,3);document.getElementById("todayWords").innerHTML=selected.map(createWordCard).join("");}
+function clearTodayWords(){document.getElementById("todayWords").innerHTML="";}
+function searchWords(){let k=document.getElementById("searchInput").value.trim().replace(/^#/,"");let results=document.getElementById("searchResults");if(!k){results.innerHTML="";return;}let m=words.filter(i=>[i.category,i.word,i.zhuyin,i.meaning,i.note,i.example,i.exampleZhuyin,i.confuse,(i.tags||[]).join(" ")].some(x=>(x||"").includes(k)));results.innerHTML=m.length?m.map(createWordCard).join(""):'<div class="empty">找不到耶 🥲</div>';}
+function renderCategoryButtons(){let cats=["全部",...new Set(words.map(w=>w.category))];document.getElementById("categoryButtons").innerHTML=cats.map(c=>`<button class="secondary small" onclick="filterByCategory('${c}')">${c}</button>`).join("");}
+function renderTagButtons(){let area=document.getElementById("tagButtons");if(!area)return;let tags=[...new Set(words.flatMap(w=>w.tags||[]))].sort();area.innerHTML=tags.map(t=>`<button class="secondary small" onclick="filterByTag('${t}')">#${t}</button>`).join("");}
+function filterByCategory(c){renderWordList(c==="全部"?words:words.filter(w=>w.category===c));}
+function filterByTag(t){renderWordList(words.filter(w=>(w.tags||[]).includes(t)));}
+function showFavorites(){renderWordList(words.filter(w=>favorites.includes(w.word)));}
+function showWeakWords(){renderWordList(words.filter(w=>weakWords.includes(w.word)));}
+function showPriorityWords(){renderWordList([...words].sort((a,b)=>score(b)-score(a)));}
+function clearWeakWords(){if(!confirm("苦手單字と忘れた回数を消す？"))return;weakWords=[];mistakeCounts={};saveAll();renderWordList(words);}
+function startQuiz(){let pool=[...words].sort((a,b)=>score(b)-score(a)||Math.random()-.5);let q=(Math.random()<.5&&pool.some(w=>score(w)>0))?pool.find(w=>score(w)>0):words[Math.floor(Math.random()*words.length)];let ans=[q.meaning];while(ans.length<4){let r=words[Math.floor(Math.random()*words.length)].meaning;if(!ans.includes(r))ans.push(r);}ans.sort(()=>Math.random()-.5);currentQuiz=q;quizRuns++;saveAll();document.getElementById("quizArea").innerHTML=`<div class="quiz-card"><span class="tag">${q.category}</span><div class="word">${q.word}</div><div class="zhuyin">${q.zhuyin}</div><p class="hint">この意味はどれ？</p><div class="quiz-options">${ans.map(a=>`<button onclick="checkAnswer('${a.replace(/'/g,"\\'")}')">${a}</button>`).join("")}</div><div id="quizResult"></div></div>`;}
+function checkAnswer(a){if(!currentQuiz)return;let result=document.getElementById("quizResult");if(a===currentQuiz.meaning){result.innerHTML=`<div class="quiz-result"><span class="correct">⭕ 正解！</span><br>${currentQuiz.example}<br>${currentQuiz.exampleZhuyin}</div>`;}else{if(!weakWords.includes(currentQuiz.word))weakWords.push(currentQuiz.word);mistakeCounts[currentQuiz.word]=(mistakeCounts[currentQuiz.word]||0)+1;saveAll();result.innerHTML=`<div class="quiz-result"><span class="wrong">❌ 不正解</span><br>正解：${currentQuiz.meaning}<br>${currentQuiz.example}<br>${currentQuiz.exampleZhuyin}<br>⚠️ ${currentQuiz.confuse||currentQuiz.note}</div>`;}}
+function clearQuiz(){document.getElementById("quizArea").innerHTML="";currentQuiz=null;}
+function renderPhrases(){document.getElementById("phraseList").innerHTML=phrases.map(p=>`<div class="phrase-card"><div class="phrase-main">${p.text}</div><div class="phrase-sub">${p.zhuyin}</div><div class="phrase-meaning">${p.meaning}</div></div>`).join("");}
+function refresh(){renderWordList(words);searchWords();}
+window.addEventListener("load",()=>{renderCategoryButtons();renderTagButtons();renderWordList();renderPhrases();pickWords();updateStats();});

@@ -68,3 +68,64 @@ const phrases = [
   { text: "記得開泡泡。", zhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄎㄞ ㄆㄠˋ ㄆㄠˋ", meaning: "シールド張るの忘れないで。" },
   { text: "我可能會晚一點到。", zhuyin: "ㄨㄛˇ ㄎㄜˇ ㄋㄥˊ ㄏㄨㄟˋ ㄨㄢˇ ㄧˋ ㄉㄧㄢˇ ㄉㄠˋ", meaning: "少し遅れるかも。" }
 ];
+
+
+// Ver.2.0: あゆあん苦手単語パック Vol.1 + tags/confuse
+const enrich = {
+  "至少": {confuse:"意味を忘れやすい。チャットで見かけたら即復習枠。", tags:["何回も忘れた","副詞","台湾人よく使う"]},
+  "划算": {confuse:"『お得』より『コスパがいい』で覚えると残りやすい。", tags:["何回も忘れた","買い物","夜市"]},
+  "剛好": {confuse:"差不多＝だいたい、剛好＝ちょうど。ここが混ざりやすい。", tags:["差不多と混同","何回も忘れた"]},
+  "差不多": {confuse:"剛好と混ぜない。ぴったりではなく『だいたい』。", tags:["差不多と混同","WOS"]},
+  "幾乎": {confuse:"似乎と字面が似るけど意味は別。幾乎＝ほとんど。", tags:["幾乎と似乎","何度も質問した"]},
+  "原來": {confuse:"原來是這樣啊 を丸ごと覚えると強い。", tags:["何回も忘れた","リアクション"]},
+  "竟然": {confuse:"『まさか！』の驚き。你竟然不知道！で覚える枠。", tags:["何回も忘れた","リアクション"]},
+  "好像": {confuse:"声調注意。ㄏㄠˇ ㄒㄧㄤˋ＝3声＋4声。3声3声で覚えがち。", tags:["声調注意","何度も質問した"]},
+  "想不出來": {confuse:"想不起來＝思い出せない。想不出來＝考えても出てこない。", tags:["想不起來と想不出來","何度も質問した"]},
+  "想不起來": {confuse:"想不出來＝思いつかない。想不起來＝記憶から取り出せない。", tags:["想不起來と想不出來","何度も質問した"]},
+  "記得要": {confuse:"記得開泡泡のように要が落ちても自然。", tags:["WOS","台湾人よく使う"]},
+  "等一下": {confuse:"等一下＋我看一下 は実用セット。", tags:["台湾人よく使う","会話"]},
+  "看一下": {confuse:"看看より『確認する』が出やすい。", tags:["台湾人よく使う","会話"]},
+  "吃吃看": {confuse:"想吃吃看＋食べ物、で丸ごと使う。", tags:["台湾旅行","夜市","会話"]},
+  "用看看": {confuse:"用一下より『試しに使ってみる』感。", tags:["台湾人よく使う","会話"]},
+  "只能": {confuse:"只＋能。只能習慣＝慣れるしかない。", tags:["何度も質問した","会話"]},
+  "還是": {confuse:"選択疑問の『それとも』と、結局の『やっぱり』がある。", tags:["何度も質問した","副詞"]},
+  "應該": {confuse:"應該要〜で『〜しなきゃ/〜するはず』っぽく使う。", tags:["何度も質問した","副詞"]},
+  "搞錯": {confuse:"錯は間違い。搞錯了＝勘違いした。", tags:["何度も質問した","会話"]},
+  "颱風假": {confuse:"放颱風假＝台風休みになる。", tags:["台湾生活","天気"]},
+  "涼快": {confuse:"冷＝寒い、涼快＝涼しくて快適。", tags:["天気","何度も質問した"]},
+  "忙翻了": {confuse:"忙死了に近いけど、忙しさでひっくり返る感じ。", tags:["会話","あゆあん語録"]}
+};
+
+const extraWords = [
+  { category:"副詞", word:"似乎", zhuyin:"ㄙˋ ㄏㄨ", meaning:"〜みたいだ、〜らしい", note:"好像に近いけど少し書き言葉寄り。", confuse:"幾乎＝ほとんど、似乎＝〜みたい。字面だけで混ざりやすい。", example:"他似乎不知道。", exampleZhuyin:"ㄊㄚ ㄙˋ ㄏㄨ ㄅㄨˋ ㄓ ㄉㄠˋ", tags:["幾乎と似乎","何度も質問した"] },
+  { category:"会話", word:"懂", zhuyin:"ㄉㄨㄥˇ", meaning:"わかる、理解する", note:"懂了＝わかった。", confuse:"3声。感情が乗ると4声っぽく言いがちなので注意。", example:"我懂了。", exampleZhuyin:"ㄨㄛˇ ㄉㄨㄥˇ ㄌㄜ˙", tags:["声調注意","何度も質問した"] },
+  { category:"会話", word:"習慣", zhuyin:"ㄒㄧˊ ㄍㄨㄢˋ", meaning:"慣れる、習慣", note:"動詞にも名詞にもなる。", confuse:"『慣れる』は習慣でOK。只能習慣＝慣れるしかない。", example:"我應該習慣。", exampleZhuyin:"ㄨㄛˇ ㄧㄥ ㄍㄞ ㄒㄧˊ ㄍㄨㄢˋ", tags:["何度も質問した","会話"] },
+  { category:"接続", word:"就", zhuyin:"ㄐㄧㄡˋ", meaning:"すぐ、もう、それなら、〜すれば", note:"意味が広すぎる超重要語。", confuse:"才と対になりがち。就＝早い・自然な流れ、才＝やっと・遅い。", example:"我明天就去。", exampleZhuyin:"ㄨㄛˇ ㄇㄧㄥˊ ㄊㄧㄢ ㄐㄧㄡˋ ㄑㄩˋ", tags:["就と才","接続詞","何度も質問した"] },
+  { category:"接続", word:"才", zhuyin:"ㄘㄞˊ", meaning:"やっと、〜して初めて、たった", note:"遅さ・条件・少なさのニュアンス。", confuse:"就と対比。現在才＝今やっと。", example:"我現在才洗澡。", exampleZhuyin:"ㄨㄛˇ ㄒㄧㄢˋ ㄗㄞˋ ㄘㄞˊ ㄒㄧˇ ㄗㄠˇ", tags:["就と才","接続詞","何度も質問した"] },
+  { category:"接続", word:"又", zhuyin:"ㄧㄡˋ", meaning:"また、さらに", note:"すでに起きたこと・繰り返し。", confuse:"再＝これからまた。又＝もうまた起きた。", example:"我又忘記了。", exampleZhuyin:"ㄨㄛˇ ㄧㄡˋ ㄨㄤˋ ㄐㄧˋ ㄌㄜ˙", tags:["又と再","何度も質問した"] },
+  { category:"接続", word:"再", zhuyin:"ㄗㄞˋ", meaning:"また、もう一度、あとで", note:"これから起こることに使う。", confuse:"又＝すでにまた。再＝これからまた。", example:"我明天再問你。", exampleZhuyin:"ㄨㄛˇ ㄇㄧㄥˊ ㄊㄧㄢ ㄗㄞˋ ㄨㄣˋ ㄋㄧˇ", tags:["又と再","何度も質問した"] },
+  { category:"接続", word:"如果", zhuyin:"ㄖㄨˊ ㄍㄨㄛˇ", meaning:"もし", note:"仮定の文を作る。", confuse:"ㄖ が ㄌ 寄りになりやすい発音注意枠。", example:"如果明天下雨，我就不去。", exampleZhuyin:"ㄖㄨˊ ㄍㄨㄛˇ ㄇㄧㄥˊ ㄊㄧㄢ ㄒㄧㄚˋ ㄩˇ，ㄨㄛˇ ㄐㄧㄡˋ ㄅㄨˊ ㄑㄩˋ", tags:["r注意","接続詞","発音注意"] },
+  { category:"接続", word:"因為", zhuyin:"ㄧㄣ ㄨㄟˋ", meaning:"なぜなら、〜だから", note:"理由を言う。", confuse:"因為＋理由、所以＋結果。セットで覚える。", example:"因為日本沒有放颱風假。", exampleZhuyin:"ㄧㄣ ㄨㄟˋ ㄖˋ ㄅㄣˇ ㄇㄟˊ ㄧㄡˇ ㄈㄤˋ ㄊㄞˊ ㄈㄥ ㄐㄧㄚˋ", tags:["因為所以","接続詞"] },
+  { category:"接続", word:"所以", zhuyin:"ㄙㄨㄛˇ ㄧˇ", meaning:"だから、それで", note:"結果を言う。", confuse:"因為＋理由、所以＋結果。日本語順と相性良い。", example:"所以我應該要上班。", exampleZhuyin:"ㄙㄨㄛˇ ㄧˇ ㄨㄛˇ ㄧㄥ ㄍㄞ ㄧㄠˋ ㄕㄤˋ ㄅㄢ", tags:["因為所以","接続詞"] },
+  { category:"接続", word:"雖然", zhuyin:"ㄙㄨㄟ ㄖㄢˊ", meaning:"〜だけど、〜ではあるが", note:"譲歩の文。後ろに但是/可是が来やすい。", confuse:"雖然A，但是B の型で覚える。", example:"雖然很難，但是很好玩。", exampleZhuyin:"ㄙㄨㄟ ㄖㄢˊ ㄏㄣˇ ㄋㄢˊ，ㄉㄢˋ ㄕˋ ㄏㄣˇ ㄏㄠˇ ㄨㄢˊ", tags:["接続詞","何度も質問した"] },
+  { category:"接続", word:"但是", zhuyin:"ㄉㄢˋ ㄕˋ", meaning:"でも、しかし", note:"比較的はっきりした逆接。", confuse:"可是より少し硬め・はっきり。", example:"但是我還是想去。", exampleZhuyin:"ㄉㄢˋ ㄕˋ ㄨㄛˇ ㄏㄞˊ ㄕˋ ㄒㄧㄤˇ ㄑㄩˋ", tags:["接続詞"] },
+  { category:"接続", word:"可是", zhuyin:"ㄎㄜˇ ㄕˋ", meaning:"でも、だけど", note:"口語で使いやすい逆接。", confuse:"但是より会話っぽい。可是我想〜で便利。", example:"可是我想吃吃看潤餅耶。", exampleZhuyin:"ㄎㄜˇ ㄕˋ ㄨㄛˇ ㄒㄧㄤˇ ㄔ ㄔ ㄎㄢˋ ㄖㄨㄣˋ ㄅㄧㄥˇ ㄧㄝ", tags:["接続詞","会話"] },
+  { category:"助動詞", word:"可以", zhuyin:"ㄎㄜˇ ㄧˇ", meaning:"〜できる、〜してもいい", note:"許可・可能。", confuse:"能/會との違いで迷いやすい。可以＝OK/許可寄り。", example:"可以開嗎？", exampleZhuyin:"ㄎㄜˇ ㄧˇ ㄎㄞ ㄇㄚ˙", tags:["可以能會","WOS","助動詞"] },
+  { category:"助動詞", word:"能", zhuyin:"ㄋㄥˊ", meaning:"〜できる", note:"条件的にできる。", confuse:"可以より能力・条件寄り。能不能＝できるかどうか。", example:"明天能不能上班？", exampleZhuyin:"ㄇㄧㄥˊ ㄊㄧㄢ ㄋㄥˊ ㄅㄨˋ ㄋㄥˊ ㄕㄤˋ ㄅㄢ", tags:["可以能會","助動詞"] },
+  { category:"助動詞", word:"會", zhuyin:"ㄏㄨㄟˋ", meaning:"〜するだろう、〜できる", note:"未来・可能性・習得能力。", confuse:"會有颱風/會下雨など、未来の見込みでよく使う。", example:"明天好像會下雨。", exampleZhuyin:"ㄇㄧㄥˊ ㄊㄧㄢ ㄏㄠˇ ㄒㄧㄤˋ ㄏㄨㄟˋ ㄒㄧㄚˋ ㄩˇ", tags:["可以能會","助動詞","何度も質問した"] },
+  { category:"副詞", word:"比較", zhuyin:"ㄅㄧˇ ㄐㄧㄠˋ", meaning:"比較的、より〜", note:"比べる時に使う。", confuse:"比較涼快＝より涼しい。比とセットで考えがち。", example:"明天會比較涼快。", exampleZhuyin:"ㄇㄧㄥˊ ㄊㄧㄢ ㄏㄨㄟˋ ㄅㄧˇ ㄐㄧㄠˋ ㄌㄧㄤˊ ㄎㄨㄞˋ", tags:["何度も質問した","副詞"] },
+  { category:"副詞", word:"一點", zhuyin:"ㄧˋ ㄉㄧㄢˇ", meaning:"少し", note:"台湾では一點が自然。", confuse:"有一點はネガティブ専用ではない。", example:"我好像懂一點了。", exampleZhuyin:"ㄨㄛˇ ㄏㄠˇ ㄒㄧㄤˋ ㄉㄨㄥˇ ㄧˋ ㄉㄧㄢˇ ㄌㄜ˙", tags:["何度も質問した","副詞"] },
+  { category:"リアクション", word:"欸", zhuyin:"ㄟˋ", meaning:"え、ねえ、あれ", note:"台湾の会話でよく出る感嘆詞。", confuse:"語気で意味が変わる。やわらかく使うと自然。", example:"欸，這個很好吃。", exampleZhuyin:"ㄟˋ，ㄓㄜˋ ㄍㄜ˙ ㄏㄣˇ ㄏㄠˇ ㄔ", tags:["台湾人よく使う","リアクション"] },
+  { category:"リアクション", word:"好扯", zhuyin:"ㄏㄠˇ ㄔㄜˇ", meaning:"やばい、ありえない", note:"カジュアルな驚き・ツッコミ。", confuse:"親しい場面向け。少しくだけた表現。", example:"這也太扯了吧。", exampleZhuyin:"ㄓㄜˋ ㄧㄝˇ ㄊㄞˋ ㄔㄜˇ ㄌㄜ˙ ㄅㄚ", tags:["台湾人よく使う","リアクション"] },
+  { category:"リアクション", word:"有道理", zhuyin:"ㄧㄡˇ ㄉㄠˋ ㄌㄧˇ", meaning:"一理ある、たしかに", note:"相手の説明に納得した時。", confuse:"懂了より『筋が通ってるね』寄り。", example:"你說得有道理。", exampleZhuyin:"ㄋㄧˇ ㄕㄨㄛ ㄉㄜ˙ ㄧㄡˇ ㄉㄠˋ ㄌㄧˇ", tags:["台湾人よく使う","リアクション"] },
+  { category:"発音", word:"忍不住", zhuyin:"ㄖㄣˇ ㄅㄨˊ ㄓㄨˋ", meaning:"我慢できずに〜する", note:"音だけ聞くと拾いにくかった単語。", confuse:"ㄖㄣˇ の r 音注意。忍たま乱太郎で記憶。", example:"我忍不住笑了。", exampleZhuyin:"ㄨㄛˇ ㄖㄣˇ ㄅㄨˊ ㄓㄨˋ ㄒㄧㄠˋ ㄌㄜ˙", tags:["r注意","発音注意","何度も質問した"] }
+];
+
+for (const item of words) {
+  if (enrich[item.word]) Object.assign(item, enrich[item.word]);
+  item.tags = item.tags || [item.category];
+  item.confuse = item.confuse || item.note || "復習ポイントなし";
+}
+for (const item of extraWords) {
+  if (!words.some(w => w.word === item.word)) words.push(item);
+}

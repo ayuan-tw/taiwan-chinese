@@ -313,3 +313,5 @@ footer {
 .phrase-main { font-size: 1.12rem; color: var(--main-dark); font-weight: bold; }
 .phrase-sub { margin-top: 4px; color: var(--muted); }
 .phrase-meaning { margin-top: 8px; }
+
+.confuse{margin-top:12px;padding:10px;border:1px solid #f2d8c3;border-radius:12px;background:#fff8f1;color:#d87941;font-size:.92rem;line-height:1.6}.tag-row{margin-top:10px}.tag.hot{background:#fff1e8;color:#d87941}.priority{display:inline-block;margin-top:8px;color:#d87941;font-size:.82rem}.quiz-result{margin-top:14px;padding:12px;border-radius:12px;background:#f2fbfd;color:#236b86;line-height:1.6}.correct{color:#2f8f7b;font-weight:bold}.wrong{color:#c05d5d;font-weight:bold}
