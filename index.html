@@ -24,45 +24,51 @@
       <div class="button-row category-buttons compact" id="hotTagButtons"></div>
       <div id="searchResults" class="cards result-area"></div>
     </section>
-    <section class="panel">
+<section class="panel">
+      <h2 class="section-title">⚡ 瞬間作文</h2>
+      <div class="button-row"><button onclick="startComposition('word')">單字</button><button onclick="startComposition('pattern')">型</button><button onclick="startComposition('mix')">混合</button><button class="secondary" onclick="clearComposition()">消す</button></div>
+      <p class="hint">日本語を見て、まず自分で台湾華語にしてから答えを見る。</p>
+      <div id="compositionArea" class="quiz-area"></div>
+    </section>
+<section class="panel">
+      <h2 class="section-title">📝 ランダムクイズ</h2>
+      <div class="button-row"><button onclick="startQuiz()">クイズを出す</button><button class="secondary" onclick="clearQuiz()">消す</button></div>
+      <p class="hint">間違えた単語は自動で「苦手單字」に入ります。</p><div id="quizArea" class="quiz-area"></div>
+    </section>
+<section class="panel">
       <h2 class="section-title">🔥 復習優先3單字</h2>
       <div class="button-row"><button onclick="pickPriorityWords()">復習優先3單字</button><button class="secondary" onclick="clearPriorityWords()">消す</button></div>
       <p class="hint">間違えた回数・お気に入り・苦手登録を見て優先度を出します。</p>
       <div id="priorityWords" class="cards result-area"></div>
     </section>
-    <section class="panel">
+<section class="panel">
       <h2 class="section-title">🌱 今天的3個單字</h2>
       <div class="button-row"><button onclick="pickWords()">ランダム3單字</button><button class="secondary" onclick="clearTodayWords()">消す</button></div>
       <div id="todayWords" class="cards result-area"></div>
     </section>
-    <section class="panel">
-      <h2 class="section-title">🏷️ タグで見る</h2>
-      <p class="hint">#声調注意、#就と才、#WOS みたいに絞り込めます。</p>
-      <div class="button-row category-buttons compact" id="tagButtons"></div>
-    </section>
-
-    <section class="panel">
+<section class="panel">
       <h2 class="section-title">🧩 型卡</h2>
       <p class="hint">台湾人との雑談で実際に使いそうな型だけ集めたコーナー。</p>
       <div class="button-row"><button onclick="renderPatternList(patterns)">全部表示</button><button class="secondary" onclick="showPatternPriority()">🔥 復習優先順</button></div>
       <div class="button-row category-buttons compact" id="patternTagButtons"></div>
       <div id="patternList" class="cards result-area"></div>
     </section>
+
+    
+    
     <section class="panel">
-      <h2 class="section-title">⚡ 瞬間作文</h2>
-      <div class="button-row"><button onclick="startComposition('word')">單字</button><button onclick="startComposition('pattern')">型</button><button onclick="startComposition('mix')">混合</button><button class="secondary" onclick="clearComposition()">消す</button></div>
-      <p class="hint">日本語を見て、まず自分で台湾華語にしてから答えを見る。</p>
-      <div id="compositionArea" class="quiz-area"></div>
+      <h2 class="section-title">🏷️ タグで見る</h2>
+      <p class="hint">#声調注意、#就と才、#WOS みたいに絞り込めます。</p>
+      <div class="button-row category-buttons compact" id="tagButtons"></div>
     </section>
-    <section class="panel">
-      <h2 class="section-title">📝 ランダムクイズ</h2>
-      <div class="button-row"><button onclick="startQuiz()">クイズを出す</button><button class="secondary" onclick="clearQuiz()">消す</button></div>
-      <p class="hint">間違えた単語は自動で「苦手單字」に入ります。</p><div id="quizArea" class="quiz-area"></div>
-    </section>
+
+    
+    
+    
     <section class="panel"><h2 class="section-title">🗣️ あゆあん語録</h2><p class="hint">そのまま会話で使えそうな文だけ集めたコーナー。</p><div id="phraseList" class="phrase-list"></div></section>
     <section class="panel"><h2 class="section-title">📘 單字一覧</h2><div class="button-row category-buttons" id="categoryButtons"></div><div class="button-row"><button class="secondary" onclick="showFavorites()">⭐ お気に入りだけ</button><button class="secondary" onclick="showWeakWords()">🔁 苦手單字だけ</button><button class="secondary" onclick="showPriorityWords()">🔥 復習優先順</button><button class="secondary" onclick="clearWeakWords()">苦手リストを消す</button><button class="secondary" onclick="renderWordList(words)">全部表示</button></div><div id="wordList" class="cards"></div></section>
   </main>
-  <footer>Ver.3.2｜單字卡・型卡・瞬間作文・回答入力欄修正版</footer>
+  <footer>Ver.3.3｜練習ファースト配置</footer>
   <script src="words.js?v=3.2"></script><script src="app.js?v=3.2"></script>
 </body>
 </html>
