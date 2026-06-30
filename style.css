@@ -358,3 +358,12 @@ footer {
 .score-row{margin-top:12px;justify-content:flex-start;}
 .mini-feedback{margin-top:10px;font-weight:700;}
 @media (max-width:640px){.composition-input{font-size:1.05rem;}}
+
+
+/* Ver.3.2 composition fix */
+.composition-card{text-align:left;}
+.composition-card .hint{text-align:center;}
+.composition-label{display:block;margin:14px 0 6px;font-size:.86rem;font-weight:800;color:var(--main);letter-spacing:.04em;}
+.composition-card .composition-ja{cursor:default;user-select:text;}
+.composition-card .composition-input{display:block;box-sizing:border-box;}
+.composition-card .button-row{justify-content:center;}
