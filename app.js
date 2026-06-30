@@ -71,15 +71,47 @@ function renderPatternList(list=patterns){const area=document.getElementById("pa
 function showPatternPriority(){renderPatternList([...patterns].sort((a,b)=>patternScore(b)-patternScore(a)));}
 function renderPatternTagButtons(){let area=document.getElementById("patternTagButtons"); if(!area)return; let tags=[...new Set(patterns.flatMap(getPatternTags))].sort(); area.innerHTML=tags.map(t=>`<button class="secondary small" onclick="renderPatternList(patterns.filter(p=>getPatternTags(p).includes('${t}'))) ">#${t}</button>`).join("");}
 function wordCompositionPool(){return words.map(w=>({type:"word",category:w.category,source:w.word,ja:w.meaning,answer:w.word,zhuyin:w.zhuyin}));}
+function normalizeCompositionText(text){
+  return String(text||"")
+    .toLowerCase()
+    .replace(/[\s　，。！？!?、,.；;：:"“”‘’'（）()]/g,"")
+    .replace(/臺/g,"台")
+    .replace(/妳/g,"你");
+}
+function getCompositionInput(){
+  const input=document.getElementById("compositionInput");
+  return input?input.value.trim():"";
+}
 function startComposition(mode="mix"){
   const wordPool=wordCompositionPool();
   let pool=mode==="word"?wordPool:mode==="pattern"?compositionPrompts:[...wordPool,...compositionPrompts];
   const weighted=pool.slice().sort(()=>Math.random()-.5).sort((a,b)=>((a.type==="pattern"?patternMistakeCounts[a.source]||0:mistakeCounts[a.source]||0))-((b.type==="pattern"?patternMistakeCounts[b.source]||0:mistakeCounts[b.source]||0)));
   currentComposition=weighted[weighted.length-1]||pool[Math.floor(Math.random()*pool.length)];
   quizRuns++; saveAll();
-  document.getElementById("compositionArea").innerHTML=`<div class="quiz-card"><span class="tag">${currentComposition.type==="pattern"?"型":"單字"}：${currentComposition.category}</span><p class="hint">日本語を台湾華語にしてみて</p><div class="composition-ja">${currentComposition.ja}</div><div class="button-row"><button onclick="showCompositionAnswer()">答えを見る</button><button class="secondary" onclick="markCompositionMistake()">苦手にする</button><button class="secondary" onclick="startComposition('${mode}')">次の問題</button></div><div id="compositionResult"></div></div>`;
+  document.getElementById("compositionArea").innerHTML=`<div class="quiz-card"><span class="tag">${currentComposition.type==="pattern"?"型":"單字"}：${currentComposition.category}</span><p class="hint">日本語を台湾華語にしてみて。スマホならここにカーソルを置いて、繁體中文（台灣）キーボードの🎤でもOK。</p><div class="composition-ja">${currentComposition.ja}</div><textarea id="compositionInput" class="composition-input" rows="3" placeholder="ここに中文で入力／音声入力"></textarea><div class="button-row"><button onclick="checkCompositionAnswer()">答え合わせ</button><button onclick="showCompositionAnswer()">答えを見る</button><button class="secondary" onclick="markCompositionMistake()">苦手にする</button><button class="secondary" onclick="startComposition('${mode}')">次の問題</button></div><div id="compositionResult"></div></div>`;
+  setTimeout(()=>{const input=document.getElementById("compositionInput"); if(input) input.focus();},50);
 }
-function showCompositionAnswer(){if(!currentComposition)return;document.getElementById("compositionResult").innerHTML=`<div class="quiz-result"><span class="correct">答え</span><br><div class="word">${currentComposition.answer}</div><div class="zhuyin">${currentComposition.zhuyin}</div><span class="note">型：${currentComposition.source}</span></div>`;}
+function showCompositionAnswer(){
+  if(!currentComposition)return;
+  const user=getCompositionInput();
+  document.getElementById("compositionResult").innerHTML=`<div class="quiz-result"><span class="correct">答え</span>${user?`<br><span class="note">你的答案：</span><br><div class="user-answer">${user}</div>`:""}<br><div class="word">${currentComposition.answer}</div><div class="zhuyin">${currentComposition.zhuyin}</div><span class="note">型：${currentComposition.source}</span></div>`;
+}
+function checkCompositionAnswer(){
+  if(!currentComposition)return;
+  const user=getCompositionInput();
+  const result=document.getElementById("compositionResult");
+  if(!user){result.innerHTML=`<div class="quiz-result"><span class="wrong">まだ入力されてないよ</span><br>キーボード入力でも🎤音声入力でもOK。</div>`;return;}
+  const ok=normalizeCompositionText(user)===normalizeCompositionText(currentComposition.answer);
+  if(ok){
+    result.innerHTML=`<div class="quiz-result"><span class="correct">⭕ ぴったり！</span><br><div class="user-answer">${user}</div><div class="zhuyin">${currentComposition.zhuyin}</div><span class="note">この調子で次いこー</span></div>`;
+  }else{
+    result.innerHTML=`<div class="quiz-result"><span class="wrong">△ 答えと違うかも</span><br><span class="note">你的答案：</span><br><div class="user-answer">${user}</div><br><span class="note">參考答案：</span><br><div class="word">${currentComposition.answer}</div><div class="zhuyin">${currentComposition.zhuyin}</div><div class="button-row score-row"><button onclick="markCompositionCorrect()">これでOKにする</button><button class="secondary" onclick="markCompositionMistake()">苦手にする</button></div></div>`;
+  }
+}
+function markCompositionCorrect(){
+  if(!currentComposition)return;
+  document.getElementById("compositionResult").innerHTML+=`<div class="mini-feedback correct">自己採点：OK！</div>`;
+}
 function markCompositionMistake(){if(!currentComposition)return; if(currentComposition.type==="pattern"){if(!weakCards.includes(currentComposition.source))weakCards.push(currentComposition.source); patternMistakeCounts[currentComposition.source]=(patternMistakeCounts[currentComposition.source]||0)+1;}else{if(!weakWords.includes(currentComposition.source))weakWords.push(currentComposition.source); mistakeCounts[currentComposition.source]=(mistakeCounts[currentComposition.source]||0)+1;} saveAll(); showCompositionAnswer();}
 function clearComposition(){document.getElementById("compositionArea").innerHTML="";currentComposition=null;}
 

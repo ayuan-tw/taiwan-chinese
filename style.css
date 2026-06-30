@@ -329,3 +329,32 @@ footer {
 .prompt-list li{margin:0 0 10px;line-height:1.6;}
 .composition-ja{font-size:1.35rem;font-weight:800;margin:16px 0;padding:18px;border-radius:18px;background:#fff7df;}
 .quiz-result .word{margin-top:10px;}
+
+/* Ver.3.1 input composition */
+.composition-input{
+  width:100%;
+  min-height:86px;
+  margin:10px 0 14px;
+  padding:13px 14px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  font-size:1.12rem;
+  line-height:1.6;
+  color:var(--ink);
+  background:#fff;
+  resize:vertical;
+  font-family:"Hiragino Sans", "Yu Gothic", "Noto Sans TC", sans-serif;
+}
+.composition-input:focus{
+  outline:2px solid rgba(79,159,189,.35);
+  border-color:var(--main);
+}
+.user-answer{
+  margin-top:6px;
+  font-size:1.25rem;
+  font-weight:700;
+  color:var(--ink);
+}
+.score-row{margin-top:12px;justify-content:flex-start;}
+.mini-feedback{margin-top:10px;font-weight:700;}
+@media (max-width:640px){.composition-input{font-size:1.05rem;}}
