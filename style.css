@@ -322,3 +322,10 @@ footer {
 @media (max-width:640px){
   .dashboard{grid-template-columns:repeat(2,1fr);gap:10px}.cards{grid-template-columns:1fr;gap:12px}.card{padding:15px}.word{font-size:1.4rem}.button-row.compact button{font-size:.86rem;padding:7px 10px}.details{display:none}.card.open .details{display:block}.mobile-more{display:block;background:#eef7fb!important;color:var(--dark)!important;border:1px solid var(--line)!important}.example,.confuse{font-size:.92rem}.tag{font-size:.74rem}
 }
+
+/* Ver.3.0 */
+.pattern-card .word{color:#6f4bb2;}
+.prompt-list{margin:10px 0 0 1.1rem;padding:0;}
+.prompt-list li{margin:0 0 10px;line-height:1.6;}
+.composition-ja{font-size:1.35rem;font-weight:800;margin:16px 0;padding:18px;border-radius:18px;background:#fff7df;}
+.quiz-result .word{margin-top:10px;}

@@ -37,3 +37,60 @@ function clearQuiz(){document.getElementById("quizArea").innerHTML="";currentQui
 function renderPhrases(){document.getElementById("phraseList").innerHTML=phrases.map(p=>`<div class="phrase-card"><div class="phrase-main">${p.text}</div><div class="phrase-sub">${p.zhuyin}</div><div class="phrase-meaning">${p.meaning}</div></div>`).join("");}
 function refresh(){renderWordList(words);searchWords();}
 window.addEventListener("load",()=>{renderCategoryButtons();renderTagButtons();renderWordList();renderPhrases();pickPriorityWords();updateStats();});
+
+// Ver.3.0 additions: 型カード・瞬間作文
+let weakCards=JSON.parse(localStorage.getItem("weakCards")||"[]");
+let patternMistakeCounts=JSON.parse(localStorage.getItem("patternMistakeCounts")||"{}");
+let currentComposition=null;
+
+const oldUpdateStats=updateStats;
+updateStats=function(){
+  oldUpdateStats();
+  const pc=document.getElementById("patternCount");
+  if(pc) pc.textContent=(typeof patterns!=="undefined"?patterns.length:0);
+  const wc=document.getElementById("weakCount");
+  if(wc) wc.textContent=[...new Set([...weakWords,...weakCards])].length;
+}
+const oldSaveAll=saveAll;
+saveAll=function(){
+  localStorage.setItem("weakCards",JSON.stringify(weakCards));
+  localStorage.setItem("patternMistakeCounts",JSON.stringify(patternMistakeCounts));
+  oldSaveAll();
+}
+function patternScore(item){return (patternMistakeCounts[item.pattern]||0)*3+(weakCards.includes(item.pattern)?2:0);}
+function getPatternTags(p){return (p.tags&&p.tags.length)?p.tags:[p.category].filter(Boolean);}
+function toggleWeakPattern(key){weakCards=weakCards.includes(key)?weakCards.filter(w=>w!==key):[...weakCards,key];saveAll();renderPatternList(patterns);}
+function createPatternCard(item){
+  const tags=getPatternTags(item).map(t=>`<span class="tag hot">#${t}</span>`).join("");
+  const top=getPatternTags(item).slice(0,3).map(t=>`<span class="tag hot">#${t}</span>`).join("");
+  const weak=weakCards.includes(item.pattern)?"苦手解除":"苦手登録";
+  const promptList=(item.prompts||[]).map(q=>`<li><b>${q.ja}</b><br>${q.answer}<br><span class="zhuyin">${q.zhuyin}</span></li>`).join("");
+  return `<div class="card pattern-card"><div class="card-top"><div class="tag">${item.category}</div><button class="small star" onclick="toggleWeakPattern('${escapeWordText(item.pattern)}')">${weak}</button></div><div class="word">${item.pattern}</div><div class="zhuyin">${item.zhuyin}</div><div class="meaning">${item.meaning}</div><div class="tag-row top-tags">${top}</div><button class="mobile-more" onclick="toggleCard(this)">例文・瞬間作文を見る</button><div class="details"><div class="example">${item.example}<br><span style="color:#666">${item.exampleZhuyin}</span><br><span class="note">${item.note}</span></div><div class="confuse">⚡ 瞬間作文候補</div><ol class="prompt-list">${promptList}</ol><div class="tag-row">${tags}</div><span class="priority">復習優先度：${patternScore(item)} / 間違えた回数：${patternMistakeCounts[item.pattern]||0}</span></div></div>`;
+}
+function renderPatternList(list=patterns){const area=document.getElementById("patternList"); if(area) area.innerHTML=list.length?list.map(createPatternCard).join(""):'<div class="empty">找不到耶 🥲</div>';}
+function showPatternPriority(){renderPatternList([...patterns].sort((a,b)=>patternScore(b)-patternScore(a)));}
+function renderPatternTagButtons(){let area=document.getElementById("patternTagButtons"); if(!area)return; let tags=[...new Set(patterns.flatMap(getPatternTags))].sort(); area.innerHTML=tags.map(t=>`<button class="secondary small" onclick="renderPatternList(patterns.filter(p=>getPatternTags(p).includes('${t}'))) ">#${t}</button>`).join("");}
+function wordCompositionPool(){return words.map(w=>({type:"word",category:w.category,source:w.word,ja:w.meaning,answer:w.word,zhuyin:w.zhuyin}));}
+function startComposition(mode="mix"){
+  const wordPool=wordCompositionPool();
+  let pool=mode==="word"?wordPool:mode==="pattern"?compositionPrompts:[...wordPool,...compositionPrompts];
+  const weighted=pool.slice().sort(()=>Math.random()-.5).sort((a,b)=>((a.type==="pattern"?patternMistakeCounts[a.source]||0:mistakeCounts[a.source]||0))-((b.type==="pattern"?patternMistakeCounts[b.source]||0:mistakeCounts[b.source]||0)));
+  currentComposition=weighted[weighted.length-1]||pool[Math.floor(Math.random()*pool.length)];
+  quizRuns++; saveAll();
+  document.getElementById("compositionArea").innerHTML=`<div class="quiz-card"><span class="tag">${currentComposition.type==="pattern"?"型":"單字"}：${currentComposition.category}</span><p class="hint">日本語を台湾華語にしてみて</p><div class="composition-ja">${currentComposition.ja}</div><div class="button-row"><button onclick="showCompositionAnswer()">答えを見る</button><button class="secondary" onclick="markCompositionMistake()">苦手にする</button><button class="secondary" onclick="startComposition('${mode}')">次の問題</button></div><div id="compositionResult"></div></div>`;
+}
+function showCompositionAnswer(){if(!currentComposition)return;document.getElementById("compositionResult").innerHTML=`<div class="quiz-result"><span class="correct">答え</span><br><div class="word">${currentComposition.answer}</div><div class="zhuyin">${currentComposition.zhuyin}</div><span class="note">型：${currentComposition.source}</span></div>`;}
+function markCompositionMistake(){if(!currentComposition)return; if(currentComposition.type==="pattern"){if(!weakCards.includes(currentComposition.source))weakCards.push(currentComposition.source); patternMistakeCounts[currentComposition.source]=(patternMistakeCounts[currentComposition.source]||0)+1;}else{if(!weakWords.includes(currentComposition.source))weakWords.push(currentComposition.source); mistakeCounts[currentComposition.source]=(mistakeCounts[currentComposition.source]||0)+1;} saveAll(); showCompositionAnswer();}
+function clearComposition(){document.getElementById("compositionArea").innerHTML="";currentComposition=null;}
+
+const oldSearchWords=searchWords;
+searchWords=function(){
+  let k=document.getElementById("searchInput").value.trim().replace(/^#/,"");
+  let results=document.getElementById("searchResults");if(!k){results.innerHTML="";return;}
+  let wm=words.filter(i=>[i.category,i.word,i.zhuyin,i.meaning,i.note,i.example,i.exampleZhuyin,i.confuse,getWordTags(i).join(" ")].some(x=>(x||"").includes(k)));
+  let pm=patterns.filter(i=>[i.category,i.pattern,i.zhuyin,i.meaning,i.note,i.example,i.exampleZhuyin,getPatternTags(i).join(" ")].some(x=>(x||"").includes(k)));
+  results.innerHTML=(wm.length||pm.length)?[...wm.map(createWordCard),...pm.map(createPatternCard)].join(""):'<div class="empty">找不到耶 🥲</div>';
+}
+
+const oldWindowLoad = window.onload;
+window.addEventListener("load",()=>{renderPatternTagButtons();renderPatternList(patterns);updateStats();});
