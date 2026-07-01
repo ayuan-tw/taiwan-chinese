@@ -4,7 +4,7 @@ let mistakeCounts=JSON.parse(localStorage.getItem("mistakeCounts")||"{}");
 let quizRuns=Number(localStorage.getItem("quizRuns")||localStorage.getItem("quizCount")||"0");
 let currentQuiz=null;
 
-// Ver.3.4: 1周するまで重複しないランダム山札
+// Ver.3.5: 1周するまで重複しないランダム山札
 let quizQueue=[];
 let compositionQueues={mix:[], word:[], pattern:[]};
 function shuffleArray(arr){
@@ -70,7 +70,7 @@ function showFavorites(){renderWordList(words.filter(w=>favorites.includes(w.wor
 function showWeakWords(){renderWordList(words.filter(w=>weakWords.includes(w.word)));}
 function showPriorityWords(){renderWordList([...words].sort((a,b)=>score(b)-score(a)));}
 function clearWeakWords(){if(!confirm("苦手單字と忘れた回数を消す？"))return;weakWords=[];mistakeCounts={};saveAll();renderWordList(words);}
-function startQuiz(){let pool=[...words].sort((a,b)=>score(b)-score(a)||Math.random()-.5);let q=(Math.random()<.5&&pool.some(w=>score(w)>0))?pool.find(w=>score(w)>0):words[Math.floor(Math.random()*words.length)];let ans=[q.meaning];while(ans.length<4){let r=words[Math.floor(Math.random()*words.length)].meaning;if(!ans.includes(r))ans.push(r);}ans.sort(()=>Math.random()-.5);currentQuiz=q;quizRuns++;saveAll();document.getElementById("quizArea").innerHTML=`<div class="quiz-card"><span class="tag">${q.category}</span><div class="word">${q.word}</div><div class="zhuyin">${q.zhuyin}</div><p class="hint">この意味はどれ？</p><div class="quiz-options">${ans.map(a=>`<button onclick="checkAnswer('${a.replace(/'/g,"\\'")}')">${a}</button>`).join("")}</div><div id="quizResult"></div></div>`;}
+function startQuiz(){let pool=[...words].sort((a,b)=>score(b)-score(a)||Math.random()-.5);let q=pickFromQueue("quiz",pool,w=>w.word)||pool[0];let ans=[q.meaning];while(ans.length<4){let r=words[Math.floor(Math.random()*words.length)].meaning;if(!ans.includes(r))ans.push(r);}ans.sort(()=>Math.random()-.5);currentQuiz=q;quizRuns++;saveAll();document.getElementById("quizArea").innerHTML=`<div class="quiz-card"><span class="tag">${q.category}</span><div class="word">${q.word}</div><div class="zhuyin">${q.zhuyin}</div><p class="hint">この意味はどれ？</p><div class="quiz-options">${ans.map(a=>`<button onclick="checkAnswer('${a.replace(/'/g,"\\'")}')">${a}</button>`).join("")}</div><div id="quizResult"></div></div>`;}
 function checkAnswer(a){if(!currentQuiz)return;let result=document.getElementById("quizResult");if(a===currentQuiz.meaning){result.innerHTML=`<div class="quiz-result"><span class="correct">⭕ 正解！</span><br>${currentQuiz.example}<br>${currentQuiz.exampleZhuyin}</div>`;}else{if(!weakWords.includes(currentQuiz.word))weakWords.push(currentQuiz.word);mistakeCounts[currentQuiz.word]=(mistakeCounts[currentQuiz.word]||0)+1;saveAll();result.innerHTML=`<div class="quiz-result"><span class="wrong">❌ 不正解</span><br>正解：${currentQuiz.meaning}<br>${currentQuiz.example}<br>${currentQuiz.exampleZhuyin}<br>⚠️ ${currentQuiz.confuse||currentQuiz.note}</div>`;}}
 function clearQuiz(){document.getElementById("quizArea").innerHTML="";currentQuiz=null;}
 function renderPhrases(){document.getElementById("phraseList").innerHTML=phrases.map(p=>`<div class="phrase-card"><div class="phrase-main">${p.text}</div><div class="phrase-sub">${p.zhuyin}</div><div class="phrase-meaning">${p.meaning}</div></div>`).join("");}
