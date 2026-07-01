@@ -3,6 +3,45 @@ let weakWords=JSON.parse(localStorage.getItem("weakWords")||"[]");
 let mistakeCounts=JSON.parse(localStorage.getItem("mistakeCounts")||"{}");
 let quizRuns=Number(localStorage.getItem("quizRuns")||localStorage.getItem("quizCount")||"0");
 let currentQuiz=null;
+
+// Ver.3.4: 1周するまで重複しないランダム山札
+let quizQueue=[];
+let compositionQueues={mix:[], word:[], pattern:[]};
+function shuffleArray(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function pickFromQueue(queueName,pool,keyFn){
+  if(!pool.length)return null;
+  const unique=[];
+  const seen=new Set();
+  pool.forEach(item=>{
+    const key=keyFn(item);
+    if(!seen.has(key)){seen.add(key); unique.push(item);}
+  });
+  let queue=queueName==="quiz"?quizQueue:compositionQueues[queueName];
+  const keys=new Set(unique.map(keyFn));
+  queue=queue.filter(item=>keys.has(keyFn(item)));
+  if(queue.length===0){
+    queue=shuffleArray(unique);
+  }
+  const item=queue.shift();
+  if(queueName==="quiz") quizQueue=queue; else compositionQueues[queueName]=queue;
+  return item;
+}
+function weightedQuizPool(){
+  const base=[...words];
+  const weak=base.filter(w=>score(w)>0);
+  // 苦手は少し多めに山札へ入れる。でも山札内で同じカードが連続しないように後で調整。
+  const pool=[...base,...weak,...weak.filter(w=>(mistakeCounts[w.word]||0)>1)];
+  const seen=[];
+  pool.forEach(w=>seen.push(w));
+  return seen;
+}
 function saveAll(){localStorage.setItem("favorites",JSON.stringify(favorites));localStorage.setItem("weakWords",JSON.stringify(weakWords));localStorage.setItem("mistakeCounts",JSON.stringify(mistakeCounts));localStorage.setItem("quizRuns",String(quizRuns));updateStats();}
 function updateStats(){document.getElementById("totalCount").textContent=words.length;document.getElementById("favoriteCount").textContent=favorites.length;document.getElementById("weakCount").textContent=weakWords.length;document.getElementById("quizCount").textContent=quizRuns;}
 function score(item){return (mistakeCounts[item.word]||0)*3+(weakWords.includes(item.word)?2:0)+(favorites.includes(item.word)?1:0);}
@@ -85,8 +124,9 @@ function getCompositionInput(){
 function startComposition(mode="mix"){
   const wordPool=wordCompositionPool();
   let pool=mode==="word"?wordPool:mode==="pattern"?compositionPrompts:[...wordPool,...compositionPrompts];
-  const weighted=pool.slice().sort(()=>Math.random()-.5).sort((a,b)=>((a.type==="pattern"?patternMistakeCounts[a.source]||0:mistakeCounts[a.source]||0))-((b.type==="pattern"?patternMistakeCounts[b.source]||0:mistakeCounts[b.source]||0)));
-  currentComposition=weighted[weighted.length-1]||pool[Math.floor(Math.random()*pool.length)];
+  const weakPool=pool.filter(a=>(a.type==="pattern"?patternMistakeCounts[a.source]||0:mistakeCounts[a.source]||0)>0);
+  const weightedPool=[...pool,...weakPool,...weakPool];
+  currentComposition=pickFromQueue(mode,weightedPool,a=>`${a.type}:${a.source}:${a.ja}`)||pool[Math.floor(Math.random()*pool.length)];
   quizRuns++; saveAll();
   document.getElementById("compositionArea").innerHTML=`<div class="quiz-card composition-card"><span class="tag">${currentComposition.type==="pattern"?"型":"單字"}：${currentComposition.category}</span><p class="hint">日本語を見て、台湾華語で答えてみて。スマホなら下の入力欄にカーソルを置いて、繁體中文（台灣）キーボードの🎤でもOK。</p><div class="composition-label">問題</div><div class="composition-ja" aria-label="問題文">${currentComposition.ja}</div><label class="composition-label" for="compositionInput">你的答案</label><textarea id="compositionInput" class="composition-input" rows="3" lang="zh-Hant-TW" inputmode="text" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="ここに中文で入力／音声入力&#10;例：比我想像中還好吃"></textarea><div class="button-row"><button onclick="checkCompositionAnswer()">答え合わせ</button><button onclick="showCompositionAnswer()">答えを見る</button><button class="secondary" onclick="markCompositionMistake()">苦手にする</button><button class="secondary" onclick="startComposition('${mode}')">次の問題</button></div><div id="compositionResult"></div></div>`;
   setTimeout(()=>{const input=document.getElementById("compositionInput"); if(input) input.focus();},50);
