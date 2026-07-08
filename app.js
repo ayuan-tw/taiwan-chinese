@@ -1,5 +1,5 @@
 
-// Ver.4.0: ブラウザ標準の音声読み上げ（Web Speech API）
+// Ver.4.1: ブラウザ標準の音声読み上げ（Web Speech API）＋自由読み上げ
 let availableVoices=[];
 let audioPrefs=JSON.parse(localStorage.getItem("audioPrefs")||"{}");
 
@@ -83,6 +83,77 @@ function stopSpeech(){
 function testSpeech(){
   speakText("這樣不錯耶！");
 }
+
+function setSpeechRate(value){
+  const rate=document.getElementById("speechRate");
+  if(rate){
+    rate.value=String(value);
+    updateRateLabel();
+    saveAudioPrefs();
+  }else{
+    audioPrefs.rate=value;
+    localStorage.setItem("audioPrefs",JSON.stringify(audioPrefs));
+  }
+}
+function getFreeSpeakText(){
+  const el=document.getElementById("freeSpeakText");
+  return el?el.value.trim():"";
+}
+function saveFreeSpeakText(){
+  const text=getFreeSpeakText();
+  localStorage.setItem("freeSpeakText",text);
+}
+function initFreeSpeak(){
+  const el=document.getElementById("freeSpeakText");
+  if(!el)return;
+  el.value=localStorage.getItem("freeSpeakText")||"";
+  el.addEventListener("input",saveFreeSpeakText);
+}
+function speakFreeText(){
+  const text=getFreeSpeakText();
+  const status=document.getElementById("freeSpeakStatus");
+  if(!text){
+    if(status)status.innerHTML='<span class="wrong">まだ中文が入ってないよ</span>';
+    return;
+  }
+  saveFreeSpeakText();
+  speakText(text);
+  if(status)status.innerHTML=`<span class="correct">読み上げ中：</span><span class="free-speak-preview">${escapeHtml(text).slice(0,80)}${text.length>80?"…":""}</span>`;
+}
+async function pasteFreeText(){
+  const el=document.getElementById("freeSpeakText");
+  const status=document.getElementById("freeSpeakStatus");
+  if(!el)return;
+  try{
+    if(navigator.clipboard&&navigator.clipboard.readText){
+      const text=await navigator.clipboard.readText();
+      if(text){
+        el.value=text;
+        saveFreeSpeakText();
+        if(status)status.innerHTML='<span class="correct">貼り付けたよ。🔊で再生できるよ。</span>';
+        el.focus();
+        return;
+      }
+    }
+    el.focus();
+    if(status)status.innerHTML='<span class="note">ここに貼り付けてね。iPhoneは長押し→ペーストでもOK。</span>';
+  }catch(e){
+    el.focus();
+    if(status)status.innerHTML='<span class="note">ブラウザの制限で自動貼り付けできないかも。長押し→ペーストしてね。</span>';
+  }
+}
+function clearFreeText(){
+  const el=document.getElementById("freeSpeakText");
+  if(el)el.value="";
+  localStorage.removeItem("freeSpeakText");
+  const status=document.getElementById("freeSpeakStatus");
+  if(status)status.textContent="";
+  stopSpeech();
+}
+function escapeHtml(text){
+  return String(text||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
 function initAudio(){
   const rate=document.getElementById("speechRate");
   const auto=document.getElementById("autoSpeak");
@@ -173,7 +244,7 @@ function checkAnswer(a){if(!currentQuiz)return;let result=document.getElementByI
 function clearQuiz(){document.getElementById("quizArea").innerHTML="";currentQuiz=null;}
 function renderPhrases(){document.getElementById("phraseList").innerHTML=phrases.map(p=>`<div class="phrase-card"><div class="phrase-main">${p.text}</div><div class="phrase-sub">${p.zhuyin}</div><div class="audio-row">${audioButton(p.text,"🔊 音声")}</div><div class="phrase-meaning">${p.meaning}</div></div>`).join("");}
 function refresh(){renderWordList(words);searchWords();}
-window.addEventListener("load",()=>{initAudio();renderCategoryButtons();renderTagButtons();renderWordList();renderPhrases();pickPriorityWords();updateStats();});
+window.addEventListener("load",()=>{initAudio();initFreeSpeak();renderCategoryButtons();renderTagButtons();renderWordList();renderPhrases();pickPriorityWords();updateStats();});
 
 // Ver.3.0 additions: 型カード・瞬間作文
 let weakCards=JSON.parse(localStorage.getItem("weakCards")||"[]");

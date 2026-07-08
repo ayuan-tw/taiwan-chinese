@@ -408,3 +408,49 @@ footer {
   padding: .35rem .65rem;
   font-size: .82rem;
 }
+
+
+/* Ver.4.1 free speak */
+.free-speak-panel {
+  background: rgba(255, 255, 255, 0.82);
+}
+.free-speak-input{
+  width:100%;
+  min-height:112px;
+  margin:14px 0 14px;
+  padding:14px 15px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  font-size:1.12rem;
+  line-height:1.7;
+  color:var(--ink);
+  background:#fff;
+  resize:vertical;
+  font-family:"Hiragino Sans", "Yu Gothic", "Noto Sans TC", sans-serif;
+}
+.free-speak-input:focus{
+  outline:2px solid rgba(79,159,189,.35);
+  border-color:var(--main);
+}
+.free-speak-buttons{
+  margin-top:4px;
+}
+.speed-buttons{
+  margin-top:0;
+}
+.free-speak-status{
+  min-height:1.4rem;
+  margin-top:8px;
+  text-align:center;
+  color:var(--muted);
+  line-height:1.6;
+}
+.free-speak-preview{
+  display:inline-block;
+  margin-left:.35rem;
+}
+@media (max-width:640px){
+  .free-speak-input{font-size:1.05rem;min-height:100px;}
+  .free-speak-buttons button{min-width:42%;}
+  .speed-buttons button{min-width:70px;}
+}

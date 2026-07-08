@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>澄詞｜あゆあん台湾華語</title>
-  <link rel="stylesheet" href="style.css?v=4.0" />
+  <link rel="stylesheet" href="style.css?v=4.1" />
 </head>
 <body>
   <header><div class="header-inner"><p class="eyebrow">あゆあん台湾華語ノート</p><h1>澄詞</h1><p>単語カード・型カード・瞬間作文で育てる、あゆあん専用台湾華語アプリ</p></div></header>
@@ -36,6 +36,25 @@
       </div>
     </section>
 
+
+    <section class="panel free-speak-panel">
+      <h2 class="section-title">🗣️ 自由読み上げ</h2>
+      <p class="hint">LINEやTWTで見かけた中文、課題文、言ってみたい文を貼って読み上げできます。注音が混ざっていても中文だけ読ませやすいです。</p>
+      <textarea id="freeSpeakText" class="free-speak-input" rows="4" lang="zh-Hant-TW" inputmode="text" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="ここに中文を入力／貼り付け
+例：但你剛剛不是發出聲音了嗎？"></textarea>
+      <div class="button-row free-speak-buttons">
+        <button onclick="speakFreeText()">🔊 読み上げ</button>
+        <button class="secondary" onclick="pasteFreeText()">📋 貼り付け</button>
+        <button class="secondary" onclick="clearFreeText()">🗑 消す</button>
+      </div>
+      <div class="button-row speed-buttons">
+        <button class="secondary small" onclick="setSpeechRate(0.7)">🐢 0.7</button>
+        <button class="secondary small" onclick="setSpeechRate(0.9)">🚶 0.9</button>
+        <button class="secondary small" onclick="setSpeechRate(1.0)">👂 1.0</button>
+        <button class="secondary small" onclick="setSpeechRate(1.1)">🐇 1.1</button>
+      </div>
+      <div id="freeSpeakStatus" class="free-speak-status"></div>
+    </section>
     <section class="panel search-first">
       <h2 class="section-title">🔍 單字搜尋</h2>
       <div class="search-box"><input id="searchInput" type="text" placeholder="例：好像 / ㄏㄠˇ / #声調注意 / 就と才" oninput="searchWords()" /></div>
@@ -88,7 +107,7 @@
     <section class="panel"><h2 class="section-title">🗣️ あゆあん語録</h2><p class="hint">そのまま会話で使えそうな文だけ集めたコーナー。</p><div id="phraseList" class="phrase-list"></div></section>
     <section class="panel"><h2 class="section-title">📘 單字一覧</h2><div class="button-row category-buttons" id="categoryButtons"></div><div class="button-row"><button class="secondary" onclick="showFavorites()">⭐ お気に入りだけ</button><button class="secondary" onclick="showWeakWords()">🔁 苦手單字だけ</button><button class="secondary" onclick="showPriorityWords()">🔥 復習優先順</button><button class="secondary" onclick="clearWeakWords()">苦手リストを消す</button><button class="secondary" onclick="renderWordList(words)">全部表示</button></div><div id="wordList" class="cards"></div></section>
   </main>
-  <footer>Ver.4.0｜Ver.3.6ベース＋音声読み上げ</footer>
-  <script src="words.js?v=4.0"></script><script src="app.js?v=4.0"></script>
+  <footer>Ver.4.1｜Ver.3.6ベース＋音声読み上げ＋自由読み上げ</footer>
+  <script src="words.js?v=4.1"></script><script src="app.js?v=4.1"></script>
 </body>
 </html>
