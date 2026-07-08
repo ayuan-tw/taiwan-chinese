@@ -1,3 +1,101 @@
+
+// Ver.4.0: ブラウザ標準の音声読み上げ（Web Speech API）
+let availableVoices=[];
+let audioPrefs=JSON.parse(localStorage.getItem("audioPrefs")||"{}");
+
+function speechTextAttr(text){
+  return encodeURIComponent(String(text||""));
+}
+function audioButton(text,label="🔊 音声"){
+  if(!text)return "";
+  return `<button class="secondary small audio-btn" onclick="speakEncoded('${speechTextAttr(text)}')">${label}</button>`;
+}
+function speakEncoded(encoded){
+  speakText(decodeURIComponent(encoded));
+}
+function getSpeechRate(){
+  const el=document.getElementById("speechRate");
+  return el?Number(el.value||0.9):Number(audioPrefs.rate||0.9);
+}
+function updateRateLabel(){
+  const rate=document.getElementById("speechRate");
+  const label=document.getElementById("rateLabel");
+  if(rate&&label)label.textContent=Number(rate.value).toFixed(2);
+}
+function saveAudioPrefs(){
+  const voice=document.getElementById("voiceSelect");
+  const rate=document.getElementById("speechRate");
+  const auto=document.getElementById("autoSpeak");
+  audioPrefs={
+    voiceURI:voice?voice.value:(audioPrefs.voiceURI||""),
+    rate:rate?Number(rate.value||0.9):(audioPrefs.rate||0.9),
+    autoSpeak:auto?auto.checked:!!audioPrefs.autoSpeak
+  };
+  localStorage.setItem("audioPrefs",JSON.stringify(audioPrefs));
+}
+function shouldAutoSpeak(){
+  const auto=document.getElementById("autoSpeak");
+  return auto?auto.checked:!!audioPrefs.autoSpeak;
+}
+function populateVoiceSelect(){
+  const select=document.getElementById("voiceSelect");
+  if(!select||!("speechSynthesis" in window))return;
+  availableVoices=window.speechSynthesis.getVoices()||[];
+  const current=audioPrefs.voiceURI||select.value||"";
+  const zhVoices=availableVoices.filter(v=>/^zh/i.test(v.lang||""));
+  select.innerHTML=`<option value="">自動選択（zh-TW優先）</option>`+
+    zhVoices.map(v=>`<option value="${v.voiceURI}">${v.name}（${v.lang}）</option>`).join("");
+  select.value=current;
+}
+function pickChineseVoice(){
+  if(!("speechSynthesis" in window))return null;
+  availableVoices=window.speechSynthesis.getVoices()||availableVoices||[];
+  const selected=audioPrefs.voiceURI;
+  if(selected){
+    const v=availableVoices.find(v=>v.voiceURI===selected);
+    if(v)return v;
+  }
+  return availableVoices.find(v=>/zh[-_]?TW/i.test(v.lang||""))
+      || availableVoices.find(v=>/zh[-_]?Hant/i.test(v.lang||""))
+      || availableVoices.find(v=>/zh[-_]?HK/i.test(v.lang||""))
+      || availableVoices.find(v=>/^zh/i.test(v.lang||""))
+      || null;
+}
+function speakText(text){
+  const clean=String(text||"").replace(/[ㄅ-ㄩˊˇˋ˙\s]+/g," ").trim();
+  if(!clean)return;
+  if(!("speechSynthesis" in window)){
+    alert("このブラウザは音声読み上げに対応していないみたい。Chrome / Safariで試してね。");
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(clean);
+  u.lang="zh-TW";
+  u.rate=getSpeechRate();
+  u.pitch=1;
+  const voice=pickChineseVoice();
+  if(voice)u.voice=voice;
+  window.speechSynthesis.speak(u);
+}
+function stopSpeech(){
+  if("speechSynthesis" in window)window.speechSynthesis.cancel();
+}
+function testSpeech(){
+  speakText("這樣不錯耶！");
+}
+function initAudio(){
+  const rate=document.getElementById("speechRate");
+  const auto=document.getElementById("autoSpeak");
+  if(rate&&audioPrefs.rate)rate.value=audioPrefs.rate;
+  if(auto)auto.checked=!!audioPrefs.autoSpeak;
+  updateRateLabel();
+  populateVoiceSelect();
+  if("speechSynthesis" in window){
+    window.speechSynthesis.onvoiceschanged=populateVoiceSelect;
+    setTimeout(populateVoiceSelect,300);
+  }
+}
+
 let favorites=JSON.parse(localStorage.getItem("favorites")||"[]");
 let weakWords=JSON.parse(localStorage.getItem("weakWords")||"[]");
 let mistakeCounts=JSON.parse(localStorage.getItem("mistakeCounts")||"{}");
@@ -53,7 +151,7 @@ function createWordCard(item){
   const allTags=getWordTags(item);
   const topTags=allTags.slice(0,3).map(t=>`<span class="tag hot">#${t}</span>`).join("");
   const tags=allTags.map(t=>`<span class="tag hot">#${t}</span>`).join("");
-  return `<div class="card"><div class="card-top"><div class="tag">${item.category}</div><button class="small star" onclick="toggleFavorite('${escapeWordText(item.word)}')">${star}</button></div><div class="word">${item.word}</div><div class="zhuyin">${item.zhuyin}</div><div class="meaning">${item.meaning}</div><div class="tag-row top-tags">${topTags}</div><button class="mobile-more" onclick="toggleCard(this)">例文・忘れやすい理由を見る</button><div class="details"><div class="example">${item.example}<br><span style="color:#666">${item.exampleZhuyin}</span><br><span class="note">${item.note}</span></div><div class="confuse">⚠️ ${item.confuse||item.note}</div><div class="tag-row">${tags}</div><span class="priority">復習優先度：${score(item)} / 忘れた回数：${mistakeCounts[item.word]||0}</span></div></div>`;
+  return `<div class="card"><div class="card-top"><div class="tag">${item.category}</div><button class="small star" onclick="toggleFavorite('${escapeWordText(item.word)}')">${star}</button></div><div class="word">${item.word}</div><div class="zhuyin">${item.zhuyin}</div><div class="audio-row">${audioButton(item.word,"🔊 單字")}${audioButton(item.example,"🔊 例文")}</div><div class="meaning">${item.meaning}</div><div class="tag-row top-tags">${topTags}</div><button class="mobile-more" onclick="toggleCard(this)">例文・忘れやすい理由を見る</button><div class="details"><div class="example">${item.example}<br><span style="color:#666">${item.exampleZhuyin}</span><br><span class="note">${item.note}</span></div><div class="confuse">⚠️ ${item.confuse||item.note}</div><div class="tag-row">${tags}</div><span class="priority">復習優先度：${score(item)} / 忘れた回数：${mistakeCounts[item.word]||0}</span></div></div>`;
 }
 function renderWordList(list=words){document.getElementById("wordList").innerHTML=list.length?list.map(createWordCard).join(""):'<div class="empty">找不到耶 🥲</div>';}
 function pickWords(){document.getElementById("todayWords").innerHTML=[...words].sort(()=>Math.random()-.5).slice(0,3).map(createWordCard).join("");}
@@ -70,12 +168,12 @@ function showFavorites(){renderWordList(words.filter(w=>favorites.includes(w.wor
 function showWeakWords(){renderWordList(words.filter(w=>weakWords.includes(w.word)));}
 function showPriorityWords(){renderWordList([...words].sort((a,b)=>score(b)-score(a)));}
 function clearWeakWords(){if(!confirm("苦手單字と忘れた回数を消す？"))return;weakWords=[];mistakeCounts={};saveAll();renderWordList(words);}
-function startQuiz(){let pool=[...words].sort((a,b)=>score(b)-score(a)||Math.random()-.5);let q=pickFromQueue("quiz",pool,w=>w.word)||pool[0];let ans=[q.meaning];while(ans.length<4){let r=words[Math.floor(Math.random()*words.length)].meaning;if(!ans.includes(r))ans.push(r);}ans.sort(()=>Math.random()-.5);currentQuiz=q;quizRuns++;saveAll();document.getElementById("quizArea").innerHTML=`<div class="quiz-card"><span class="tag">${q.category}</span><div class="word">${q.word}</div><div class="zhuyin">${q.zhuyin}</div><p class="hint">この意味はどれ？</p><div class="quiz-options">${ans.map(a=>`<button onclick="checkAnswer('${a.replace(/'/g,"\\'")}')">${a}</button>`).join("")}</div><div id="quizResult"></div></div>`;}
-function checkAnswer(a){if(!currentQuiz)return;let result=document.getElementById("quizResult");if(a===currentQuiz.meaning){result.innerHTML=`<div class="quiz-result"><span class="correct">⭕ 正解！</span><br>${currentQuiz.example}<br>${currentQuiz.exampleZhuyin}</div>`;}else{if(!weakWords.includes(currentQuiz.word))weakWords.push(currentQuiz.word);mistakeCounts[currentQuiz.word]=(mistakeCounts[currentQuiz.word]||0)+1;saveAll();result.innerHTML=`<div class="quiz-result"><span class="wrong">❌ 不正解</span><br>正解：${currentQuiz.meaning}<br>${currentQuiz.example}<br>${currentQuiz.exampleZhuyin}<br>⚠️ ${currentQuiz.confuse||currentQuiz.note}</div>`;}}
+function startQuiz(){let pool=[...words].sort((a,b)=>score(b)-score(a)||Math.random()-.5);let q=pickFromQueue("quiz",pool,w=>w.word)||pool[0];let ans=[q.meaning];while(ans.length<4){let r=words[Math.floor(Math.random()*words.length)].meaning;if(!ans.includes(r))ans.push(r);}ans.sort(()=>Math.random()-.5);currentQuiz=q;quizRuns++;saveAll();document.getElementById("quizArea").innerHTML=`<div class="quiz-card"><span class="tag">${q.category}</span><div class="word">${q.word}</div><div class="zhuyin">${q.zhuyin}</div><div class="audio-row">${audioButton(q.word,"🔊 單字")}${audioButton(q.example,"🔊 例文")}</div><p class="hint">この意味はどれ？</p><div class="quiz-options">${ans.map(a=>`<button onclick="checkAnswer('${a.replace(/'/g,"\\'")}')">${a}</button>`).join("")}</div><div id="quizResult"></div></div>`;if(shouldAutoSpeak())speakText(q.word);}
+function checkAnswer(a){if(!currentQuiz)return;let result=document.getElementById("quizResult");if(a===currentQuiz.meaning){result.innerHTML=`<div class="quiz-result"><span class="correct">⭕ 正解！</span><br>${currentQuiz.example}<br>${currentQuiz.exampleZhuyin}<div class="audio-row">${audioButton(currentQuiz.example,"🔊 例文")}</div></div>`;}else{if(!weakWords.includes(currentQuiz.word))weakWords.push(currentQuiz.word);mistakeCounts[currentQuiz.word]=(mistakeCounts[currentQuiz.word]||0)+1;saveAll();result.innerHTML=`<div class="quiz-result"><span class="wrong">❌ 不正解</span><br>正解：${currentQuiz.meaning}<br>${currentQuiz.example}<br>${currentQuiz.exampleZhuyin}<div class="audio-row">${audioButton(currentQuiz.example,"🔊 例文")}</div><br>⚠️ ${currentQuiz.confuse||currentQuiz.note}</div>`;}}
 function clearQuiz(){document.getElementById("quizArea").innerHTML="";currentQuiz=null;}
-function renderPhrases(){document.getElementById("phraseList").innerHTML=phrases.map(p=>`<div class="phrase-card"><div class="phrase-main">${p.text}</div><div class="phrase-sub">${p.zhuyin}</div><div class="phrase-meaning">${p.meaning}</div></div>`).join("");}
+function renderPhrases(){document.getElementById("phraseList").innerHTML=phrases.map(p=>`<div class="phrase-card"><div class="phrase-main">${p.text}</div><div class="phrase-sub">${p.zhuyin}</div><div class="audio-row">${audioButton(p.text,"🔊 音声")}</div><div class="phrase-meaning">${p.meaning}</div></div>`).join("");}
 function refresh(){renderWordList(words);searchWords();}
-window.addEventListener("load",()=>{renderCategoryButtons();renderTagButtons();renderWordList();renderPhrases();pickPriorityWords();updateStats();});
+window.addEventListener("load",()=>{initAudio();renderCategoryButtons();renderTagButtons();renderWordList();renderPhrases();pickPriorityWords();updateStats();});
 
 // Ver.3.0 additions: 型カード・瞬間作文
 let weakCards=JSON.parse(localStorage.getItem("weakCards")||"[]");
@@ -104,7 +202,7 @@ function createPatternCard(item){
   const top=getPatternTags(item).slice(0,3).map(t=>`<span class="tag hot">#${t}</span>`).join("");
   const weak=weakCards.includes(item.pattern)?"苦手解除":"苦手登録";
   const promptList=(item.prompts||[]).map(q=>`<li><b>${q.ja}</b><br>${q.answer}<br><span class="zhuyin">${q.zhuyin}</span></li>`).join("");
-  return `<div class="card pattern-card"><div class="card-top"><div class="tag">${item.category}</div><button class="small star" onclick="toggleWeakPattern('${escapeWordText(item.pattern)}')">${weak}</button></div><div class="word">${item.pattern}</div><div class="zhuyin">${item.zhuyin}</div><div class="meaning">${item.meaning}</div><div class="tag-row top-tags">${top}</div><button class="mobile-more" onclick="toggleCard(this)">例文・瞬間作文を見る</button><div class="details"><div class="example">${item.example}<br><span style="color:#666">${item.exampleZhuyin}</span><br><span class="note">${item.note}</span></div><div class="confuse">⚡ 瞬間作文候補</div><ol class="prompt-list">${promptList}</ol><div class="tag-row">${tags}</div><span class="priority">復習優先度：${patternScore(item)} / 間違えた回数：${patternMistakeCounts[item.pattern]||0}</span></div></div>`;
+  return `<div class="card pattern-card"><div class="card-top"><div class="tag">${item.category}</div><button class="small star" onclick="toggleWeakPattern('${escapeWordText(item.pattern)}')">${weak}</button></div><div class="word">${item.pattern}</div><div class="zhuyin">${item.zhuyin}</div><div class="audio-row">${audioButton(item.example,"🔊 例文")}</div><div class="meaning">${item.meaning}</div><div class="tag-row top-tags">${top}</div><button class="mobile-more" onclick="toggleCard(this)">例文・瞬間作文を見る</button><div class="details"><div class="example">${item.example}<br><span style="color:#666">${item.exampleZhuyin}</span><br><span class="note">${item.note}</span></div><div class="confuse">⚡ 瞬間作文候補</div><ol class="prompt-list">${promptList}</ol><div class="tag-row">${tags}</div><span class="priority">復習優先度：${patternScore(item)} / 間違えた回数：${patternMistakeCounts[item.pattern]||0}</span></div></div>`;
 }
 function renderPatternList(list=patterns){const area=document.getElementById("patternList"); if(area) area.innerHTML=list.length?list.map(createPatternCard).join(""):'<div class="empty">找不到耶 🥲</div>';}
 function showPatternPriority(){renderPatternList([...patterns].sort((a,b)=>patternScore(b)-patternScore(a)));}
@@ -134,7 +232,7 @@ function startComposition(mode="mix"){
 function showCompositionAnswer(){
   if(!currentComposition)return;
   const user=getCompositionInput();
-  document.getElementById("compositionResult").innerHTML=`<div class="quiz-result"><span class="correct">答え</span>${user?`<br><span class="note">你的答案：</span><br><div class="user-answer">${user}</div>`:""}<br><div class="word">${currentComposition.answer}</div><div class="zhuyin">${currentComposition.zhuyin}</div><span class="note">型：${currentComposition.source}</span></div>`;
+  document.getElementById("compositionResult").innerHTML=`<div class="quiz-result"><span class="correct">答え</span>${user?`<br><span class="note">你的答案：</span><br><div class="user-answer">${user}</div>`:""}<br><div class="word">${currentComposition.answer}</div><div class="zhuyin">${currentComposition.zhuyin}</div><div class="audio-row">${audioButton(currentComposition.answer,"🔊 答え")}</div><span class="note">型：${currentComposition.source}</span></div>`;if(shouldAutoSpeak())speakText(currentComposition.answer);
 }
 function checkCompositionAnswer(){
   if(!currentComposition)return;
@@ -143,9 +241,9 @@ function checkCompositionAnswer(){
   if(!user){result.innerHTML=`<div class="quiz-result"><span class="wrong">まだ入力されてないよ</span><br>キーボード入力でも🎤音声入力でもOK。</div>`;return;}
   const ok=normalizeCompositionText(user)===normalizeCompositionText(currentComposition.answer);
   if(ok){
-    result.innerHTML=`<div class="quiz-result"><span class="correct">⭕ ぴったり！</span><br><div class="user-answer">${user}</div><div class="zhuyin">${currentComposition.zhuyin}</div><span class="note">この調子で次いこー</span></div>`;
+    result.innerHTML=`<div class="quiz-result"><span class="correct">⭕ ぴったり！</span><br><div class="user-answer">${user}</div><div class="zhuyin">${currentComposition.zhuyin}</div><div class="audio-row">${audioButton(currentComposition.answer,"🔊 答え")}</div><span class="note">この調子で次いこー</span></div>`;if(shouldAutoSpeak())speakText(currentComposition.answer);
   }else{
-    result.innerHTML=`<div class="quiz-result"><span class="wrong">△ 答えと違うかも</span><br><span class="note">你的答案：</span><br><div class="user-answer">${user}</div><br><span class="note">參考答案：</span><br><div class="word">${currentComposition.answer}</div><div class="zhuyin">${currentComposition.zhuyin}</div><div class="button-row score-row"><button onclick="markCompositionCorrect()">これでOKにする</button><button class="secondary" onclick="markCompositionMistake()">苦手にする</button></div></div>`;
+    result.innerHTML=`<div class="quiz-result"><span class="wrong">△ 答えと違うかも</span><br><span class="note">你的答案：</span><br><div class="user-answer">${user}</div><br><span class="note">參考答案：</span><br><div class="word">${currentComposition.answer}</div><div class="zhuyin">${currentComposition.zhuyin}</div><div class="audio-row">${audioButton(currentComposition.answer,"🔊 答え")}</div><div class="button-row score-row"><button onclick="markCompositionCorrect()">これでOKにする</button><button class="secondary" onclick="markCompositionMistake()">苦手にする</button></div></div>`;
   }
 }
 function markCompositionCorrect(){

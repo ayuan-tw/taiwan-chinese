@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>澄詞｜あゆあん台湾華語</title>
-  <link rel="stylesheet" href="style.css?v=3.6" />
+  <link rel="stylesheet" href="style.css?v=4.0" />
 </head>
 <body>
   <header><div class="header-inner"><p class="eyebrow">あゆあん台湾華語ノート</p><h1>澄詞</h1><p>単語カード・型カード・瞬間作文で育てる、あゆあん専用台湾華語アプリ</p></div></header>
@@ -16,6 +16,26 @@
       <div class="stat-card"><span id="weakCount">0</span><p>苦手卡</p></div>
       <div class="stat-card"><span id="quizCount">0</span><p>クイズ回数</p></div>
     </section>
+
+    <section class="panel audio-panel">
+      <h2 class="section-title">🔊 音声</h2>
+      <p class="hint">ブラウザ標準の読み上げ機能で台湾華語を再生します。Safariでは最初に🔊ボタンを押すと動きやすいです。</p>
+      <div class="audio-controls">
+        <label>声
+          <select id="voiceSelect" onchange="saveAudioPrefs()">
+            <option value="">自動選択（zh-TW優先）</option>
+          </select>
+        </label>
+        <label>速度
+          <input id="speechRate" type="range" min="0.6" max="1.2" step="0.05" value="0.9" oninput="updateRateLabel(); saveAudioPrefs();" />
+          <span id="rateLabel">0.90</span>
+        </label>
+        <label class="check-label"><input id="autoSpeak" type="checkbox" onchange="saveAudioPrefs()" /> 出題時に自動再生</label>
+        <button class="secondary small" onclick="stopSpeech()">停止</button>
+        <button class="secondary small" onclick="testSpeech()">テスト</button>
+      </div>
+    </section>
+
     <section class="panel search-first">
       <h2 class="section-title">🔍 單字搜尋</h2>
       <div class="search-box"><input id="searchInput" type="text" placeholder="例：好像 / ㄏㄠˇ / #声調注意 / 就と才" oninput="searchWords()" /></div>
@@ -68,7 +88,7 @@
     <section class="panel"><h2 class="section-title">🗣️ あゆあん語録</h2><p class="hint">そのまま会話で使えそうな文だけ集めたコーナー。</p><div id="phraseList" class="phrase-list"></div></section>
     <section class="panel"><h2 class="section-title">📘 單字一覧</h2><div class="button-row category-buttons" id="categoryButtons"></div><div class="button-row"><button class="secondary" onclick="showFavorites()">⭐ お気に入りだけ</button><button class="secondary" onclick="showWeakWords()">🔁 苦手單字だけ</button><button class="secondary" onclick="showPriorityWords()">🔥 復習優先順</button><button class="secondary" onclick="clearWeakWords()">苦手リストを消す</button><button class="secondary" onclick="renderWordList(words)">全部表示</button></div><div id="wordList" class="cards"></div></section>
   </main>
-  <footer>Ver.3.6｜接続詞型カード追加</footer>
-  <script src="words.js?v=3.6"></script><script src="app.js?v=3.6"></script>
+  <footer>Ver.4.0｜Ver.3.6ベース＋音声読み上げ</footer>
+  <script src="words.js?v=4.0"></script><script src="app.js?v=4.0"></script>
 </body>
 </html>

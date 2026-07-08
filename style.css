@@ -367,3 +367,44 @@ footer {
 .composition-card .composition-ja{cursor:default;user-select:text;}
 .composition-card .composition-input{display:block;box-sizing:border-box;}
 .composition-card .button-row{justify-content:center;}
+
+
+/* Ver.4.0 audio */
+.audio-panel {
+  border: 1px solid rgba(90, 120, 160, .18);
+}
+.audio-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .7rem;
+  align-items: center;
+}
+.audio-controls label {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .9rem;
+}
+.audio-controls select {
+  max-width: 220px;
+  padding: .45rem .6rem;
+  border-radius: 999px;
+  border: 1px solid var(--line, #ddd);
+  background: #fff;
+}
+.audio-controls input[type="range"] {
+  width: 130px;
+}
+.check-label {
+  white-space: nowrap;
+}
+.audio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin: .45rem 0;
+}
+.audio-btn {
+  padding: .35rem .65rem;
+  font-size: .82rem;
+}
