@@ -1,7 +1,10 @@
 
-// Ver.4.1: ブラウザ標準の音声読み上げ（Web Speech API）＋自由読み上げ
+// Ver.4.2: ブラウザ標準の音声読み上げ＋自由読み上げ＋リピート再生＋注音表示
 let availableVoices=[];
 let audioPrefs=JSON.parse(localStorage.getItem("audioPrefs")||"{}");
+let speechRepeatTimer=null;
+let speechRunId=0;
+let freeSpeakPrefs=JSON.parse(localStorage.getItem("freeSpeakPrefs")||"{}");
 
 function speechTextAttr(text){
   return encodeURIComponent(String(text||""));
@@ -61,23 +64,43 @@ function pickChineseVoice(){
       || availableVoices.find(v=>/^zh/i.test(v.lang||""))
       || null;
 }
-function speakText(text){
-  const clean=String(text||"").replace(/[ㄅ-ㄩˊˇˋ˙\s]+/g," ").trim();
+function prepareSpeechText(text){
+  return String(text||"").replace(/[ㄅ-ㄩˊˇˋ˙\s]+/g," ").trim();
+}
+function speakText(text, options={}){
+  const clean=prepareSpeechText(text);
   if(!clean)return;
   if(!("speechSynthesis" in window)){
     alert("このブラウザは音声読み上げに対応していないみたい。Chrome / Safariで試してね。");
     return;
   }
   window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(clean);
-  u.lang="zh-TW";
-  u.rate=getSpeechRate();
-  u.pitch=1;
-  const voice=pickChineseVoice();
-  if(voice)u.voice=voice;
-  window.speechSynthesis.speak(u);
+  if(speechRepeatTimer)clearTimeout(speechRepeatTimer);
+  const repeat=Math.max(1,Math.min(Number(options.repeat||1),10));
+  const gap=Math.max(0,Number(options.gap||0));
+  const runId=++speechRunId;
+  const speakOne=(count)=>{
+    if(runId!==speechRunId)return;
+    const u=new SpeechSynthesisUtterance(clean);
+    u.lang="zh-TW";
+    u.rate=getSpeechRate();
+    u.pitch=1;
+    const voice=pickChineseVoice();
+    if(voice)u.voice=voice;
+    u.onend=()=>{
+      if(runId!==speechRunId)return;
+      if(count<repeat){
+        speechRepeatTimer=setTimeout(()=>speakOne(count+1),gap);
+      }
+    };
+    u.onerror=()=>{};
+    window.speechSynthesis.speak(u);
+  };
+  speakOne(1);
 }
 function stopSpeech(){
+  speechRunId++;
+  if(speechRepeatTimer)clearTimeout(speechRepeatTimer);
   if("speechSynthesis" in window)window.speechSynthesis.cancel();
 }
 function testSpeech(){
@@ -103,10 +126,26 @@ function saveFreeSpeakText(){
   const text=getFreeSpeakText();
   localStorage.setItem("freeSpeakText",text);
 }
+function getFreeSpeakRepeat(){
+  const el=document.getElementById("freeSpeakRepeat");
+  return el?Number(el.value||1):Number(freeSpeakPrefs.repeat||1);
+}
+function getFreeSpeakGap(){
+  const el=document.getElementById("freeSpeakGap");
+  return el?Number(el.value||1000):Number(freeSpeakPrefs.gap||1000);
+}
+function saveFreeSpeakPrefs(){
+  freeSpeakPrefs={repeat:getFreeSpeakRepeat(),gap:getFreeSpeakGap()};
+  localStorage.setItem("freeSpeakPrefs",JSON.stringify(freeSpeakPrefs));
+}
 function initFreeSpeak(){
   const el=document.getElementById("freeSpeakText");
   if(!el)return;
   el.value=localStorage.getItem("freeSpeakText")||"";
+  const repeat=document.getElementById("freeSpeakRepeat");
+  const gap=document.getElementById("freeSpeakGap");
+  if(repeat&&freeSpeakPrefs.repeat)repeat.value=String(freeSpeakPrefs.repeat);
+  if(gap&&freeSpeakPrefs.gap)gap.value=String(freeSpeakPrefs.gap);
   el.addEventListener("input",saveFreeSpeakText);
 }
 function speakFreeText(){
@@ -117,8 +156,10 @@ function speakFreeText(){
     return;
   }
   saveFreeSpeakText();
-  speakText(text);
-  if(status)status.innerHTML=`<span class="correct">読み上げ中：</span><span class="free-speak-preview">${escapeHtml(text).slice(0,80)}${text.length>80?"…":""}</span>`;
+  saveFreeSpeakPrefs();
+  const repeat=getFreeSpeakRepeat();
+  speakText(text,{repeat,gap:getFreeSpeakGap()});
+  if(status)status.innerHTML=`<span class="correct">読み上げ中${repeat>1?`（${repeat}回）`:""}：</span><span class="free-speak-preview">${escapeHtml(text).slice(0,80)}${text.length>80?"…":""}</span>`;
 }
 async function pasteFreeText(){
   const el=document.getElementById("freeSpeakText");
@@ -148,8 +189,27 @@ function clearFreeText(){
   localStorage.removeItem("freeSpeakText");
   const status=document.getElementById("freeSpeakStatus");
   if(status)status.textContent="";
+  const zh=document.getElementById("freeSpeakZhuyin");
+  if(zh){zh.hidden=true;zh.innerHTML="";}
   stopSpeech();
 }
+function showFreeSpeakZhuyin(){
+  const text=getFreeSpeakText();
+  const box=document.getElementById("freeSpeakZhuyin");
+  const status=document.getElementById("freeSpeakStatus");
+  if(!box)return;
+  if(!text){
+    if(status)status.innerHTML='<span class="wrong">まだ中文が入ってないよ</span>';
+    return;
+  }
+  saveFreeSpeakText();
+  const converter=window.ChengciZhuyinLite;
+  const result=converter?converter.convert(text):"";
+  box.hidden=false;
+  box.innerHTML=`<div class="zhuyin-title">📖 注音（登録済み単語・型を優先 / 簡易変換）</div><div class="zhuyin-original">${escapeHtml(text)}</div><div class="zhuyin-output">${escapeHtml(result||"注音を作れなかったみたい🥲")}</div><div class="zhuyin-note">※ 多音字は文脈でズレることがあります。最後は音声・辞書・のあ確認で調整してね。</div>`;
+  if(status)status.innerHTML='<span class="correct">注音を表示したよ。</span>';
+}
+
 function escapeHtml(text){
   return String(text||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
