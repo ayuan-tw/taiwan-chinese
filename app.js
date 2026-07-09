@@ -395,3 +395,26 @@ searchWords=function(){
 
 const oldWindowLoad = window.onload;
 window.addEventListener("load",()=>{renderPatternTagButtons();renderPatternList(patterns);updateStats();});
+
+// Ver.5.0 tab navigation
+function showTab(name){
+  document.querySelectorAll('.tab-page').forEach(page=>page.classList.remove('active'));
+  const target=document.getElementById(`tab-${name}`);
+  if(target) target.classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.tabTarget===name);
+  });
+  localStorage.setItem('chengciActiveTab', name);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function scrollToPanel(id){
+  showTab('home');
+  setTimeout(()=>{
+    const el=document.getElementById(id);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  },80);
+}
+window.addEventListener('load',()=>{
+  const saved=localStorage.getItem('chengciActiveTab')||'home';
+  showTab(saved);
+});
