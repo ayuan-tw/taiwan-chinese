@@ -598,3 +598,20 @@ body{
   .quick-grid{grid-template-columns:repeat(2,1fr);}
   .quick-grid button{min-height:68px;}
 }
+
+
+/* Ver.5.1 offline status */
+.offline-status{
+  margin-top:12px;
+  padding:12px 14px;
+  border-radius:14px;
+  background:#fff8e5;
+  border:1px solid rgba(160,120,40,.22);
+  color:#6a5420;
+  font-weight:700;
+}
+.offline-status.ok{
+  background:#edf8f4;
+  border-color:rgba(79,143,136,.28);
+  color:#345e59;
+}

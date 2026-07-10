@@ -418,3 +418,41 @@ window.addEventListener('load',()=>{
   const saved=localStorage.getItem('chengciActiveTab')||'home';
   showTab(saved);
 });
+
+
+// Ver.5.1 PWA offline support
+function setOfflineStatus(message, ok=false){
+  const el=document.getElementById('offlineStatus');
+  if(!el)return;
+  el.textContent=message;
+  el.classList.toggle('ok', !!ok);
+}
+function updateNetworkBadge(){
+  setOfflineStatus(navigator.onLine ? 'オンライン：オフライン保存が有効なら、次回から電波なしでも開けます。' : 'オフライン：保存済みデータで動作中です。', !navigator.onLine);
+}
+async function refreshOfflineCache(){
+  if(!('serviceWorker' in navigator) || !('caches' in window)){
+    setOfflineStatus('このブラウザはオフライン保存に対応していないみたいです。');
+    return;
+  }
+  setOfflineStatus('オフライン用データを更新中…');
+  try{
+    const cache=await caches.open('chengci-v5-1-offline');
+    await cache.addAll(['./index.html','./style.css','./app.js','./words.js','./zhuyin-lite.js','./manifest.json','./icon.svg']);
+    setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
+  }catch(e){
+    setOfflineStatus('保存更新に失敗しました。ネット接続がある時にもう一度試してね。');
+  }
+}
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./service-worker.js').then(()=>{
+      setOfflineStatus('オフライン保存OK。初回読み込み後は電波なしでも使えます。', true);
+    }).catch(()=>{
+      setOfflineStatus('オフライン保存の登録に失敗しました。GitHub Pages上で開くと有効になります。');
+    });
+    updateNetworkBadge();
+  });
+  window.addEventListener('online', updateNetworkBadge);
+  window.addEventListener('offline', updateNetworkBadge);
+}
