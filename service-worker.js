@@ -1,10 +1,11 @@
-const CACHE_NAME = 'chengci-v5-1-offline';
+const CACHE_NAME = 'chengci-v5-2-zhuyin-dict';
 const OFFLINE_ASSETS = [
   './',
   './index.html',
   './style.css',
   './app.js',
   './words.js',
+  './zhuyin-dict.js',
   './zhuyin-lite.js',
   './manifest.json',
   './icon.svg'

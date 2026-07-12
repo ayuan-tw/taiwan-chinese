@@ -1,4 +1,4 @@
-// Ver.4.2 zhuyin-lite: 澄詞の登録データを優先して、入力文の注音を簡易表示する小さな変換器
+// Ver.5.2 zhuyin-lite: 澄詞の登録データを優先して、入力文の注音を簡易表示する小さな変換器
 (function(){
   const manualCharMap={
     "我":"ㄨㄛˇ","你":"ㄋㄧˇ","他":"ㄊㄚ","她":"ㄊㄚ","們":"ㄇㄣ˙","的":"ㄉㄜ˙","了":"ㄌㄜ˙","嗎":"ㄇㄚ˙","呢":"ㄋㄜ˙","吧":"ㄅㄚ˙","啊":"ㄚ","喔":"ㄛ","啦":"ㄌㄚ˙","耶":"ㄧㄝ",
@@ -29,12 +29,14 @@
   }
   function build(){
     if(phraseMap&&charMap)return;
-    phraseMap=new Map(); charMap=Object.assign({},manualCharMap);
+    const dict=window.ChengciZhuyinDictionary||{phrases:{},chars:{}};
+    phraseMap=new Map(Object.entries(dict.phrases||{}));
+    charMap=Object.assign({},dict.chars||{},manualCharMap);
     collectEntries().forEach(([text,zh])=>{
       addEntry(phraseMap,text,zh);
       const t=plainChinese(text); const z=splitZhuyin(zh);
       if(t&&z.length===t.length){
-        [...t].forEach((ch,i)=>{ if(!charMap[ch]) charMap[ch]=z[i]; });
+        [...t].forEach((ch,i)=>{ charMap[ch]=z[i]; });
       }
     });
   }

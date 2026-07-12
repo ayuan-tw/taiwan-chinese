@@ -206,7 +206,7 @@ function showFreeSpeakZhuyin(){
   const converter=window.ChengciZhuyinLite;
   const result=converter?converter.convert(text):"";
   box.hidden=false;
-  box.innerHTML=`<div class="zhuyin-title">📖 注音（登録済み単語・型を優先 / 簡易変換）</div><div class="zhuyin-original">${escapeHtml(text)}</div><div class="zhuyin-output">${escapeHtml(result||"注音を作れなかったみたい🥲")}</div><div class="zhuyin-note">※ 多音字は文脈でズレることがあります。最後は音声・辞書・のあ確認で調整してね。</div>`;
+  box.innerHTML=`<div class="zhuyin-title">📖 注音（澄詞データ → 台湾華語熟語辞書 → 常用字辞書）</div><div class="zhuyin-original">${escapeHtml(text)}</div><div class="zhuyin-output">${escapeHtml(result||"注音を作れなかったみたい🥲")}</div><div class="zhuyin-note">※ 多音字は文脈でズレることがあります。最後は音声・辞書・のあ確認で調整してね。</div>`;
   if(status)status.innerHTML='<span class="correct">注音を表示したよ。</span>';
 }
 
@@ -438,7 +438,7 @@ async function refreshOfflineCache(){
   setOfflineStatus('オフライン用データを更新中…');
   try{
     const cache=await caches.open('chengci-v5-1-offline');
-    await cache.addAll(['./index.html','./style.css','./app.js','./words.js','./zhuyin-lite.js','./manifest.json','./icon.svg']);
+    await cache.addAll(['./index.html','./style.css','./app.js','./words.js','./zhuyin-dict.js','./zhuyin-lite.js','./manifest.json','./icon.svg']);
     setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
   }catch(e){
     setOfflineStatus('保存更新に失敗しました。ネット接続がある時にもう一度試してね。');
