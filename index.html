@@ -116,6 +116,7 @@
             <option value="1">1回</option>
             <option value="3">3回</option>
             <option value="5">5回</option>
+            <option value="10">10回</option>
           </select>
         </label>
         <label>間隔
@@ -128,6 +129,7 @@
       </div>
       <div class="button-row free-speak-buttons">
         <button onclick="speakFreeText()">🔊 読み上げ</button>
+        <button class="stop-button" onclick="stopFreeSpeech()">⏹ 停止</button>
         <button class="secondary" onclick="showFreeSpeakZhuyin()">📖 注音表示</button>
         <button class="secondary" onclick="pasteFreeText()">📋 貼り付け</button>
         <button class="secondary" onclick="clearFreeText()">🗑 消す</button>
@@ -145,13 +147,13 @@
     <section class="tab-page" id="tab-settings">
       <section class="panel">
   <h2 class="section-title">⚙️ 設定</h2>
-  <p class="hint">Ver.5.2はオフライン対応版。初回だけネットで開けば、次回以降はキャッシュから起動できます。</p>
+  <p class="hint">Ver.5.3はオフライン対応版。初回だけネットで開けば、次回以降はキャッシュから起動できます。</p>
   <div class="button-row"><button onclick="showTab('pronunciation')">🔊 音声設定を開く</button><button class="secondary" onclick="refreshOfflineCache()">📦 オフライン保存を更新</button></div>
   <div id="offlineStatus" class="offline-status">オフライン保存の状態を確認中…</div>
 </section>
     </section>
   </main>
-  <footer>Ver.5.2｜オフライン対応＋タブ整理版</footer>
-  <script src="words.js?v=5.2"></script><script src="zhuyin-dict.js?v=5.2"></script><script src="zhuyin-lite.js?v=5.2"></script><script src="app.js?v=5.2"></script>
+  <footer>Ver.5.3｜10回リピート＋停止ボタン</footer>
+  <script src="words.js?v=5.3"></script><script src="zhuyin-dict.js?v=5.3"></script><script src="zhuyin-lite.js?v=5.3"></script><script src="app.js?v=5.3"></script>
 </body>
 </html>

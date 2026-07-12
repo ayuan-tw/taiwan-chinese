@@ -100,8 +100,16 @@ function speakText(text, options={}){
 }
 function stopSpeech(){
   speechRunId++;
-  if(speechRepeatTimer)clearTimeout(speechRepeatTimer);
+  if(speechRepeatTimer){
+    clearTimeout(speechRepeatTimer);
+    speechRepeatTimer=null;
+  }
   if("speechSynthesis" in window)window.speechSynthesis.cancel();
+}
+function stopFreeSpeech(){
+  stopSpeech();
+  const status=document.getElementById("freeSpeakStatus");
+  if(status)status.innerHTML='<span class="note">⏹ 読み上げを停止しました</span>';
 }
 function testSpeech(){
   speakText("這樣不錯耶！");

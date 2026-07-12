@@ -615,3 +615,15 @@ body{
   border-color:rgba(79,143,136,.28);
   color:#345e59;
 }
+
+
+/* Ver.5.3 free speech controls */
+.stop-button{
+  background:#fff1f1;
+  color:#a52828;
+  border:1px solid #e5aaaa;
+  box-shadow:none;
+}
+.stop-button:hover{
+  background:#ffe4e4;
+}
