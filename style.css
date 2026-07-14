@@ -627,3 +627,6 @@ body{
 .stop-button:hover{
   background:#ffe4e4;
 }
+
+.idiom-card{border-top:4px solid var(--sub)}
+.idiom-card .word{font-size:1.35rem}

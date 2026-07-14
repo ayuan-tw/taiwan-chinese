@@ -445,7 +445,7 @@ async function refreshOfflineCache(){
   }
   setOfflineStatus('オフライン用データを更新中…');
   try{
-    const cache=await caches.open('chengci-v5-1-offline');
+    const cache=await caches.open('chengci-v5-4-offline');
     await cache.addAll(['./index.html','./style.css','./app.js','./words.js','./zhuyin-dict.js','./zhuyin-lite.js','./manifest.json','./icon.svg']);
     setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
   }catch(e){
@@ -464,3 +464,50 @@ if('serviceWorker' in navigator){
   window.addEventListener('online', updateNetworkBadge);
   window.addEventListener('offline', updateNetworkBadge);
 }
+
+
+// Ver.5.4 慣用說法・統合クイズ
+let weakIdioms=JSON.parse(localStorage.getItem("weakIdioms")||"[]");
+let idiomMistakeCounts=JSON.parse(localStorage.getItem("idiomMistakeCounts")||"{}");
+function idiomKey(i){return i.text;}
+function idiomScore(i){return (idiomMistakeCounts[idiomKey(i)]||0)*3+(weakIdioms.includes(idiomKey(i))?2:0);}
+function getIdiomTags(i){return (i.tags&&i.tags.length)?i.tags:[i.category].filter(Boolean);}
+const v54SaveAll=saveAll;
+saveAll=function(){localStorage.setItem("weakIdioms",JSON.stringify(weakIdioms));localStorage.setItem("idiomMistakeCounts",JSON.stringify(idiomMistakeCounts));v54SaveAll();}
+const v54UpdateStats=updateStats;
+updateStats=function(){v54UpdateStats();const el=document.getElementById("idiomCount");if(el)el.textContent=idioms.length;}
+function toggleWeakIdiom(key){weakIdioms=weakIdioms.includes(key)?weakIdioms.filter(x=>x!==key):[...weakIdioms,key];saveAll();renderIdiomList(idioms);}
+function createIdiomCard(item){
+ const tags=getIdiomTags(item).map(t=>`<span class="tag hot">#${t}</span>`).join("");
+ const weak=weakIdioms.includes(idiomKey(item))?"苦手解除":"苦手登録";
+ return `<div class="card idiom-card"><div class="card-top"><div class="tag">${item.category}</div><button class="small star" onclick="toggleWeakIdiom('${escapeWordText(idiomKey(item))}')">${weak}</button></div><div class="word">${item.text}</div><div class="zhuyin">${item.zhuyin}</div><div class="audio-row">${audioButton(item.text,"🔊 音声")}</div><div class="meaning">${item.meaning}</div><button class="mobile-more" onclick="toggleCard(this)">使い方メモを見る</button><div class="details"><div class="example"><span class="note">${item.note||""}</span></div><div class="tag-row">${tags}</div><span class="priority">復習優先度：${idiomScore(item)} / 間違えた回数：${idiomMistakeCounts[idiomKey(item)]||0}</span></div></div>`;
+}
+function renderIdiomList(list=idioms){const area=document.getElementById("idiomList");if(area)area.innerHTML=list.length?list.map(createIdiomCard).join(""):'<div class="empty">找不到耶 🥲</div>';}
+function showIdiomPriority(){renderIdiomList([...idioms].sort((a,b)=>idiomScore(b)-idiomScore(a)));}
+function renderIdiomTagButtons(){const area=document.getElementById("idiomTagButtons");if(!area)return;const tags=[...new Set(idioms.flatMap(getIdiomTags))].sort();area.innerHTML=tags.map(t=>`<button class="secondary small" onclick="renderIdiomList(idioms.filter(i=>getIdiomTags(i).includes('${t}')))">#${t}</button>`).join("");}
+function idiomCompositionPool(){return idioms.map(i=>({type:"idiom",category:i.category,source:i.text,ja:i.meaning,answer:i.text,zhuyin:i.zhuyin}));}
+function typeLabel(t){return t==="pattern"?"句型":t==="idiom"?"慣用說法":"單字";}
+startComposition=function(mode="mix"){
+ const wordPool=wordCompositionPool(), idiomPool=idiomCompositionPool();
+ let pool=mode==="word"?wordPool:mode==="pattern"?compositionPrompts:mode==="idiom"?idiomPool:[...wordPool,...compositionPrompts,...idiomPool];
+ const weakPool=pool.filter(a=>a.type==="pattern"?(patternMistakeCounts[a.source]||0)>0:a.type==="idiom"?(idiomMistakeCounts[a.source]||0)>0:(mistakeCounts[a.source]||0)>0);
+ const weighted=[...pool,...weakPool,...weakPool];currentComposition=pickFromQueue(mode,weighted,a=>`${a.type}:${a.source}:${a.ja}`)||pool[Math.floor(Math.random()*pool.length)];quizRuns++;saveAll();
+ document.getElementById("compositionArea").innerHTML=`<div class="quiz-card composition-card"><span class="tag">${typeLabel(currentComposition.type)}：${currentComposition.category}</span><p class="hint">日本語を見て、台湾華語で答えてみて。</p><div class="composition-label">問題</div><div class="composition-ja">${currentComposition.ja}</div><label class="composition-label" for="compositionInput">你的答案</label><textarea id="compositionInput" class="composition-input" rows="3" lang="zh-Hant-TW" inputmode="text" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="ここに中文で入力／音声入力"></textarea><div class="button-row"><button onclick="checkCompositionAnswer()">答え合わせ</button><button onclick="showCompositionAnswer()">答えを見る</button><button class="secondary" onclick="markCompositionMistake()">苦手にする</button><button class="secondary" onclick="startComposition('${mode}')">次の問題</button></div><div id="compositionResult"></div></div>`;
+ setTimeout(()=>{const input=document.getElementById("compositionInput");if(input)input.focus();},50);
+}
+markCompositionMistake=function(){if(!currentComposition)return;if(currentComposition.type==="pattern"){if(!weakCards.includes(currentComposition.source))weakCards.push(currentComposition.source);patternMistakeCounts[currentComposition.source]=(patternMistakeCounts[currentComposition.source]||0)+1;}else if(currentComposition.type==="idiom"){if(!weakIdioms.includes(currentComposition.source))weakIdioms.push(currentComposition.source);idiomMistakeCounts[currentComposition.source]=(idiomMistakeCounts[currentComposition.source]||0)+1;}else{if(!weakWords.includes(currentComposition.source))weakWords.push(currentComposition.source);mistakeCounts[currentComposition.source]=(mistakeCounts[currentComposition.source]||0)+1;}saveAll();showCompositionAnswer();}
+function quizItems(mode="mix"){
+ const ws=words.map(w=>({type:"word",key:w.word,category:w.category,front:w.word,zhuyin:w.zhuyin,meaning:w.meaning,audio:w.word,note:w.note,example:w.example,exampleZhuyin:w.exampleZhuyin,score:score(w)}));
+ const ps=patterns.map(p=>({type:"pattern",key:p.pattern,category:p.category,front:p.pattern,zhuyin:p.zhuyin,meaning:p.meaning,audio:p.example,note:p.note,example:p.example,exampleZhuyin:p.exampleZhuyin,score:patternScore(p)}));
+ const is=idioms.map(i=>({type:"idiom",key:i.text,category:i.category,front:i.text,zhuyin:i.zhuyin,meaning:i.meaning,audio:i.text,note:i.note,example:i.text,exampleZhuyin:i.zhuyin,score:idiomScore(i)}));
+ return mode==="word"?ws:mode==="pattern"?ps:mode==="idiom"?is:[...ws,...ps,...is];
+}
+startQuiz=function(mode="mix"){
+ const all=quizItems(mode), pool=[...all].sort((a,b)=>b.score-a.score||Math.random()-.5);const q=pickFromQueue(`quiz-${mode}`,pool,x=>`${x.type}:${x.key}`)||pool[0];if(!q)return;
+ let ans=[q.meaning];while(ans.length<Math.min(4,all.length)){const r=all[Math.floor(Math.random()*all.length)].meaning;if(!ans.includes(r))ans.push(r);}ans.sort(()=>Math.random()-.5);currentQuiz=q;quizRuns++;saveAll();
+ document.getElementById("quizArea").innerHTML=`<div class="quiz-card"><span class="tag">${typeLabel(q.type)}：${q.category}</span><div class="word">${q.front}</div><div class="zhuyin">${q.zhuyin}</div><div class="audio-row">${audioButton(q.audio,"🔊 音声")}</div><p class="hint">この意味はどれ？</p><div class="quiz-options">${ans.map(a=>`<button onclick="checkAnswer('${a.replace(/'/g,"\\'")}')">${a}</button>`).join("")}</div><div id="quizResult"></div></div>`;if(shouldAutoSpeak())speakText(q.audio);
+}
+checkAnswer=function(a){if(!currentQuiz)return;const q=currentQuiz,result=document.getElementById("quizResult");if(a===q.meaning){result.innerHTML=`<div class="quiz-result"><span class="correct">⭕ 正解！</span><br>${q.example||q.front}<br>${q.exampleZhuyin||q.zhuyin}<div class="audio-row">${audioButton(q.audio,"🔊 音声")}</div></div>`;}else{if(q.type==="pattern"){if(!weakCards.includes(q.key))weakCards.push(q.key);patternMistakeCounts[q.key]=(patternMistakeCounts[q.key]||0)+1;}else if(q.type==="idiom"){if(!weakIdioms.includes(q.key))weakIdioms.push(q.key);idiomMistakeCounts[q.key]=(idiomMistakeCounts[q.key]||0)+1;}else{if(!weakWords.includes(q.key))weakWords.push(q.key);mistakeCounts[q.key]=(mistakeCounts[q.key]||0)+1;}saveAll();result.innerHTML=`<div class="quiz-result"><span class="wrong">❌ 不正解</span><br>正解：${q.meaning}<br>${q.note||""}</div>`;}}
+const v54SearchWords=searchWords;
+searchWords=function(){let k=document.getElementById("searchInput").value.trim().replace(/^#/,"");let results=document.getElementById("searchResults");if(!k){results.innerHTML="";return;}let wm=words.filter(i=>[i.category,i.word,i.zhuyin,i.meaning,i.note,i.example,i.exampleZhuyin,i.confuse,getWordTags(i).join(" ")].some(x=>(x||"").includes(k)));let pm=patterns.filter(i=>[i.category,i.pattern,i.zhuyin,i.meaning,i.note,i.example,i.exampleZhuyin,getPatternTags(i).join(" ")].some(x=>(x||"").includes(k)));let im=idioms.filter(i=>[i.category,i.text,i.zhuyin,i.meaning,i.note,getIdiomTags(i).join(" ")].some(x=>(x||"").includes(k)));results.innerHTML=(wm.length||pm.length||im.length)?[...wm.map(createWordCard),...pm.map(createPatternCard),...im.map(createIdiomCard)].join(""):'<div class="empty">找不到耶 🥲</div>';}
+window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
