@@ -630,3 +630,41 @@ body{
 
 .idiom-card{border-top:4px solid var(--sub)}
 .idiom-card .word{font-size:1.35rem}
+
+
+/* Ver.5.4.2: dashboard cards as section shortcuts */
+.stat-link {
+  appearance: none;
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+.stat-link small {
+  display: block;
+  margin-top: 8px;
+  color: var(--main-dark);
+  font-size: .76rem;
+  font-weight: 700;
+}
+.stat-link:hover,
+.stat-link:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--main);
+  box-shadow: 0 8px 20px var(--shadow);
+  outline: none;
+}
+.stat-link:active { transform: translateY(0); }
+.jump-highlight {
+  animation: sectionJumpHighlight .9s ease;
+}
+@keyframes sectionJumpHighlight {
+  0%, 100% { box-shadow: 0 4px 14px var(--shadow); }
+  35% { box-shadow: 0 0 0 4px rgba(79,159,189,.22), 0 8px 22px var(--shadow); }
+}
+@media (max-width: 520px) {
+  .dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat-card { padding: 14px 10px; }
+  .stat-card span { font-size: 1.65rem; }
+}

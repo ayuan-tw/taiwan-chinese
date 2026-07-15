@@ -422,6 +422,17 @@ function scrollToPanel(id){
     if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
   },80);
 }
+function jumpToStudyPanel(id){
+  showTab('study');
+  setTimeout(()=>{
+    const el=document.getElementById(id);
+    if(el){
+      el.scrollIntoView({behavior:'smooth', block:'start'});
+      el.classList.add('jump-highlight');
+      setTimeout(()=>el.classList.remove('jump-highlight'), 900);
+    }
+  },80);
+}
 window.addEventListener('load',()=>{
   const saved=localStorage.getItem('chengciActiveTab')||'home';
   showTab(saved);
@@ -445,7 +456,7 @@ async function refreshOfflineCache(){
   }
   setOfflineStatus('オフライン用データを更新中…');
   try{
-    const cache=await caches.open('chengci-v5-4-offline');
+    const cache=await caches.open('chengci-v5-4-2-offline');
     await cache.addAll(['./index.html','./style.css','./app.js','./words.js','./zhuyin-dict.js','./zhuyin-lite.js','./manifest.json','./icon.svg']);
     setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
   }catch(e){
