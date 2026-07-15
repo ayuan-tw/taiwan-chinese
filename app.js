@@ -260,7 +260,14 @@ function pickFromQueue(queueName,pool,keyFn){
     const key=keyFn(item);
     if(!seen.has(key)){seen.add(key); unique.push(item);}
   });
-  let queue=queueName==="quiz"?quizQueue:compositionQueues[queueName];
+  // Ver.5.4.3: 新しい出題モードでも未初期化の山札で止まらないようにする
+  let queue;
+  if(queueName==="quiz"){
+    queue=quizQueue;
+  }else{
+    if(!Array.isArray(compositionQueues[queueName])) compositionQueues[queueName]=[];
+    queue=compositionQueues[queueName];
+  }
   const keys=new Set(unique.map(keyFn));
   queue=queue.filter(item=>keys.has(keyFn(item)));
   if(queue.length===0){
