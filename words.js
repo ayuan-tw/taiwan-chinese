@@ -55,6 +55,12 @@ const words = [
 ];
 
 
+const v55Words = [
+  { category: "会話", word: "抓到", zhuyin: "ㄓㄨㄚ ㄉㄠˋ", meaning: "つかまえる／見つける／気づく", note: "実際につかまえるほか、ミスやポイントを見つけた時にも使える。", example: "我終於抓到問題了。", exampleZhuyin: "ㄨㄛˇ ㄓㄨㄥ ㄩˊ ㄓㄨㄚ ㄉㄠˋ ㄨㄣˋ ㄊㄧˊ ㄌㄜ˙" },
+  { category: "会話", word: "發現", zhuyin: "ㄈㄚ ㄒㄧㄢˋ", meaning: "気づく／発見する", note: "見たり考えたりして、新しい事実に気づいた時。", example: "我才發現去年也寫過。", exampleZhuyin: "ㄨㄛˇ ㄘㄞˊ ㄈㄚ ㄒㄧㄢˋ ㄑㄩˋ ㄋㄧㄢˊ ㄧㄝˇ ㄒㄧㄝˇ ㄍㄨㄛˋ" }
+];
+for (const item of v55Words) { if (!words.some(w => w.word === item.word)) words.push(item); }
+
 const phrases = [
   { text: "原來是這樣啊。", zhuyin: "ㄩㄢˊ ㄌㄞˊ ㄕˋ ㄓㄜˋ ㄧㄤˋ ㄚ", meaning: "なるほど、そういうことか。" },
   { text: "我好像懂一點了。", zhuyin: "ㄨㄛˇ ㄏㄠˇ ㄒㄧㄤˋ ㄉㄨㄥˇ ㄧˋ ㄉㄧㄢˇ ㄌㄜ˙", meaning: "ちょっとわかった気がする。" },
@@ -1344,5 +1350,17 @@ const v54Patterns = [
   }
 ];
 for (const item of v54Patterns) { if (!patterns.some(p => p.pattern === item.pattern)) patterns.push(item); }
+
+
+const v55Patterns = [
+  {category:"結果", pattern:"害我＋（結果）", zhuyin:"ㄏㄞˋ ㄨㄛˇ", meaning:"そのせいで私は～になった／～してしまった", note:"相手や出来事が原因で、自分に困った結果が起きた時。軽い文句にも使える。", example:"你害我嚇一跳。", exampleZhuyin:"ㄋㄧˇ ㄏㄞˋ ㄨㄛˇ ㄒㄧㄚˋ ㄧˊ ㄊㄧㄠˋ", tags:["会話","結果"], prompts:[{ja:"びっくりさせられた",answer:"你害我嚇一跳。",zhuyin:"ㄋㄧˇ ㄏㄞˋ ㄨㄛˇ ㄒㄧㄚˋ ㄧˊ ㄊㄧㄠˋ"},{ja:"そのせいで遅刻した",answer:"害我遲到了。",zhuyin:"ㄏㄞˋ ㄨㄛˇ ㄔˊ ㄉㄠˋ ㄌㄜ˙"}]},
+  {category:"強調", pattern:"光是～就～", zhuyin:"ㄍㄨㄤ ㄕˋ ～ ㄐㄧㄡˋ ～", meaning:"～だけで、もう～", note:"一つのことだけでも十分その結果になる、と強調する。", example:"光是上班就滿身都是汗。", exampleZhuyin:"ㄍㄨㄤ ㄕˋ ㄕㄤˋ ㄅㄢ ㄐㄧㄡˋ ㄇㄢˇ ㄕㄣ ㄉㄡ ㄕˋ ㄏㄢˋ", tags:["会話","強調"], prompts:[{ja:"出勤だけで汗だく",answer:"光是上班就滿身都是汗。",zhuyin:"ㄍㄨㄤ ㄕˋ ㄕㄤˋ ㄅㄢ ㄐㄧㄡˋ ㄇㄢˇ ㄕㄣ ㄉㄡ ㄕˋ ㄏㄢˋ"}]},
+  {category:"変化", pattern:"V著V著，就～", zhuyin:"V ㄓㄜ˙ V ㄓㄜ˙，ㄐㄧㄡˋ ～", meaning:"～しているうちに、（自然に）～した", note:"動作を続けるうちに、結果が自然に起きた時。", example:"看著看著，就睡著了。", exampleZhuyin:"ㄎㄢˋ ㄓㄜ˙ ㄎㄢˋ ㄓㄜ˙，ㄐㄧㄡˋ ㄕㄨㄟˋ ㄓㄠˊ ㄌㄜ˙", tags:["時間","変化"], prompts:[{ja:"見ているうちに寝ちゃった",answer:"看著看著，就睡著了。",zhuyin:"ㄎㄢˋ ㄓㄜ˙ ㄎㄢˋ ㄓㄜ˙，ㄐㄧㄡˋ ㄕㄨㄟˋ ㄓㄠˊ ㄌㄜ˙"}]},
+  {category:"発見", pattern:"V著V著，才～", zhuyin:"V ㄓㄜ˙ V ㄓㄜ˙，ㄘㄞˊ ～", meaning:"～しているうちに、そこで初めて～した", note:"続けている途中で、遅れて気づいたり発見したりした時。", example:"寫著寫著，我才發現去年也寫過。", exampleZhuyin:"ㄒㄧㄝˇ ㄓㄜ˙ ㄒㄧㄝˇ ㄓㄜ˙，ㄨㄛˇ ㄘㄞˊ ㄈㄚ ㄒㄧㄢˋ ㄑㄩˋ ㄋㄧㄢˊ ㄧㄝˇ ㄒㄧㄝˇ ㄍㄨㄛˋ", tags:["時間","発見"], prompts:[{ja:"書いているうちに去年も書いたと気づいた",answer:"寫著寫著，我才發現去年也寫過。",zhuyin:"ㄒㄧㄝˇ ㄓㄜ˙ ㄒㄧㄝˇ ㄓㄜ˙，ㄨㄛˇ ㄘㄞˊ ㄈㄚ ㄒㄧㄢˋ ㄑㄩˋ ㄋㄧㄢˊ ㄧㄝˇ ㄒㄧㄝˇ ㄍㄨㄛˋ"}]},
+  {category:"補足", pattern:"～就是了", zhuyin:"～ ㄐㄧㄡˋ ㄕˋ ㄌㄜ˙", meaning:"もっとも～だけど／ただ～というだけ", note:"前の内容に軽く補足や限定を加える。台湾の会話でも自然。", example:"去年也很熱，只是更早就是了。", exampleZhuyin:"ㄑㄩˋ ㄋㄧㄢˊ ㄧㄝˇ ㄏㄣˇ ㄖㄜˋ，ㄓˇ ㄕˋ ㄍㄥˋ ㄗㄠˇ ㄐㄧㄡˋ ㄕˋ ㄌㄜ˙", tags:["補足","会話"], prompts:[{ja:"もっとも去年はもっと早かったけど",answer:"不過去年更早就是了。",zhuyin:"ㄅㄨˋ ㄍㄨㄛˋ ㄑㄩˋ ㄋㄧㄢˊ ㄍㄥˋ ㄗㄠˇ ㄐㄧㄡˋ ㄕˋ ㄌㄜ˙"}]},
+  {category:"推量", pattern:"不知道是不是…", zhuyin:"ㄅㄨˋ ㄓ ㄉㄠˋ ㄕˋ ㄅㄨˊ ㄕˋ", meaning:"～なのかな／～かどうかわからない", note:"断定せず、原因や可能性をやわらかく考える言い方。", example:"不知道是不是最近太累了。", exampleZhuyin:"ㄅㄨˋ ㄓ ㄉㄠˋ ㄕˋ ㄅㄨˊ ㄕˋ ㄗㄨㄟˋ ㄐㄧㄣˋ ㄊㄞˋ ㄌㄟˋ ㄌㄜ˙", tags:["推量","会話"], prompts:[{ja:"最近疲れすぎなのかな",answer:"不知道是不是最近太累了。",zhuyin:"ㄅㄨˋ ㄓ ㄉㄠˋ ㄕˋ ㄅㄨˊ ㄕˋ ㄗㄨㄟˋ ㄐㄧㄣˋ ㄊㄞˋ ㄌㄟˋ ㄌㄜ˙"}]},
+  {category:"感覚", pattern:"總覺得…", zhuyin:"ㄗㄨㄥˇ ㄐㄩㄝˊ ㄉㄜ˙", meaning:"なんとなく～な気がする", note:"はっきりした根拠はないけれど、ずっとそんな感じがする時。", example:"總覺得今天比昨天更熱。", exampleZhuyin:"ㄗㄨㄥˇ ㄐㄩㄝˊ ㄉㄜ˙ ㄐㄧㄣ ㄊㄧㄢ ㄅㄧˇ ㄗㄨㄛˊ ㄊㄧㄢ ㄍㄥˋ ㄖㄜˋ", tags:["感覚","会話"], prompts:[{ja:"なんとなく今日は昨日より暑い気がする",answer:"總覺得今天比昨天更熱。",zhuyin:"ㄗㄨㄥˇ ㄐㄩㄝˊ ㄉㄜ˙ ㄐㄧㄣ ㄊㄧㄢ ㄅㄧˇ ㄗㄨㄛˊ ㄊㄧㄢ ㄍㄥˋ ㄖㄜˋ"}]}
+];
+for (const item of v55Patterns) { if (!patterns.some(p => p.pattern === item.pattern)) patterns.push(item); }
 
 const compositionPrompts = patterns.flatMap(p => p.prompts.map(q => ({...q, type:"pattern", source:p.pattern, category:p.category})));

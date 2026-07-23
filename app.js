@@ -260,7 +260,7 @@ function pickFromQueue(queueName,pool,keyFn){
     const key=keyFn(item);
     if(!seen.has(key)){seen.add(key); unique.push(item);}
   });
-  // Ver.5.4.3: 新しい出題モードでも未初期化の山札で止まらないようにする
+  // Ver.5.5.0: 新しい出題モードでも未初期化の山札で止まらないようにする
   let queue;
   if(queueName==="quiz"){
     queue=quizQueue;
