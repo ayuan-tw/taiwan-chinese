@@ -1,4 +1,4 @@
-// Ver.5.5.1 offline Taiwanese Mandarin dictionary
+// Ver.5.5.2 offline Taiwanese Mandarin dictionary
 // Generated from all entries in 華語八千詞表202204, plus curated phrase/polyphone overrides.
 (function(){
   window.ChengciZhuyinDictionary={

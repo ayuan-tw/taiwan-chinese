@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chengci-v5-5-1-offline';
+const CACHE_NAME = 'chengci-v5-5-2-offline';
 const OFFLINE_ASSETS = [
   './',
   './index.html',
@@ -32,19 +32,19 @@ self.addEventListener('fetch', (event) => {
   const requestUrl = new URL(event.request.url);
   if (requestUrl.origin !== location.origin) return;
 
-  event.respondWith(
-    caches.match(event.request, { ignoreSearch: true }).then((cached) => {
-      const fetchAndCache = fetch(event.request).then((response) => {
-        if (response && response.ok && response.type === 'basic') {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-        }
-        return response;
-      }).catch(() => cached || caches.match('./index.html'));
-
-      return cached || fetchAndCache;
-    })
-  );
+  event.respondWith((async()=>{
+    try{
+      const response=await fetch(event.request, {cache:'no-store'});
+      if(response && response.ok){
+        const copy=response.clone();
+        const cache=await caches.open(CACHE_NAME);
+        await cache.put(event.request, copy);
+      }
+      return response;
+    }catch(e){
+      return (await caches.match(event.request)) || (await caches.match('./index.html'));
+    }
+  })());
 });
 
 self.addEventListener('message', (event) => {

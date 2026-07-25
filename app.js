@@ -463,8 +463,11 @@ async function refreshOfflineCache(){
   }
   setOfflineStatus('オフライン用データを更新中…');
   try{
-    const cache=await caches.open('chengci-v5-4-2-offline');
-    await cache.addAll(['./index.html','./style.css','./app.js','./words.js','./zhuyin-dict.js','./zhuyin-lite.js','./manifest.json','./icon.svg']);
+    const currentCache='chengci-v5-5-2-offline';
+    const keys=await caches.keys();
+    await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!==currentCache).map(k=>caches.delete(k)));
+    const cache=await caches.open(currentCache);
+    await cache.addAll(['./','./index.html?v=5.5.2','./style.css?v=5.5.2','./app.js?v=5.5.2','./words.js?v=5.5.2','./zhuyin-dict.js?v=5.5.2','./zhuyin-lite.js?v=5.5.2','./manifest.json?v=5.5.2','./icon.svg']);
     setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
   }catch(e){
     setOfflineStatus('保存更新に失敗しました。ネット接続がある時にもう一度試してね。');
@@ -472,7 +475,9 @@ async function refreshOfflineCache(){
 }
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./service-worker.js').then(()=>{
+    navigator.serviceWorker.register('./service-worker.js?v=5.5.2').then(async(reg)=>{
+      await reg.update();
+      if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
       setOfflineStatus('オフライン保存OK。初回読み込み後は電波なしでも使えます。', true);
     }).catch(()=>{
       setOfflineStatus('オフライン保存の登録に失敗しました。GitHub Pages上で開くと有効になります。');
