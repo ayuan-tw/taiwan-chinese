@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chengci-v5-4-3-offline';
+const CACHE_NAME = 'chengci-v5-5-1-offline';
 const OFFLINE_ASSETS = [
   './',
   './index.html',
