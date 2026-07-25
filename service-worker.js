@@ -1,4 +1,5 @@
-const CACHE_NAME = 'chengci-v5-6-0-offline';
+const CACHE_NAME = 'chengci-v5-7-0-offline';
+const APP_VERSION = '5.7.0';
 const OFFLINE_ASSETS = [
   './',
   './index.html',
@@ -8,7 +9,9 @@ const OFFLINE_ASSETS = [
   './zhuyin-dict.js',
   './zhuyin-lite.js',
   './manifest.json',
-  './icon.svg'
+  './icon.svg',
+  './version.json',
+  './CHANGELOG.md'
 ];
 
 self.addEventListener('install', (event) => {
@@ -48,5 +51,9 @@ self.addEventListener('fetch', (event) => {
 });
 
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
+  if (!event.data) return;
+  if (event.data.type === 'SKIP_WAITING') self.skipWaiting();
+  if (event.data.type === 'GET_VERSION' && event.source) {
+    event.source.postMessage({type:'APP_VERSION', version:APP_VERSION});
+  }
 });

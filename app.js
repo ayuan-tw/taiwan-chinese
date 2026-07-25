@@ -505,11 +505,11 @@ async function refreshOfflineCache(){
   }
   setOfflineStatus('オフライン用データを更新中…');
   try{
-    const currentCache='chengci-v5-6-0-offline';
+    const currentCache='chengci-v5-7-0-offline';
     const keys=await caches.keys();
     await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!==currentCache).map(k=>caches.delete(k)));
     const cache=await caches.open(currentCache);
-    await cache.addAll(['./','./index.html?v=5.6.0','./style.css?v=5.6.0','./app.js?v=5.6.0','./words.js?v=5.6.0','./zhuyin-dict.js?v=5.6.0','./zhuyin-lite.js?v=5.6.0','./manifest.json?v=5.6.0','./icon.svg']);
+    await cache.addAll(['./','./index.html?v=5.7.0','./style.css?v=5.7.0','./app.js?v=5.7.0','./words.js?v=5.7.0','./zhuyin-dict.js?v=5.7.0','./zhuyin-lite.js?v=5.7.0','./manifest.json?v=5.7.0','./version.json','./CHANGELOG.md','./icon.svg']);
     setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
   }catch(e){
     setOfflineStatus('保存更新に失敗しました。ネット接続がある時にもう一度試してね。');
@@ -517,7 +517,7 @@ async function refreshOfflineCache(){
 }
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./service-worker.js?v=5.6.0').then(async(reg)=>{
+    navigator.serviceWorker.register('./service-worker.js?v=5.7.0').then(async(reg)=>{
       await reg.update();
       if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
       setOfflineStatus('オフライン保存OK。初回読み込み後は電波なしでも使えます。', true);
@@ -576,3 +576,134 @@ checkAnswer=function(a){if(!currentQuiz)return;const q=currentQuiz,result=docume
 const v54SearchWords=searchWords;
 searchWords=function(){let k=document.getElementById("searchInput").value.trim().replace(/^#/,"");let results=document.getElementById("searchResults");if(!k){results.innerHTML="";return;}let wm=words.filter(i=>[i.category,i.word,i.zhuyin,i.meaning,i.note,i.example,i.exampleZhuyin,i.confuse,getWordTags(i).join(" ")].some(x=>(x||"").includes(k)));let pm=patterns.filter(i=>[i.category,i.pattern,i.zhuyin,i.meaning,i.note,i.example,i.exampleZhuyin,getPatternTags(i).join(" ")].some(x=>(x||"").includes(k)));let im=idioms.filter(i=>[i.category,i.text,i.zhuyin,i.meaning,i.note,getIdiomTags(i).join(" ")].some(x=>(x||"").includes(k)));results.innerHTML=(wm.length||pm.length||im.length)?[...wm.map(createWordCard),...pm.map(createPatternCard),...im.map(createIdiomCard)].join(""):'<div class="empty">找不到耶 🥲</div>';}
 window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
+
+// Ver.5.7.0 app update manager
+const CHENGCI_APP_VERSION = '5.7.0';
+let pendingAppVersion = null;
+let updateReloading = false;
+
+function compareVersions(a,b){
+  const pa=String(a||'0').split('.').map(n=>Number(n)||0);
+  const pb=String(b||'0').split('.').map(n=>Number(n)||0);
+  for(let i=0;i<Math.max(pa.length,pb.length);i++){
+    const d=(pa[i]||0)-(pb[i]||0);
+    if(d!==0)return d;
+  }
+  return 0;
+}
+function setUpdateState(kind,message){
+  const el=document.getElementById('updateState');
+  if(!el)return;
+  el.className=`update-state state-${kind}`;
+  el.textContent=message;
+}
+function saveAutoUpdatePreference(){
+  const el=document.getElementById('autoUpdateCheck');
+  if(el)localStorage.setItem('chengciAutoUpdateCheck',el.checked?'1':'0');
+}
+function loadAutoUpdatePreference(){
+  const el=document.getElementById('autoUpdateCheck');
+  if(!el)return true;
+  const saved=localStorage.getItem('chengciAutoUpdateCheck');
+  el.checked=saved===null?true:saved==='1';
+  return el.checked;
+}
+async function fetchLatestVersionInfo(){
+  const response=await fetch(`./version.json?t=${Date.now()}`,{cache:'no-store'});
+  if(!response.ok)throw new Error(`version.json: ${response.status}`);
+  return response.json();
+}
+function openUpdateModal(info){
+  pendingAppVersion=info;
+  const modal=document.getElementById('updateModal');
+  if(!modal)return;
+  document.getElementById('updateModalVersion').textContent=`現在：${CHENGCI_APP_VERSION}　最新：${info.version}`;
+  document.getElementById('updateModalNotes').innerHTML=(info.notes||[]).map(n=>`<div>・${escapeHtml(n)}</div>`).join('')||'更新内容を取得しました。';
+  modal.hidden=false;
+  document.body.classList.add('modal-open');
+}
+function closeUpdateModal(){
+  const modal=document.getElementById('updateModal');
+  if(modal)modal.hidden=true;
+  document.body.classList.remove('modal-open');
+}
+async function checkForAppUpdate(showResult=false){
+  const button=document.getElementById('checkUpdateButton');
+  if(button)button.disabled=true;
+  setUpdateState('checking','🔵 確認中…');
+  try{
+    if(!navigator.onLine)throw new Error('offline');
+    const info=await fetchLatestVersionInfo();
+    const registration='serviceWorker' in navigator?await navigator.serviceWorker.getRegistration():null;
+    if(registration)await registration.update();
+    if(compareVersions(info.version,CHENGCI_APP_VERSION)>0){
+      setUpdateState('available',`🟡 Ver.${info.version}があります`);
+      openUpdateModal(info);
+    }else{
+      setUpdateState('latest','🟢 最新版（確認済み）');
+      if(showResult)showAppToast(`✅ Ver.${CHENGCI_APP_VERSION}が最新版です`);
+    }
+  }catch(error){
+    setUpdateState('offline',navigator.onLine?'🔴 更新確認に失敗':'🔴 オフラインのため確認できません');
+    if(showResult)showAppToast(navigator.onLine?'更新確認に失敗しました。少し待ってもう一度試してね。':'オフラインでは更新を確認できません。');
+  }finally{
+    if(button)button.disabled=false;
+  }
+}
+function showAppToast(message){
+  const toast=document.getElementById('dictUpdateToast');
+  if(!toast)return;
+  toast.textContent=message;toast.hidden=false;toast.classList.remove('show');void toast.offsetWidth;toast.classList.add('show');
+  setTimeout(()=>{toast.hidden=true;toast.classList.remove('show')},4200);
+}
+async function applyAppUpdate(){
+  const button=document.getElementById('applyUpdateButton');
+  if(button){button.disabled=true;button.textContent='更新中…';}
+  setUpdateState('checking','🔵 更新中…');
+  try{
+    const registrations='serviceWorker' in navigator?await navigator.serviceWorker.getRegistrations():[];
+    let registration=registrations.find(r=>r.scope.includes('/taiwan-chinese/'))||registrations[0];
+    if(!registration)registration=await navigator.serviceWorker.register(`./service-worker.js?v=${Date.now()}`);
+    await registration.update();
+    const worker=registration.waiting||registration.installing;
+    if(worker){
+      if(worker.state==='installed')worker.postMessage({type:'SKIP_WAITING'});
+      else worker.addEventListener('statechange',()=>{if(worker.state==='installed')worker.postMessage({type:'SKIP_WAITING'});});
+    }else if(registration.active){
+      registration.active.postMessage({type:'SKIP_WAITING'});
+    }
+    if('caches' in window){
+      const keys=await caches.keys();
+      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v5-7-0-offline').map(k=>caches.delete(k)));
+    }
+    updateReloading=true;
+    setTimeout(()=>location.replace(`./?updated=${Date.now()}`),900);
+  }catch(error){
+    setUpdateState('offline','🔴 更新に失敗');
+    showAppToast('更新に失敗しました。Safariで一度開いてから、もう一度試してね。');
+    if(button){button.disabled=false;button.textContent='今すぐ更新';}
+  }
+}
+async function loadChangelog(){
+  const el=document.getElementById('changelogContent');
+  if(!el)return;
+  try{
+    const response=await fetch(`./CHANGELOG.md?t=${Date.now()}`,{cache:'no-store'});
+    if(!response.ok)throw new Error();
+    const text=await response.text();
+    el.innerHTML=escapeHtml(text).replace(/^## (.+)$/gm,'<h4>$1</h4>').replace(/^- (.+)$/gm,'<div class="change-item">・$1</div>').replace(/\n{2,}/g,'<br>');
+  }catch(e){el.textContent='更新履歴を取得できませんでした。';}
+}
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(updateReloading)return;
+    updateReloading=true;
+    location.reload();
+  });
+}
+window.addEventListener('load',()=>{
+  const version=document.getElementById('appVersion');if(version)version.textContent=CHENGCI_APP_VERSION;
+  const auto=loadAutoUpdatePreference();
+  loadChangelog();
+  setTimeout(()=>{if(auto)checkForAppUpdate(false);},1300);
+});

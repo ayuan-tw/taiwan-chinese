@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>澄詞｜あゆあん台湾華語</title>
-  <link rel="manifest" href="manifest.json?v=5.6.0" />
+  <link rel="manifest" href="manifest.json?v=5.7.0" />
   <meta name="theme-color" content="#4f8f88" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="澄詞" />
-  <link rel="apple-touch-icon" href="icon.svg?v=5.6.0" />
-  <link rel="stylesheet" href="style.css?v=5.6.0" />
+  <link rel="apple-touch-icon" href="icon.svg?v=5.7.0" />
+  <link rel="stylesheet" href="style.css?v=5.7.0" />
 </head>
 <body>
   <div id="dictUpdateToast" class="dict-update-toast" hidden></div>
@@ -18,7 +18,7 @@
     <button class="tab-btn active" data-tab-target="home" onclick="showTab('home')">🏠<span>ホーム</span></button>
     <button class="tab-btn" data-tab-target="study" onclick="showTab('study')">📚<span>学習</span></button>
     <button class="tab-btn" data-tab-target="pronunciation" onclick="showTab('pronunciation')">🔊<span>発音</span></button>
-    <button class="tab-btn" data-tab-target="settings" onclick="showTab('settings')">⚙️<span>設定</span></button>
+    <button class="tab-btn" data-tab-target="settings" onclick="showTab('settings')">ℹ️<span>アプリ情報</span></button>
   </nav>
   <main>
     <section class="tab-page active" id="tab-home">
@@ -154,19 +154,45 @@
     </section>
     </section>
     <section class="tab-page" id="tab-settings">
-      <section class="panel">
-  <h2 class="section-title">⚙️ 設定</h2>
-  <p class="hint">Ver.5.6.0はホームの登録数カードから各一覧へ直接移動できるオフライン対応版。初回だけネットで開けば、次回以降はキャッシュから起動できます。</p>
-  <div class="button-row"><button onclick="showTab('pronunciation')">🔊 音声設定を開く</button><button class="secondary" onclick="refreshOfflineCache()">📦 オフライン保存を更新</button></div>
+      <section class="panel app-info-panel">
+  <h2 class="section-title">ℹ️ アプリ情報</h2>
+  <div class="app-version-card">
+    <div><span class="app-label">📱 澄詞</span><strong>Ver.<span id="appVersion">5.7.0</span></strong></div>
+    <div id="updateState" class="update-state state-unchecked">⚪ 未確認</div>
+    <div class="app-build-date">リリース：2026-07-25</div>
+  </div>
+  <div class="button-row">
+    <button id="checkUpdateButton" onclick="checkForAppUpdate(true)">🔄 更新を確認</button>
+    <button class="secondary" onclick="showTab('pronunciation')">🔊 音声設定</button>
+    <button class="secondary" onclick="refreshOfflineCache()">📦 オフライン保存を更新</button>
+  </div>
+  <label class="auto-update-setting"><input id="autoUpdateCheck" type="checkbox" checked onchange="saveAutoUpdatePreference()"> 起動時に更新を確認する</label>
   <div id="offlineStatus" class="offline-status">オフライン保存の状態を確認中…</div>
   <div class="dictionary-meta-card">
     <h3>📚 注音辞書</h3>
     <div id="dictionaryMeta">辞書情報を確認中…</div>
   </div>
+  <div class="changelog-card">
+    <h3>📜 更新履歴</h3>
+    <div id="changelogContent">更新履歴を読み込み中…</div>
+  </div>
 </section>
     </section>
   </main>
-  <footer>Ver.5.6.0｜辞書の版・更新反映を確認できます</footer>
-  <script src="words.js?v=5.6.0"></script><script src="zhuyin-dict.js?v=5.6.0"></script><script src="zhuyin-lite.js?v=5.6.0"></script><script src="app.js?v=5.6.0"></script>
+  <footer>Ver.5.7.0｜ホーム画面版から更新を確認できます</footer>
+
+  <div id="updateModal" class="update-modal" hidden>
+    <div class="update-modal-backdrop" onclick="closeUpdateModal()"></div>
+    <section class="update-modal-card" role="dialog" aria-modal="true" aria-labelledby="updateModalTitle">
+      <h2 id="updateModalTitle">🎉 新しいバージョンがあります</h2>
+      <p id="updateModalVersion"></p>
+      <div id="updateModalNotes" class="update-modal-notes"></div>
+      <div class="button-row">
+        <button id="applyUpdateButton" onclick="applyAppUpdate()">今すぐ更新</button>
+        <button class="secondary" onclick="closeUpdateModal()">あとで</button>
+      </div>
+    </section>
+  </div>
+  <script src="words.js?v=5.7.0"></script><script src="zhuyin-dict.js?v=5.7.0"></script><script src="zhuyin-lite.js?v=5.7.0"></script><script src="app.js?v=5.7.0"></script>
 </body>
 </html>
