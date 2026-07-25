@@ -319,7 +319,49 @@ function checkAnswer(a){if(!currentQuiz)return;let result=document.getElementByI
 function clearQuiz(){document.getElementById("quizArea").innerHTML="";currentQuiz=null;}
 function renderPhrases(){document.getElementById("phraseList").innerHTML=phrases.map(p=>`<div class="phrase-card"><div class="phrase-main">${p.text}</div><div class="phrase-sub">${p.zhuyin}</div><div class="audio-row">${audioButton(p.text,"🔊 音声")}</div><div class="phrase-meaning">${p.meaning}</div></div>`).join("");}
 function refresh(){renderWordList(words);searchWords();}
-window.addEventListener("load",()=>{initAudio();initFreeSpeak();renderCategoryButtons();renderTagButtons();renderWordList();renderPhrases();pickPriorityWords();updateStats();});
+
+function formatDictDate(value){
+  if(!value)return '未記録';
+  const d=new Date(value);
+  return Number.isNaN(d.getTime())?value:d.toLocaleString('ja-JP');
+}
+function renderDictionaryMeta(){
+  const el=document.getElementById('dictionaryMeta');
+  if(!el)return;
+  const m=window.CHENGCI_DICT_META;
+  if(!m){
+    el.innerHTML='<p>この辞書には版情報がありません。Studio v2.1以降で生成すると表示されます。</p>';
+    return;
+  }
+  const shortHash=(m.sourceHash||'').slice(0,12)||'未記録';
+  el.innerHTML=`<dl class="dict-meta-grid">
+    <dt>辞書</dt><dd>${escapeHtml(m.source||'不明')}</dd>
+    <dt>版</dt><dd>${escapeHtml(m.sourceVersion||'未入力')}</dd>
+    <dt>公式更新日</dt><dd>${escapeHtml(m.sourceUpdatedAt||'未入力')}</dd>
+    <dt>Studio生成日</dt><dd>${escapeHtml(formatDictDate(m.builtAt))}</dd>
+    <dt>収録</dt><dd>${Number(m.phraseCount||0).toLocaleString()}語・${Number(m.charCount||0).toLocaleString()}字（独自 ${Number(m.overrideCount||0).toLocaleString()}語）</dd>
+    <dt>識別値</dt><dd class="dict-id">${escapeHtml(shortHash)}</dd>
+  </dl>`;
+}
+function notifyDictionaryUpdate(){
+  const m=window.CHENGCI_DICT_META;
+  if(!m)return;
+  const id=m.dictId||m.sourceHash||`${m.sourceVersion}|${m.builtAt}|${m.phraseCount}`;
+  const key='chengciLastSeenDictionaryId';
+  const previous=localStorage.getItem(key);
+  localStorage.setItem(key,id);
+  if(!previous||previous===id)return;
+  const toast=document.getElementById('dictUpdateToast');
+  if(!toast)return;
+  toast.textContent=`✅ 注音辞書を更新しました：${m.sourceVersion||'新版'}（${Number(m.phraseCount||0).toLocaleString()}語）`;
+  toast.hidden=false;
+  toast.classList.remove('show');
+  void toast.offsetWidth;
+  toast.classList.add('show');
+  setTimeout(()=>{toast.hidden=true;toast.classList.remove('show')},5000);
+}
+
+window.addEventListener("load",()=>{initAudio();initFreeSpeak();renderCategoryButtons();renderTagButtons();renderWordList();renderPhrases();pickPriorityWords();updateStats();renderDictionaryMeta();notifyDictionaryUpdate();});
 
 // Ver.3.0 additions: 型カード・瞬間作文
 let weakCards=JSON.parse(localStorage.getItem("weakCards")||"[]");
@@ -463,11 +505,11 @@ async function refreshOfflineCache(){
   }
   setOfflineStatus('オフライン用データを更新中…');
   try{
-    const currentCache='chengci-v5-5-2-offline';
+    const currentCache='chengci-v5-6-0-offline';
     const keys=await caches.keys();
     await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!==currentCache).map(k=>caches.delete(k)));
     const cache=await caches.open(currentCache);
-    await cache.addAll(['./','./index.html?v=5.5.2','./style.css?v=5.5.2','./app.js?v=5.5.2','./words.js?v=5.5.2','./zhuyin-dict.js?v=5.5.2','./zhuyin-lite.js?v=5.5.2','./manifest.json?v=5.5.2','./icon.svg']);
+    await cache.addAll(['./','./index.html?v=5.6.0','./style.css?v=5.6.0','./app.js?v=5.6.0','./words.js?v=5.6.0','./zhuyin-dict.js?v=5.6.0','./zhuyin-lite.js?v=5.6.0','./manifest.json?v=5.6.0','./icon.svg']);
     setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
   }catch(e){
     setOfflineStatus('保存更新に失敗しました。ネット接続がある時にもう一度試してね。');
@@ -475,7 +517,7 @@ async function refreshOfflineCache(){
 }
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./service-worker.js?v=5.5.2').then(async(reg)=>{
+    navigator.serviceWorker.register('./service-worker.js?v=5.6.0').then(async(reg)=>{
       await reg.update();
       if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
       setOfflineStatus('オフライン保存OK。初回読み込み後は電波なしでも使えます。', true);

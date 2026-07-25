@@ -668,3 +668,5 @@ body{
   .stat-card { padding: 14px 10px; }
   .stat-card span { font-size: 1.65rem; }
 }
+
+.dictionary-meta-card{margin-top:16px;padding:14px;border:1px solid var(--line,#cbd8e6);border-radius:14px;background:rgba(255,255,255,.6)}.dictionary-meta-card h3{margin:0 0 10px}.dict-meta-grid{display:grid;grid-template-columns:max-content 1fr;gap:6px 12px;font-size:.94rem}.dict-meta-grid dt{font-weight:700}.dict-meta-grid dd{margin:0;overflow-wrap:anywhere}.dict-id{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem}.dict-update-toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:9999;max-width:min(92vw,540px);padding:13px 18px;border-radius:999px;background:#163a5f;color:white;box-shadow:0 8px 30px rgba(0,0,0,.25);font-weight:700;text-align:center}.dict-update-toast.show{animation:dictToast 4.8s ease both}@keyframes dictToast{0%{opacity:0;transform:translate(-50%,-12px)}10%,82%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-12px)}}
