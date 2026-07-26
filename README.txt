@@ -1,6 +1,13 @@
-澄詞 Ver.5.7.0
+澄詞 Ver.6.0.0
 
-GitHub Pagesへ、このフォルダ内のファイルをすべて上書きしてください。
-ホーム画面版では「アプリ情報」→「更新を確認」から最新版を確認できます。
+【上書き方法】
+このフォルダの「中身」を、GitHub Pagesの現在の澄詞フォルダへすべて上書きしてください。
+古い words.js はVer.6では使いません。GitHub上に残っていても動作には影響しませんが、削除して構いません。
 
-重要：version.json と CHANGELOG.md も必ずアップロードしてください。
+【辞書構成】
+data/base/dictionary.js : 配布版の基本辞書
+data/user/override.json : あゆあん個人の追加・修正差分
+
+同じ word / pattern / text がoverrideにある場合、override側の項目で上書きされます。
+
+重要：data、js、docsフォルダも含め、フォルダ構成を保ったままアップロードしてください。

@@ -578,7 +578,7 @@ searchWords=function(){let k=document.getElementById("searchInput").value.trim()
 window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
 
 // Ver.5.7.0 app update manager
-const CHENGCI_APP_VERSION = '5.7.0';
+const CHENGCI_APP_VERSION = '6.0.0';
 let pendingAppVersion = null;
 let updateReloading = false;
 
@@ -674,7 +674,7 @@ async function applyAppUpdate(){
     }
     if('caches' in window){
       const keys=await caches.keys();
-      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v5-7-0-offline').map(k=>caches.delete(k)));
+      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-0-0-offline').map(k=>caches.delete(k)));
     }
     updateReloading=true;
     setTimeout(()=>location.replace(`./?updated=${Date.now()}`),900);
@@ -706,4 +706,56 @@ window.addEventListener('load',()=>{
   const auto=loadAutoUpdatePreference();
   loadChangelog();
   setTimeout(()=>{if(auto)checkForAppUpdate(false);},1300);
+});
+
+
+// Ver.6.0.0 音から單字
+let currentAudioWord=null;
+let audioWordMode='mental';
+function pickAudioWord(){
+  const pool=[...words].filter(w=>w.word&&w.meaning).sort((a,b)=>score(b)-score(a)||Math.random()-.5);
+  return pickFromQueue('audio-word',pool,w=>w.word)||pool[0];
+}
+function audioWordCard(answerVisible=false){
+  if(!currentAudioWord)return '';
+  const w=currentAudioWord;
+  const input=audioWordMode==='input'&&!answerVisible?`<div class="audio-answer-row"><input id="audioWordInput" class="audio-word-input" lang="zh-Hant-TW" autocomplete="off" placeholder="聞こえた繁體字を入力"><button onclick="checkAudioWordInput()">答え合わせ</button></div>`:'';
+  const reveal=!answerVisible?`<button class="secondary" onclick="revealAudioWordAnswer(false)">答えを見る</button>`:'';
+  const answer=answerVisible?`<div class="audio-word-answer"><div class="word">${escapeHtml(w.word)}</div><div class="zhuyin">${escapeHtml(w.zhuyin||'')}</div><p><strong>${escapeHtml(w.meaning||'')}</strong></p><p>${escapeHtml(w.example||'')}</p><div class="zhuyin">${escapeHtml(w.exampleZhuyin||'')}</div><div class="audio-row">${audioButton(w.word,'🔊 單字')}${w.example?audioButton(w.example,'🔊 例文'):''}</div><div class="button-row"><button onclick="markAudioWordResult(true)">⭕ わかった</button><button class="secondary" onclick="markAudioWordResult(false)">🔥 復習へ</button><button onclick="startAudioWordQuiz(audioWordMode)">次へ</button></div></div>`:'';
+  return `<div class="quiz-card audio-word-card"><span class="tag">${escapeHtml(w.category||'單字')}</span><div class="audio-prompt-icon">🎧</div><p class="hint">文字を見ずに聞いてみよう</p><div class="audio-row center">${audioButton(w.word,'▶️ 再生')}</div>${input}<div class="button-row center">${reveal}</div><div id="audioWordFeedback"></div>${answer}</div>`;
+}
+function startAudioWordQuiz(mode='mental'){
+  audioWordMode=mode;
+  currentAudioWord=pickAudioWord();
+  const area=document.getElementById('audioWordArea');if(!area||!currentAudioWord)return;
+  area.innerHTML=audioWordCard(false);
+  setTimeout(()=>speakText(currentAudioWord.word),120);
+  if(mode==='input')setTimeout(()=>document.getElementById('audioWordInput')?.focus(),180);
+}
+function revealAudioWordAnswer(markWrong=false){
+  if(!currentAudioWord)return;
+  if(markWrong)recordAudioWordMistake();
+  document.getElementById('audioWordArea').innerHTML=audioWordCard(true);
+}
+function normalizeAudioAnswer(value){return String(value||'').replace(/[\s，。！？、,.!?]/g,'').trim();}
+function checkAudioWordInput(){
+  if(!currentAudioWord)return;
+  const input=document.getElementById('audioWordInput');
+  const correct=normalizeAudioAnswer(input?.value)===normalizeAudioAnswer(currentAudioWord.word);
+  if(!correct)recordAudioWordMistake();
+  document.getElementById('audioWordArea').innerHTML=audioWordCard(true);
+  const box=document.getElementById('audioWordFeedback');
+  if(box)box.innerHTML=correct?'<div class="quiz-result"><span class="correct">⭕ 正解！</span></div>':'<div class="quiz-result"><span class="wrong">❌ 惜しい！復習優先に追加しました</span></div>';
+}
+function recordAudioWordMistake(){
+  const key=currentAudioWord?.word;if(!key)return;
+  if(!weakWords.includes(key))weakWords.push(key);
+  mistakeCounts[key]=(mistakeCounts[key]||0)+1;
+  saveAll();
+}
+function markAudioWordResult(known){if(!known)recordAudioWordMistake();startAudioWordQuiz(audioWordMode);}
+function clearAudioWordQuiz(){stopSpeech();currentAudioWord=null;const area=document.getElementById('audioWordArea');if(area)area.innerHTML='';}
+
+window.addEventListener('chengci-dictionary-ready',()=>{
+  renderCategoryButtons();renderTagButtons();renderPatternTagButtons();renderIdiomTagButtons();updateStats();
 });
