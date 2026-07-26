@@ -680,12 +680,3 @@ body{
 .changelog-card{margin-top:16px;padding:14px;border:1px solid var(--line,#cbd8e6);border-radius:14px;background:rgba(255,255,255,.6)}.changelog-card h3{margin:0 0 10px}.changelog-card h4{margin:12px 0 6px;color:var(--main-dark)}.change-item{margin:4px 0;line-height:1.55}
 .update-modal[hidden]{display:none}.update-modal{position:fixed;inset:0;z-index:12000;display:grid;place-items:center;padding:18px}.update-modal-backdrop{position:absolute;inset:0;background:rgba(13,30,43,.55);backdrop-filter:blur(3px)}.update-modal-card{position:relative;width:min(92vw,520px);max-height:84vh;overflow:auto;padding:22px;border-radius:22px;background:#fff;box-shadow:0 22px 70px rgba(0,0,0,.3)}.update-modal-card h2{margin-top:0}.update-modal-notes{margin:14px 0;padding:13px;border-radius:14px;background:#f3f8fb;line-height:1.65}.modal-open{overflow:hidden}
 @media(max-width:520px){.app-version-card>div:first-child{align-items:flex-start;flex-direction:column}.update-modal-card{padding:18px}.update-modal-card .button-row button{width:100%}}
-
-
-/* Ver.6 音から單字 */
-.audio-word-card{text-align:center}
-.audio-prompt-icon{font-size:3rem;margin:.4rem 0}
-.audio-row.center,.button-row.center{justify-content:center}
-.audio-answer-row{display:flex;gap:.6rem;align-items:center;justify-content:center;margin:1rem 0;flex-wrap:wrap}
-.audio-word-input{min-width:min(100%,18rem);font-size:1.15rem;padding:.8rem 1rem;border:1px solid #b7c8c4;border-radius:12px;background:#fff}
-.audio-word-answer{margin-top:1rem;padding-top:1rem;border-top:1px dashed #b7c8c4}

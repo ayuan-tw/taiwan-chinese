@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>澄詞｜あゆあん台湾華語</title>
-  <link rel="manifest" href="manifest.json?v=6.0.2" />
+  <link rel="manifest" href="manifest.json?v=6.0.3" />
   <meta name="theme-color" content="#4f8f88" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="澄詞" />
-  <link rel="apple-touch-icon" href="assets/icons/icon.svg?v=6.0.2" />
-  <link rel="stylesheet" href="css/style.css?v=6.0.2" />
+  <link rel="apple-touch-icon" href="assets/icon.svg?v=6.0.3" />
+  <link rel="stylesheet" href="css/style.css?v=6.0.3" />
 </head>
 <body>
   <div id="dictUpdateToast" class="dict-update-toast" hidden></div>
@@ -37,7 +37,6 @@
     <button onclick="scrollToPanel('searchPanel')">🔍<span>検索</span></button>
     <button onclick="scrollToPanel('compositionPanel')">🎯<span>瞬間作文</span></button>
     <button onclick="scrollToPanel('quizPanel')">🎲<span>ランダムクイズ</span></button>
-    <button onclick="scrollToPanel('audioWordPanel')">🎧<span>音から單字</span></button>
     <button onclick="scrollToPanel('priorityPanel')">📌<span>復習優先</span></button>
     <button class="secondary" onclick="showTab('pronunciation')">🔊<span>発音チェック</span></button>
   </div>
@@ -60,17 +59,6 @@
       <h2 class="section-title">🎲 ランダムクイズ</h2>
       <div class="button-row"><button onclick="startQuiz('mix')">全部混合</button><button onclick="startQuiz('word')">單字</button><button onclick="startQuiz('pattern')">句型</button><button onclick="startQuiz('idiom')">慣用說法</button><button class="secondary" onclick="clearQuiz()">消す</button></div>
       <p class="hint">單字・句型・慣用說法から出題。間違えた項目は復習優先に反映されます。</p><div id="quizArea" class="quiz-area"></div>
-    </section>
-
-      <section class="panel" id="audioWordPanel">
-      <h2 class="section-title">🎧 音から單字</h2>
-      <div class="button-row">
-        <button onclick="startAudioWordQuiz('input')">入力して答える</button>
-        <button onclick="startAudioWordQuiz('mental')">頭の中で答える</button>
-        <button class="secondary" onclick="clearAudioWordQuiz()">消す</button>
-      </div>
-      <p class="hint">音だけを聞いて、繁體字を思い浮かべる練習。答えを見るまで文字と注音は隠れます。</p>
-      <div id="audioWordArea" class="quiz-area"></div>
     </section>
       <section class="panel" id="priorityPanel">
       <h2 class="section-title">📌 復習優先3單字</h2>
@@ -169,7 +157,7 @@
       <section class="panel app-info-panel">
   <h2 class="section-title">ℹ️ アプリ情報</h2>
   <div class="app-version-card">
-    <div><span class="app-label">📱 澄詞</span><strong>Ver.<span id="appVersion">6.0.2</span></strong></div>
+    <div><span class="app-label">📱 澄詞</span><strong>Ver.<span id="appVersion">5.7.0</span></strong></div>
     <div id="updateState" class="update-state state-unchecked">⚪ 未確認</div>
     <div class="app-build-date">リリース：2026-07-25</div>
   </div>
@@ -191,7 +179,7 @@
 </section>
     </section>
   </main>
-  <footer>Ver.6.0.2｜ホーム画面版から更新を確認できます</footer>
+  <footer>Ver.5.7.0｜ホーム画面版から更新を確認できます</footer>
 
   <div id="updateModal" class="update-modal" hidden>
     <div class="update-modal-backdrop" onclick="closeUpdateModal()"></div>
@@ -205,6 +193,6 @@
       </div>
     </section>
   </div>
-  <script src="data/base/dictionary.js?v=6.0.2"></script><script src="js/dictionary-loader.js?v=6.0.2"></script><script src="data/base/zhuyin-dict.js?v=6.0.2"></script><script src="js/zhuyin-lite.js?v=6.0.2"></script><script src="js/app.js?v=6.0.2"></script>
+  <script src="data/words.js?v=6.0.3"></script><script src="data/zhuyin-dict.js?v=6.0.3"></script><script src="js/zhuyin-lite.js?v=6.0.3"></script><script src="js/app.js?v=6.0.3"></script>
 </body>
 </html>
