@@ -1,17 +1,17 @@
-const CACHE_NAME = 'chengci-v6-0-0-offline';
-const APP_VERSION = '6.0.0';
+const CACHE_NAME = 'chengci-v6-0-2-offline';
+const APP_VERSION = '6.0.2';
 const OFFLINE_ASSETS = [
   './',
   './index.html',
-  './style.css',
-  './app.js',
+  './css/style.css',
+  './js/app.js',
   './data/base/dictionary.js',
   './js/dictionary-loader.js',
   './data/user/override.json',
-  './zhuyin-dict.js',
-  './zhuyin-lite.js',
+  './data/base/zhuyin-dict.js',
+  './js/zhuyin-lite.js',
   './manifest.json',
-  './icon.svg',
+  './assets/icons/icon.svg',
   './version.json',
   './CHANGELOG.md'
 ];
