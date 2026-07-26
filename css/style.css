@@ -681,7 +681,7 @@ body{
 .update-modal[hidden]{display:none}.update-modal{position:fixed;inset:0;z-index:12000;display:grid;place-items:center;padding:18px}.update-modal-backdrop{position:absolute;inset:0;background:rgba(13,30,43,.55);backdrop-filter:blur(3px)}.update-modal-card{position:relative;width:min(92vw,520px);max-height:84vh;overflow:auto;padding:22px;border-radius:22px;background:#fff;box-shadow:0 22px 70px rgba(0,0,0,.3)}.update-modal-card h2{margin-top:0}.update-modal-notes{margin:14px 0;padding:13px;border-radius:14px;background:#f3f8fb;line-height:1.65}.modal-open{overflow:hidden}
 @media(max-width:520px){.app-version-card>div:first-child{align-items:flex-start;flex-direction:column}.update-modal-card{padding:18px}.update-modal-card .button-row button{width:100%}}
 
-/* Ver.6.1.0 音からクイズ */
+/* Ver.6.2.0 音からクイズ */
 .audio-quiz-card{text-align:center;}
 .audio-quiz-play{width:92px;height:92px;padding:0;margin:14px auto 6px;border-radius:50%;font-size:2.4rem;display:block;box-shadow:0 8px 18px rgba(35,107,134,.22);}
 .audio-quiz-prompt{margin:12px 0 6px;font-weight:800;color:var(--main-dark);}
@@ -691,3 +691,15 @@ body{
 .audio-quiz-reveal .word{margin-top:12px;}
 .audio-next-row{margin-top:16px;margin-bottom:0;}
 @media (max-width:640px){.audio-quiz-play{width:82px;height:82px;font-size:2.1rem;}}
+
+.audio-quiz-mode-buttons{align-items:stretch;}
+.audio-chinese-options button{font-size:1.25rem;letter-spacing:.04em;}
+.audio-typing-form{display:flex;gap:10px;max-width:520px;margin:14px auto 0;align-items:stretch;}
+.audio-quiz-input{flex:1;min-width:0;padding:13px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;font:inherit;font-size:1.18rem;text-align:center;}
+.audio-quiz-input:focus{outline:none;border-color:var(--main);box-shadow:0 0 0 3px rgba(79,159,189,.16);}
+.audio-quiz-input.input-correct{border-color:var(--good);background:#e7f7f2;}
+.audio-quiz-input.input-wrong{border-color:var(--bad);background:#fff0f0;}
+.audio-user-answer{margin-top:8px;color:var(--muted);}
+.input-shake{animation:inputShake .32s ease;}
+@keyframes inputShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@media(max-width:520px){.audio-typing-form{flex-direction:column}.audio-typing-form button{width:100%}}

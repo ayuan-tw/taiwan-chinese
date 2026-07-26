@@ -242,6 +242,7 @@ let quizRuns=Number(localStorage.getItem("quizRuns")||localStorage.getItem("quiz
 let currentQuiz=null;
 let currentAudioQuiz=null;
 let audioQuizQueue=[];
+let audioQuizMode=localStorage.getItem("audioQuizMode")==="typing"?"typing":"choice";
 
 // Ver.3.5: 1周するまで重複しないランダム山札
 let quizQueue=[];
@@ -320,65 +321,116 @@ function startQuiz(){let pool=[...words].sort((a,b)=>score(b)-score(a)||Math.ran
 function checkAnswer(a){if(!currentQuiz)return;let result=document.getElementById("quizResult");if(a===currentQuiz.meaning){result.innerHTML=`<div class="quiz-result"><span class="correct">⭕ 正解！</span><br>${currentQuiz.example}<br>${currentQuiz.exampleZhuyin}<div class="audio-row">${audioButton(currentQuiz.example,"🔊 例文")}</div></div>`;}else{if(!weakWords.includes(currentQuiz.word))weakWords.push(currentQuiz.word);mistakeCounts[currentQuiz.word]=(mistakeCounts[currentQuiz.word]||0)+1;saveAll();result.innerHTML=`<div class="quiz-result"><span class="wrong">❌ 不正解</span><br>正解：${currentQuiz.meaning}<br>${currentQuiz.example}<br>${currentQuiz.exampleZhuyin}<div class="audio-row">${audioButton(currentQuiz.example,"🔊 例文")}</div><br>⚠️ ${currentQuiz.confuse||currentQuiz.note}</div>`;}}
 function clearQuiz(){document.getElementById("quizArea").innerHTML="";currentQuiz=null;}
 
-function buildMeaningChoices(question){
-  const choices=[question.meaning];
-  const candidates=shuffleArray(words.filter(w=>w.word!==question.word && w.meaning && w.meaning!==question.meaning));
-  for(const item of candidates){
-    if(!choices.includes(item.meaning))choices.push(item.meaning);
+function buildChineseChoices(question){
+  const choices=[question.word];
+  const questionLength=Array.from(question.word||"").length;
+  const ranked=words
+    .filter(w=>w.word && w.word!==question.word)
+    .map(w=>{
+      const lengthGap=Math.abs(Array.from(w.word).length-questionLength);
+      const sameCategory=w.category===question.category?0:2;
+      const sameFirst=(w.zhuyin||"").split(/\s+/)[0]===(question.zhuyin||"").split(/\s+/)[0]?0:1;
+      return {word:w.word, rank:lengthGap+sameCategory+sameFirst+Math.random()};
+    })
+    .sort((a,b)=>a.rank-b.rank);
+  for(const item of ranked){
+    if(!choices.includes(item.word))choices.push(item.word);
     if(choices.length>=4)break;
   }
   return shuffleArray(choices);
 }
-function startAudioQuiz(){
+function normalizeChineseAnswer(value){
+  return String(value||"")
+    .trim()
+    .replace(/[\s　，。！？、,.!?「」『』（）()]/g,"");
+}
+function startAudioQuiz(mode='choice'){
   stopSpeech();
+  audioQuizMode=mode==='typing'?'typing':'choice';
+  localStorage.setItem('audioQuizMode',audioQuizMode);
   const pool=[...words].sort((a,b)=>score(b)-score(a)||Math.random()-.5);
   if(!audioQuizQueue.length)audioQuizQueue=shuffleArray(pool);
   currentAudioQuiz=audioQuizQueue.shift()||pool[0];
   if(!currentAudioQuiz)return;
-  const choices=buildMeaningChoices(currentAudioQuiz);
   quizRuns++;
   saveAll();
   const area=document.getElementById("audioQuizArea");
+  const answerArea=audioQuizMode==='choice'
+    ? `<p class="audio-quiz-prompt">聞こえた單字はどれ？</p>
+       <div class="quiz-options audio-chinese-options">${buildChineseChoices(currentAudioQuiz).map((choice,index)=>`<button lang="zh-Hant-TW" onclick="checkAudioQuizChoice(${index})" data-choice="${encodeURIComponent(choice)}">${escapeHtml(choice)}</button>`).join("")}</div>`
+    : `<p class="audio-quiz-prompt">聞こえた單字を中文で書いてね</p>
+       <form class="audio-typing-form" onsubmit="checkAudioQuizTyping(event)">
+         <input id="audioQuizInput" class="audio-quiz-input" type="text" lang="zh-Hant-TW" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="中文を入力" aria-label="聞こえた単語を中文で入力" />
+         <button type="submit">答える</button>
+       </form>`;
   area.innerHTML=`<div class="quiz-card audio-quiz-card">
-    <span class="tag">耳で挑戦</span>
+    <span class="tag">${audioQuizMode==='choice'?'音 → 中文4択':'音 → 中文入力'}</span>
     <button class="audio-quiz-play" type="button" onclick="replayAudioQuiz()" aria-label="単語を再生">🔊</button>
-    <p class="audio-quiz-prompt">聞こえた單字の意味はどれ？</p>
-    <div class="quiz-options">${choices.map((choice,index)=>`<button onclick="checkAudioQuizAnswer(${index})" data-choice="${encodeURIComponent(choice)}">${escapeHtml(choice)}</button>`).join("")}</div>
+    ${answerArea}
     <div id="audioQuizResult"></div>
   </div>`;
+  if(audioQuizMode==='typing')setTimeout(()=>document.getElementById('audioQuizInput')?.focus(),80);
   setTimeout(()=>speakText(currentAudioQuiz.word),120);
 }
 function replayAudioQuiz(){
-  if(!currentAudioQuiz){startAudioQuiz();return;}
+  if(!currentAudioQuiz){startAudioQuiz(audioQuizMode);return;}
   speakText(currentAudioQuiz.word);
 }
-function checkAudioQuizAnswer(index){
+function recordAudioQuizMistake(){
   if(!currentAudioQuiz)return;
-  const buttons=[...document.querySelectorAll('#audioQuizArea .quiz-options button')];
+  if(!weakWords.includes(currentAudioQuiz.word))weakWords.push(currentAudioQuiz.word);
+  mistakeCounts[currentAudioQuiz.word]=(mistakeCounts[currentAudioQuiz.word]||0)+1;
+  saveAll();
+}
+function checkAudioQuizChoice(index){
+  if(!currentAudioQuiz)return;
+  const buttons=[...document.querySelectorAll('#audioQuizArea .audio-chinese-options button')];
   const selected=buttons[index];
-  if(!selected)return;
+  if(!selected||selected.disabled)return;
   const answer=decodeURIComponent(selected.dataset.choice||"");
-  buttons.forEach(btn=>btn.disabled=true);
-  const correct=answer===currentAudioQuiz.meaning;
-  if(!correct){
-    if(!weakWords.includes(currentAudioQuiz.word))weakWords.push(currentAudioQuiz.word);
-    mistakeCounts[currentAudioQuiz.word]=(mistakeCounts[currentAudioQuiz.word]||0)+1;
-    saveAll();
-  }
+  const correct=answer===currentAudioQuiz.word;
   buttons.forEach(btn=>{
+    btn.disabled=true;
     const value=decodeURIComponent(btn.dataset.choice||"");
-    if(value===currentAudioQuiz.meaning)btn.classList.add('answer-correct');
+    if(value===currentAudioQuiz.word)btn.classList.add('answer-correct');
     else if(btn===selected)btn.classList.add('answer-wrong');
   });
+  if(!correct)recordAudioQuizMistake();
+  revealAudioQuizResult(correct,answer);
+}
+function checkAudioQuizTyping(event){
+  event?.preventDefault();
+  if(!currentAudioQuiz)return;
+  const input=document.getElementById('audioQuizInput');
+  if(!input||input.disabled)return;
+  const answer=input.value.trim();
+  if(!answer){
+    input.focus();
+    input.classList.add('input-shake');
+    setTimeout(()=>input.classList.remove('input-shake'),350);
+    return;
+  }
+  const correct=normalizeChineseAnswer(answer)===normalizeChineseAnswer(currentAudioQuiz.word);
+  input.disabled=true;
+  const submit=input.form?.querySelector('button[type="submit"]');
+  if(submit)submit.disabled=true;
+  input.classList.add(correct?'input-correct':'input-wrong');
+  if(!correct)recordAudioQuizMistake();
+  revealAudioQuizResult(correct,answer);
+}
+function revealAudioQuizResult(correct,userAnswer=''){
   const result=document.getElementById('audioQuizResult');
+  if(!result||!currentAudioQuiz)return;
+  const entered=!correct&&userAnswer?`<div class="audio-user-answer">あなたの答え：<strong lang="zh-Hant-TW">${escapeHtml(userAnswer)}</strong></div>`:'';
   result.innerHTML=`<div class="quiz-result audio-quiz-reveal">
     <span class="${correct?'correct':'wrong'}">${correct?'⭕ 正解！':'❌ 不正解'}</span>
-    <div class="word">${escapeHtml(currentAudioQuiz.word)}</div>
+    ${entered}
+    <div class="word" lang="zh-Hant-TW">${escapeHtml(currentAudioQuiz.word)}</div>
     <div class="zhuyin">${escapeHtml(currentAudioQuiz.zhuyin||'')}</div>
     <div class="meaning">${escapeHtml(currentAudioQuiz.meaning)}</div>
     <div class="audio-row">${audioButton(currentAudioQuiz.word,'🔊 單字')}${audioButton(currentAudioQuiz.example,'🔊 例文')}</div>
-    <div class="example">${escapeHtml(currentAudioQuiz.example||'')}<br><span class="zhuyin">${escapeHtml(currentAudioQuiz.exampleZhuyin||'')}</span>${correct?'':`<br><span class="note">⚠️ ${escapeHtml(currentAudioQuiz.confuse||currentAudioQuiz.note||'')}</span>`}</div>
-    <div class="button-row audio-next-row"><button onclick="startAudioQuiz()">次の問題 →</button></div>
+    <div class="example" lang="zh-Hant-TW">${escapeHtml(currentAudioQuiz.example||'')}<br><span class="zhuyin">${escapeHtml(currentAudioQuiz.exampleZhuyin||'')}</span>${correct?'':`<br><span class="note">⚠️ ${escapeHtml(currentAudioQuiz.confuse||currentAudioQuiz.note||'')}</span>`}</div>
+    <div class="button-row audio-next-row"><button onclick="startAudioQuiz(audioQuizMode)">同じモードで次へ →</button></div>
   </div>`;
 }
 function clearAudioQuiz(){
@@ -649,7 +701,7 @@ searchWords=function(){let k=document.getElementById("searchInput").value.trim()
 window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
 
 // Ver.5.7.0 app update manager
-const CHENGCI_APP_VERSION = '6.1.0';
+const CHENGCI_APP_VERSION = '6.2.0';
 let pendingAppVersion = null;
 let updateReloading = false;
 
