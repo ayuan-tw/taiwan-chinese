@@ -240,6 +240,8 @@ let weakWords=JSON.parse(localStorage.getItem("weakWords")||"[]");
 let mistakeCounts=JSON.parse(localStorage.getItem("mistakeCounts")||"{}");
 let quizRuns=Number(localStorage.getItem("quizRuns")||localStorage.getItem("quizCount")||"0");
 let currentQuiz=null;
+let currentAudioQuiz=null;
+let audioQuizQueue=[];
 
 // Ver.3.5: 1周するまで重複しないランダム山札
 let quizQueue=[];
@@ -317,6 +319,75 @@ function clearWeakWords(){if(!confirm("苦手單字と忘れた回数を消す�
 function startQuiz(){let pool=[...words].sort((a,b)=>score(b)-score(a)||Math.random()-.5);let q=pickFromQueue("quiz",pool,w=>w.word)||pool[0];let ans=[q.meaning];while(ans.length<4){let r=words[Math.floor(Math.random()*words.length)].meaning;if(!ans.includes(r))ans.push(r);}ans.sort(()=>Math.random()-.5);currentQuiz=q;quizRuns++;saveAll();document.getElementById("quizArea").innerHTML=`<div class="quiz-card"><span class="tag">${q.category}</span><div class="word">${q.word}</div><div class="zhuyin">${q.zhuyin}</div><div class="audio-row">${audioButton(q.word,"🔊 單字")}${audioButton(q.example,"🔊 例文")}</div><p class="hint">この意味はどれ？</p><div class="quiz-options">${ans.map(a=>`<button onclick="checkAnswer('${a.replace(/'/g,"\\'")}')">${a}</button>`).join("")}</div><div id="quizResult"></div></div>`;if(shouldAutoSpeak())speakText(q.word);}
 function checkAnswer(a){if(!currentQuiz)return;let result=document.getElementById("quizResult");if(a===currentQuiz.meaning){result.innerHTML=`<div class="quiz-result"><span class="correct">⭕ 正解！</span><br>${currentQuiz.example}<br>${currentQuiz.exampleZhuyin}<div class="audio-row">${audioButton(currentQuiz.example,"🔊 例文")}</div></div>`;}else{if(!weakWords.includes(currentQuiz.word))weakWords.push(currentQuiz.word);mistakeCounts[currentQuiz.word]=(mistakeCounts[currentQuiz.word]||0)+1;saveAll();result.innerHTML=`<div class="quiz-result"><span class="wrong">❌ 不正解</span><br>正解：${currentQuiz.meaning}<br>${currentQuiz.example}<br>${currentQuiz.exampleZhuyin}<div class="audio-row">${audioButton(currentQuiz.example,"🔊 例文")}</div><br>⚠️ ${currentQuiz.confuse||currentQuiz.note}</div>`;}}
 function clearQuiz(){document.getElementById("quizArea").innerHTML="";currentQuiz=null;}
+
+function buildMeaningChoices(question){
+  const choices=[question.meaning];
+  const candidates=shuffleArray(words.filter(w=>w.word!==question.word && w.meaning && w.meaning!==question.meaning));
+  for(const item of candidates){
+    if(!choices.includes(item.meaning))choices.push(item.meaning);
+    if(choices.length>=4)break;
+  }
+  return shuffleArray(choices);
+}
+function startAudioQuiz(){
+  stopSpeech();
+  const pool=[...words].sort((a,b)=>score(b)-score(a)||Math.random()-.5);
+  if(!audioQuizQueue.length)audioQuizQueue=shuffleArray(pool);
+  currentAudioQuiz=audioQuizQueue.shift()||pool[0];
+  if(!currentAudioQuiz)return;
+  const choices=buildMeaningChoices(currentAudioQuiz);
+  quizRuns++;
+  saveAll();
+  const area=document.getElementById("audioQuizArea");
+  area.innerHTML=`<div class="quiz-card audio-quiz-card">
+    <span class="tag">耳で挑戦</span>
+    <button class="audio-quiz-play" type="button" onclick="replayAudioQuiz()" aria-label="単語を再生">🔊</button>
+    <p class="audio-quiz-prompt">聞こえた單字の意味はどれ？</p>
+    <div class="quiz-options">${choices.map((choice,index)=>`<button onclick="checkAudioQuizAnswer(${index})" data-choice="${encodeURIComponent(choice)}">${escapeHtml(choice)}</button>`).join("")}</div>
+    <div id="audioQuizResult"></div>
+  </div>`;
+  setTimeout(()=>speakText(currentAudioQuiz.word),120);
+}
+function replayAudioQuiz(){
+  if(!currentAudioQuiz){startAudioQuiz();return;}
+  speakText(currentAudioQuiz.word);
+}
+function checkAudioQuizAnswer(index){
+  if(!currentAudioQuiz)return;
+  const buttons=[...document.querySelectorAll('#audioQuizArea .quiz-options button')];
+  const selected=buttons[index];
+  if(!selected)return;
+  const answer=decodeURIComponent(selected.dataset.choice||"");
+  buttons.forEach(btn=>btn.disabled=true);
+  const correct=answer===currentAudioQuiz.meaning;
+  if(!correct){
+    if(!weakWords.includes(currentAudioQuiz.word))weakWords.push(currentAudioQuiz.word);
+    mistakeCounts[currentAudioQuiz.word]=(mistakeCounts[currentAudioQuiz.word]||0)+1;
+    saveAll();
+  }
+  buttons.forEach(btn=>{
+    const value=decodeURIComponent(btn.dataset.choice||"");
+    if(value===currentAudioQuiz.meaning)btn.classList.add('answer-correct');
+    else if(btn===selected)btn.classList.add('answer-wrong');
+  });
+  const result=document.getElementById('audioQuizResult');
+  result.innerHTML=`<div class="quiz-result audio-quiz-reveal">
+    <span class="${correct?'correct':'wrong'}">${correct?'⭕ 正解！':'❌ 不正解'}</span>
+    <div class="word">${escapeHtml(currentAudioQuiz.word)}</div>
+    <div class="zhuyin">${escapeHtml(currentAudioQuiz.zhuyin||'')}</div>
+    <div class="meaning">${escapeHtml(currentAudioQuiz.meaning)}</div>
+    <div class="audio-row">${audioButton(currentAudioQuiz.word,'🔊 單字')}${audioButton(currentAudioQuiz.example,'🔊 例文')}</div>
+    <div class="example">${escapeHtml(currentAudioQuiz.example||'')}<br><span class="zhuyin">${escapeHtml(currentAudioQuiz.exampleZhuyin||'')}</span>${correct?'':`<br><span class="note">⚠️ ${escapeHtml(currentAudioQuiz.confuse||currentAudioQuiz.note||'')}</span>`}</div>
+    <div class="button-row audio-next-row"><button onclick="startAudioQuiz()">次の問題 →</button></div>
+  </div>`;
+}
+function clearAudioQuiz(){
+  stopSpeech();
+  const area=document.getElementById('audioQuizArea');
+  if(area)area.innerHTML='';
+  currentAudioQuiz=null;
+}
+
 function renderPhrases(){document.getElementById("phraseList").innerHTML=phrases.map(p=>`<div class="phrase-card"><div class="phrase-main">${p.text}</div><div class="phrase-sub">${p.zhuyin}</div><div class="audio-row">${audioButton(p.text,"🔊 音声")}</div><div class="phrase-meaning">${p.meaning}</div></div>`).join("");}
 function refresh(){renderWordList(words);searchWords();}
 
@@ -578,7 +649,7 @@ searchWords=function(){let k=document.getElementById("searchInput").value.trim()
 window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
 
 // Ver.5.7.0 app update manager
-const CHENGCI_APP_VERSION = '6.0.3';
+const CHENGCI_APP_VERSION = '6.1.0';
 let pendingAppVersion = null;
 let updateReloading = false;
 
