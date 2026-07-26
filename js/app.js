@@ -578,7 +578,7 @@ searchWords=function(){let k=document.getElementById("searchInput").value.trim()
 window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
 
 // Ver.5.7.0 app update manager
-const CHENGCI_APP_VERSION = '5.7.0';
+const CHENGCI_APP_VERSION = '6.0.3';
 let pendingAppVersion = null;
 let updateReloading = false;
 
