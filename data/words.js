@@ -61,6 +61,20 @@ const v55Words = [
 ];
 for (const item of v55Words) { if (!words.some(w => w.word === item.word)) words.push(item); }
 
+const v63Words = [
+  { category: "活動", word: "參賽", zhuyin: "ㄘㄢ ㄙㄞˋ", meaning: "大会・試合に参加する／出場する", note: "比賽に選手として参加する時に使う。", example: "他今年也有參賽。", exampleZhuyin: "ㄊㄚ ㄐㄧㄣ ㄋㄧㄢˊ ㄧㄝˇ ㄧㄡˇ ㄘㄢ ㄙㄞˋ" },
+  { category: "接続", word: "另外", zhuyin: "ㄌㄧㄥˋ ㄨㄞˋ", meaning: "そのほかに／別に／もう一つ", note: "話を付け足したり、別のものを示したりする時に便利。", example: "我另外買了一本。", exampleZhuyin: "ㄨㄛˇ ㄌㄧㄥˋ ㄨㄞˋ ㄇㄞˇ ㄌㄜ˙ ㄧˋ ㄅㄣˇ" },
+  { category: "程度", word: "要命", zhuyin: "ㄧㄠˋ ㄇㄧㄥˋ", meaning: "たまらない／ものすごく", note: "形容詞＋得要命で、程度が非常に強いことを口語的に表す。", example: "今天熱得要命。", exampleZhuyin: "ㄐㄧㄣ ㄊㄧㄢ ㄖㄜˋ ㄉㄜ˙ ㄧㄠˋ ㄇㄧㄥˋ" },
+  { category: "動作", word: "碰", zhuyin: "ㄆㄥˋ", meaning: "触る／ぶつかる／出会う", note: "碰到で『出会う・遭遇する』の意味にもなる。", example: "不要碰這個。", exampleZhuyin: "ㄅㄨˊ ㄧㄠˋ ㄆㄥˋ ㄓㄜˋ ㄍㄜ˙" },
+  { category: "状態", word: "剩下", zhuyin: "ㄕㄥˋ ㄒㄧㄚˋ", meaning: "残る／残り", note: "剩下的で『残りのもの』。日常でもよく使う。", example: "剩下的明天再做。", exampleZhuyin: "ㄕㄥˋ ㄒㄧㄚˋ ㄉㄜ˙ ㄇㄧㄥˊ ㄊㄧㄢ ㄗㄞˋ ㄗㄨㄛˋ" },
+  { category: "学習", word: "聽力", zhuyin: "ㄊㄧㄥ ㄌㄧˋ", meaning: "リスニング力／聴解力", note: "語学学習の四技能の一つ。", example: "我的聽力還不太好。", exampleZhuyin: "ㄨㄛˇ ㄉㄜ˙ ㄊㄧㄥ ㄌㄧˋ ㄏㄞˊ ㄅㄨˊ ㄊㄞˋ ㄏㄠˇ" },
+  { category: "学習", word: "口說", zhuyin: "ㄎㄡˇ ㄕㄨㄛ", meaning: "スピーキング／口頭表現", note: "台湾の語学学習・試験でよく使われる言い方。", example: "我想多練習口說。", exampleZhuyin: "ㄨㄛˇ ㄒㄧㄤˇ ㄉㄨㄛ ㄌㄧㄢˋ ㄒㄧˊ ㄎㄡˇ ㄕㄨㄛ" },
+  { category: "学習", word: "閱讀", zhuyin: "ㄩㄝˋ ㄉㄨˊ", meaning: "リーディング／読解", note: "文章を読むこと、または読解力を指す。", example: "我每天都練習閱讀。", exampleZhuyin: "ㄨㄛˇ ㄇㄟˇ ㄊㄧㄢ ㄉㄡ ㄌㄧㄢˋ ㄒㄧˊ ㄩㄝˋ ㄉㄨˊ" },
+  { category: "学習", word: "寫作", zhuyin: "ㄒㄧㄝˇ ㄗㄨㄛˋ", meaning: "ライティング／作文", note: "文章を書く技能や作文課題を指す。", example: "寫作對我來說有點難。", exampleZhuyin: "ㄒㄧㄝˇ ㄗㄨㄛˋ ㄉㄨㄟˋ ㄨㄛˇ ㄌㄞˊ ㄕㄨㄛ ㄧㄡˇ ㄉㄧㄢˇ ㄋㄢˊ" }
+];
+for (const item of v63Words) { if (!words.some(w => w.word === item.word)) words.push(item); }
+
+
 const phrases = [
   { text: "原來是這樣啊。", zhuyin: "ㄩㄢˊ ㄌㄞˊ ㄕˋ ㄓㄜˋ ㄧㄤˋ ㄚ", meaning: "なるほど、そういうことか。" },
   { text: "我好像懂一點了。", zhuyin: "ㄨㄛˇ ㄏㄠˇ ㄒㄧㄤˋ ㄉㄨㄥˇ ㄧˋ ㄉㄧㄢˇ ㄌㄜ˙", meaning: "ちょっとわかった気がする。" },
@@ -1362,5 +1376,13 @@ const v55Patterns = [
   {category:"感覚", pattern:"總覺得…", zhuyin:"ㄗㄨㄥˇ ㄐㄩㄝˊ ㄉㄜ˙", meaning:"なんとなく～な気がする", note:"はっきりした根拠はないけれど、ずっとそんな感じがする時。", example:"總覺得今天比昨天更熱。", exampleZhuyin:"ㄗㄨㄥˇ ㄐㄩㄝˊ ㄉㄜ˙ ㄐㄧㄣ ㄊㄧㄢ ㄅㄧˇ ㄗㄨㄛˊ ㄊㄧㄢ ㄍㄥˋ ㄖㄜˋ", tags:["感覚","会話"], prompts:[{ja:"なんとなく今日は昨日より暑い気がする",answer:"總覺得今天比昨天更熱。",zhuyin:"ㄗㄨㄥˇ ㄐㄩㄝˊ ㄉㄜ˙ ㄐㄧㄣ ㄊㄧㄢ ㄅㄧˇ ㄗㄨㄛˊ ㄊㄧㄢ ㄍㄥˋ ㄖㄜˋ"}]}
 ];
 for (const item of v55Patterns) { if (!patterns.some(p => p.pattern === item.pattern)) patterns.push(item); }
+
+const v63Patterns = [
+  {category:"程度補語", pattern:"動詞＋得＋程度", zhuyin:"ㄉㄨㄥˋ ㄘˊ ＋ ㄉㄜ˙ ＋ ㄔㄥˊ ㄉㄨˋ", meaning:"動作がどの程度・どんな様子かを表す", note:"得の後ろに程度や状態を置く。目的語がある場合は語順に注意。", example:"他中文說得很好。", exampleZhuyin:"ㄊㄚ ㄓㄨㄥ ㄨㄣˊ ㄕㄨㄛ ㄉㄜ˙ ㄏㄣˇ ㄏㄠˇ", tags:["型","程度補語"], prompts:[{ja:"彼は中国語をとても上手に話す",answer:"他中文說得很好。",zhuyin:"ㄊㄚ ㄓㄨㄥ ㄨㄣˊ ㄕㄨㄛ ㄉㄜ˙ ㄏㄣˇ ㄏㄠˇ"},{ja:"今日は暑くてたまらない",answer:"今天熱得要命。",zhuyin:"ㄐㄧㄣ ㄊㄧㄢ ㄖㄜˋ ㄉㄜ˙ ㄧㄠˋ ㄇㄧㄥˋ"}]},
+  {category:"処置・変更", pattern:"把 A 換成 B", zhuyin:"ㄅㄚˇ A ㄏㄨㄢˋ ㄔㄥˊ B", meaning:"AをBに替える／変更する", note:"把で対象Aを前に出し、換成で変更後のBを示す。注文変更にも便利。", example:"可以把咖啡換成茶嗎？", exampleZhuyin:"ㄎㄜˇ ㄧˇ ㄅㄚˇ ㄎㄚ ㄈㄟ ㄏㄨㄢˋ ㄔㄥˊ ㄔㄚˊ ㄇㄚ˙", tags:["型","把構文","変更"], prompts:[{ja:"コーヒーをお茶に替えられますか",answer:"可以把咖啡換成茶嗎？",zhuyin:"ㄎㄜˇ ㄧˇ ㄅㄚˇ ㄎㄚ ㄈㄟ ㄏㄨㄢˋ ㄔㄥˊ ㄔㄚˊ ㄇㄚ˙"}]},
+  {category:"必要条件", pattern:"總要 A，才 B", zhuyin:"ㄗㄨㄥˇ ㄧㄠˋ A，ㄘㄞˊ B", meaning:"やはりAしてこそB／AしないとBできない", note:"Bに至るには、まずAが必要だという感じ。總要には『少なくとも・やはり』のニュアンスがある。", example:"總要試試看，才知道適不適合。", exampleZhuyin:"ㄗㄨㄥˇ ㄧㄠˋ ㄕˋ ㄕˋ ㄎㄢˋ，ㄘㄞˊ ㄓ ㄉㄠˋ ㄕˋ ㄅㄨˊ ㄕˋ ㄏㄜˊ", tags:["型","必要条件","才"], prompts:[{ja:"試してみないと、合うかどうかわからない",answer:"總要試試看，才知道適不適合。",zhuyin:"ㄗㄨㄥˇ ㄧㄠˋ ㄕˋ ㄕˋ ㄎㄢˋ，ㄘㄞˊ ㄓ ㄉㄠˋ ㄕˋ ㄅㄨˊ ㄕˋ ㄏㄜˊ"}]}
+];
+for (const item of v63Patterns) { if (!patterns.some(p => p.pattern === item.pattern)) patterns.push(item); }
+
 
 const compositionPrompts = patterns.flatMap(p => p.prompts.map(q => ({...q, type:"pattern", source:p.pattern, category:p.category})));
