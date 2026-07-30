@@ -628,7 +628,7 @@ async function refreshOfflineCache(){
   }
   setOfflineStatus('オフライン用データを更新中…');
   try{
-    const currentCache='chengci-v6-0-3-offline';
+    const currentCache='chengci-v6-3-1-offline';
     const keys=await caches.keys();
     await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!==currentCache).map(k=>caches.delete(k)));
     const cache=await caches.open(currentCache);
@@ -701,7 +701,7 @@ searchWords=function(){let k=document.getElementById("searchInput").value.trim()
 window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
 
 // Ver.5.7.0 app update manager
-const CHENGCI_APP_VERSION = '6.3.0';
+const CHENGCI_APP_VERSION = '6.3.1';
 let pendingAppVersion = null;
 let updateReloading = false;
 
@@ -797,7 +797,7 @@ async function applyAppUpdate(){
     }
     if('caches' in window){
       const keys=await caches.keys();
-      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-0-3-offline').map(k=>caches.delete(k)));
+      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-3-1-offline').map(k=>caches.delete(k)));
     }
     updateReloading=true;
     setTimeout(()=>location.replace(`./?updated=${Date.now()}`),900);
