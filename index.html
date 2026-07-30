@@ -1,33 +1,210 @@
-// 澄詞 Ver.6 dictionary loader
-// base dictionary is loaded first. This file merges optional user overrides.
-(function(){
-  const empty={words:[],patterns:[],idioms:[],phrases:[]};
-  const keyOf={words:'word',patterns:'pattern',idioms:'text',phrases:'text'};
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>澄詞｜あゆあん台湾華語</title>
+  <link rel="manifest" href="manifest.json?v=6.3.0" />
+  <meta name="theme-color" content="#4f8f88" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="澄詞" />
+  <link rel="apple-touch-icon" href="assets/icon.svg?v=6.3.0" />
+  <link rel="stylesheet" href="css/style.css?v=6.3.0" />
+</head>
+<body>
+  <div id="dictUpdateToast" class="dict-update-toast" hidden></div>
+  <header><div class="header-inner"><p class="eyebrow">あゆあん台湾華語ノート</p><h1>澄詞</h1><p>検索・瞬間作文・発音チェックをすぐ開ける、あゆあん専用台湾華語アプリ</p></div></header>
+  <nav class="bottom-tabs" aria-label="澄詞メニュー">
+    <button class="tab-btn active" data-tab-target="home" onclick="showTab('home')">🏠<span>ホーム</span></button>
+    <button class="tab-btn" data-tab-target="study" onclick="showTab('study')">📚<span>学習</span></button>
+    <button class="tab-btn" data-tab-target="pronunciation" onclick="showTab('pronunciation')">🔊<span>発音</span></button>
+    <button class="tab-btn" data-tab-target="settings" onclick="showTab('settings')">ℹ️<span>アプリ情報</span></button>
+  </nav>
+  <main>
+    <section class="tab-page active" id="tab-home">
+      <section class="dashboard">
+      <button class="stat-card stat-link" type="button" onclick="jumpToStudyPanel('wordListPanel')" aria-label="單字一覧へ移動"><span id="totalCount">0</span><p>登録單字</p><small>一覧へ →</small></button>
+      <button class="stat-card stat-link" type="button" onclick="jumpToStudyPanel('patternPanel')" aria-label="句型カードへ移動"><span id="patternCount">0</span><p>登録句型</p><small>一覧へ →</small></button>
+      <button class="stat-card stat-link" type="button" onclick="jumpToStudyPanel('idiomPanel')" aria-label="慣用說法へ移動"><span id="idiomCount">0</span><p>慣用說法</p><small>一覧へ →</small></button>
+      <div class="stat-card"><span id="favoriteCount">0</span><p>お気に入り</p></div>
+      <div class="stat-card"><span id="weakCount">0</span><p>苦手卡</p></div>
+      <div class="stat-card"><span id="quizCount">0</span><p>クイズ回数</p></div>
+    </section>
+      <section class="panel quick-actions">
+  <h2 class="section-title">🏠 すぐ使う</h2>
+  <p class="hint">今日はここから。検索・瞬間作文・クイズ・復習優先にすぐ飛べます。</p>
+  <div class="quick-grid">
+    <button onclick="scrollToPanel('searchPanel')">🔍<span>検索</span></button>
+    <button onclick="scrollToPanel('compositionPanel')">🎯<span>瞬間作文</span></button>
+    <button onclick="scrollToPanel('quizPanel')">🎲<span>ランダムクイズ</span></button>
+    <button onclick="scrollToPanel('audioQuizPanel')">🎧<span>音からクイズ</span></button>
+    <button onclick="scrollToPanel('priorityPanel')">📌<span>復習優先</span></button>
+    <button class="secondary" onclick="showTab('pronunciation')">🔊<span>発音チェック</span></button>
+  </div>
+</section>
+      <section class="panel search-first" id="searchPanel">
+      <h2 class="section-title">🔍 單字搜尋</h2>
+      <div class="search-box"><input id="searchInput" type="text" placeholder="例：好像 / ㄏㄠˇ / #声調注意 / 就と才" oninput="searchWords()" /></div>
+      <p class="hint">単語・注音・意味・例文・タグ・忘れやすい理由から検索できます。</p>
+      <h3 class="mini-title">熱門標籤</h3>
+      <div class="button-row category-buttons compact" id="hotTagButtons"></div>
+      <div id="searchResults" class="cards result-area"></div>
+    </section>
+      <section class="panel" id="compositionPanel">
+      <h2 class="section-title">🎯 瞬間作文</h2>
+      <div class="button-row"><button onclick="startComposition('word')">單字</button><button onclick="startComposition('pattern')">句型</button><button onclick="startComposition('idiom')">慣用說法</button><button onclick="startComposition('mix')">全部混合</button><button class="secondary" onclick="clearComposition()">消す</button></div>
+      <p class="hint">日本語を見て、まず自分で台湾華語にしてから答えを見る。</p>
+      <div id="compositionArea" class="quiz-area"></div>
+    </section>
+      <section class="panel" id="quizPanel">
+      <h2 class="section-title">🎲 ランダムクイズ</h2>
+      <div class="button-row"><button onclick="startQuiz('mix')">全部混合</button><button onclick="startQuiz('word')">單字</button><button onclick="startQuiz('pattern')">句型</button><button onclick="startQuiz('idiom')">慣用說法</button><button class="secondary" onclick="clearQuiz()">消す</button></div>
+      <p class="hint">單字・句型・慣用說法から出題。間違えた項目は復習優先に反映されます。</p><div id="quizArea" class="quiz-area"></div>
+    </section>
+      <section class="panel" id="audioQuizPanel">
+      <h2 class="section-title">🎧 音からクイズ</h2>
+      <div class="button-row audio-quiz-mode-buttons">
+        <button onclick="startAudioQuiz('choice')">音 → 中文を選ぶ</button>
+        <button onclick="startAudioQuiz('typing')">音 → 中文を書く</button>
+        <button class="secondary" onclick="replayAudioQuiz()">🔊 もう一度聞く</button>
+        <button class="secondary" onclick="clearAudioQuiz()">消す</button>
+      </div>
+      <p class="hint">文字と注音は答えるまで非表示。聞こえた單字を中文で当てます。</p>
+      <div id="audioQuizArea" class="quiz-area"></div>
+    </section>
+      <section class="panel" id="priorityPanel">
+      <h2 class="section-title">📌 復習優先3單字</h2>
+      <div class="button-row"><button onclick="pickPriorityWords()">復習優先3單字</button><button class="secondary" onclick="clearPriorityWords()">消す</button></div>
+      <p class="hint">間違えた回数・お気に入り・苦手登録を見て優先度を出します。</p>
+      <div id="priorityWords" class="cards result-area"></div>
+    </section>
+      <section class="panel" id="todayWordsPanel">
+      <h2 class="section-title">🌱 今天的3個單字</h2>
+      <div class="button-row"><button onclick="pickWords()">ランダム3單字</button><button class="secondary" onclick="clearTodayWords()">消す</button></div>
+      <div id="todayWords" class="cards result-area"></div>
+    </section>
+    </section>
+    <section class="tab-page" id="tab-study">
+      <section class="panel" id="patternPanel">
+      <h2 class="section-title">🧩 句型卡</h2>
+      <p class="hint">台湾人との雑談で実際に使いそうな型だけ集めたコーナー。</p>
+      <div class="button-row"><button onclick="renderPatternList(patterns)">全部表示</button><button class="secondary" onclick="showPatternPriority()">🔥 復習優先順</button></div>
+      <div class="button-row category-buttons compact" id="patternTagButtons"></div>
+      <div id="patternList" class="cards result-area"></div>
+    </section>
+      <section class="panel" id="tagPanel">
+      <h2 class="section-title">🏷️ タグで見る</h2>
+      <p class="hint">#声調注意、#就と才、#WOS みたいに絞り込めます。</p>
+      <div class="button-row category-buttons compact" id="tagButtons"></div>
+    </section>
+      <section class="panel" id="idiomPanel">
+      <h2 class="section-title">🗣️ 慣用說法</h2>
+      <p class="hint">型でも単語でもないけど、そのまま会話で使いたい言い回し。</p>
+      <div class="button-row"><button onclick="renderIdiomList(idioms)">全部表示</button><button class="secondary" onclick="showIdiomPriority()">🔥 復習優先順</button></div>
+      <div class="button-row category-buttons compact" id="idiomTagButtons"></div>
+      <div id="idiomList" class="cards result-area"></div>
+    </section>
+      <section class="panel" id="phrasePanel"><h2 class="section-title">🗣️ あゆあん語録</h2><p class="hint">そのまま会話で使えそうな文だけ集めたコーナー。</p><div id="phraseList" class="phrase-list"></div></section>
+      <section class="panel" id="wordListPanel"><h2 class="section-title">📘 單字一覧</h2><div class="button-row category-buttons" id="categoryButtons"></div><div class="button-row"><button class="secondary" onclick="showFavorites()">⭐ お気に入りだけ</button><button class="secondary" onclick="showWeakWords()">🔁 苦手單字だけ</button><button class="secondary" onclick="showPriorityWords()">🔥 復習優先順</button><button class="secondary" onclick="clearWeakWords()">苦手リストを消す</button><button class="secondary" onclick="renderWordList(words)">全部表示</button></div><div id="wordList" class="cards"></div></section>
+    </section>
+    <section class="tab-page" id="tab-pronunciation">
+      <section class="panel audio-panel">
+      <h2 class="section-title">🔊 音声</h2>
+      <p class="hint">ブラウザ標準の読み上げ機能で台湾華語を再生します。Safariでは最初に🔊ボタンを押すと動きやすいです。</p>
+      <div class="audio-controls">
+        <label>声
+          <select id="voiceSelect" onchange="saveAudioPrefs()">
+            <option value="">自動選択（zh-TW優先）</option>
+          </select>
+        </label>
+        <label>速度
+          <input id="speechRate" type="range" min="0.6" max="1.2" step="0.05" value="0.9" oninput="updateRateLabel(); saveAudioPrefs();" />
+          <span id="rateLabel">0.90</span>
+        </label>
+        <label class="check-label"><input id="autoSpeak" type="checkbox" onchange="saveAudioPrefs()" /> 出題時に自動再生</label>
+        <button class="secondary small" onclick="stopSpeech()">停止</button>
+        <button class="secondary small" onclick="testSpeech()">テスト</button>
+      </div>
+    </section>
+      <section class="panel free-speak-panel">
+      <h2 class="section-title">🗣️ 自由読み上げ</h2>
+      <p class="hint">LINEやTWTで見かけた中文、課題文、言ってみたい文を貼って読み上げできます。注音が混ざっていても中文だけ読ませやすいです。</p>
+      <textarea id="freeSpeakText" class="free-speak-input" rows="4" lang="zh-Hant-TW" inputmode="text" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="ここに中文を入力／貼り付け
+例：但你剛剛不是發出聲音了嗎？"></textarea>
+      <div class="free-speak-options">
+        <label>リピート
+          <select id="freeSpeakRepeat" onchange="saveFreeSpeakPrefs()">
+            <option value="1">1回</option>
+            <option value="3">3回</option>
+            <option value="5">5回</option>
+            <option value="10">10回</option>
+          </select>
+        </label>
+        <label>間隔
+          <select id="freeSpeakGap" onchange="saveFreeSpeakPrefs()">
+            <option value="500">0.5秒</option>
+            <option value="1000" selected>1秒</option>
+            <option value="2000">2秒</option>
+          </select>
+        </label>
+      </div>
+      <div class="button-row free-speak-buttons">
+        <button onclick="speakFreeText()">🔊 読み上げ</button>
+        <button class="stop-button" onclick="stopFreeSpeech()">⏹ 停止</button>
+        <button class="secondary" onclick="showFreeSpeakZhuyin()">📖 注音表示</button>
+        <button class="secondary" onclick="pasteFreeText()">📋 貼り付け</button>
+        <button class="secondary" onclick="clearFreeText()">🗑 消す</button>
+      </div>
+      <div class="button-row speed-buttons">
+        <button class="secondary small" onclick="setSpeechRate(0.7)">🐢 0.7</button>
+        <button class="secondary small" onclick="setSpeechRate(0.9)">🚶 0.9</button>
+        <button class="secondary small" onclick="setSpeechRate(1.0)">👂 1.0</button>
+        <button class="secondary small" onclick="setSpeechRate(1.1)">🐇 1.1</button>
+      </div>
+      <div id="freeSpeakStatus" class="free-speak-status"></div>
+      <div id="freeSpeakZhuyin" class="free-speak-zhuyin" hidden></div>
+    </section>
+    </section>
+    <section class="tab-page" id="tab-settings">
+      <section class="panel app-info-panel">
+  <h2 class="section-title">ℹ️ アプリ情報</h2>
+  <div class="app-version-card">
+    <div><span class="app-label">📱 澄詞</span><strong>Ver.<span id="appVersion">6.3.0</span></strong></div>
+    <div id="updateState" class="update-state state-unchecked">⚪ 未確認</div>
+    <div class="app-build-date">リリース：2026-07-26</div>
+  </div>
+  <div class="button-row">
+    <button id="checkUpdateButton" onclick="checkForAppUpdate(true)">🔄 更新を確認</button>
+    <button class="secondary" onclick="showTab('pronunciation')">🔊 音声設定</button>
+    <button class="secondary" onclick="refreshOfflineCache()">📦 オフライン保存を更新</button>
+  </div>
+  <label class="auto-update-setting"><input id="autoUpdateCheck" type="checkbox" checked onchange="saveAutoUpdatePreference()"> 起動時に更新を確認する</label>
+  <div id="offlineStatus" class="offline-status">オフライン保存の状態を確認中…</div>
+  <div class="dictionary-meta-card">
+    <h3>📚 注音辞書</h3>
+    <div id="dictionaryMeta">辞書情報を確認中…</div>
+  </div>
+  <div class="changelog-card">
+    <h3>📜 更新履歴</h3>
+    <div id="changelogContent">更新履歴を読み込み中…</div>
+  </div>
+</section>
+    </section>
+  </main>
+  <footer>Ver.6.3.0｜ホーム画面版から更新を確認できます</footer>
 
-  function mergeList(target, additions, key){
-    if(!Array.isArray(target)||!Array.isArray(additions))return;
-    const index=new Map(target.map((item,i)=>[String(item?.[key]||''),i]));
-    additions.forEach(item=>{
-      if(!item||!item[key])return;
-      const k=String(item[key]);
-      if(index.has(k)) target[index.get(k)]={...target[index.get(k)],...item};
-      else { index.set(k,target.length); target.push(item); }
-    });
-  }
-
-  async function loadOverride(){
-    let data=empty;
-    try{
-      const response=await fetch(`./data/user/override.json?t=${Date.now()}`,{cache:'no-store'});
-      if(response.ok)data=await response.json();
-    }catch(error){ console.info('override.json is optional:',error); }
-    mergeList(words,data.words,keyOf.words);
-    mergeList(patterns,data.patterns,keyOf.patterns);
-    if(typeof idioms!=='undefined')mergeList(idioms,data.idioms,keyOf.idioms);
-    if(typeof phrases!=='undefined')mergeList(phrases,data.phrases,keyOf.phrases);
-    window.CHENGCI_OVERRIDE=data;
-    window.dispatchEvent(new CustomEvent('chengci-dictionary-ready',{detail:data}));
-    return data;
-  }
-  window.chengciDictionaryReady=loadOverride();
-})();
+  <div id="updateModal" class="update-modal" hidden>
+    <div class="update-modal-backdrop" onclick="closeUpdateModal()"></div>
+    <section class="update-modal-card" role="dialog" aria-modal="true" aria-labelledby="updateModalTitle">
+      <h2 id="updateModalTitle">🎉 新しいバージョンがあります</h2>
+      <p id="updateModalVersion"></p>
+      <div id="updateModalNotes" class="update-modal-notes"></div>
+      <div class="button-row">
+        <button id="applyUpdateButton" onclick="applyAppUpdate()">今すぐ更新</button>
+        <button class="secondary" onclick="closeUpdateModal()">あとで</button>
+      </div>
+    </section>
+  </div>
+  <script src="data/words.js?v=6.3.0"></script><script src="data/zhuyin-dict.js?v=6.3.0"></script><script src="js/zhuyin-lite.js?v=6.3.0"></script><script src="js/app.js?v=6.3.0"></script>
+</body>
+</html>
