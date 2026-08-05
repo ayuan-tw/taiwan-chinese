@@ -310,13 +310,45 @@ function clearPriorityWords(){document.getElementById("priorityWords").innerHTML
 function searchWords(){let k=document.getElementById("searchInput").value.trim().replace(/^#/,"");let results=document.getElementById("searchResults");if(!k){results.innerHTML="";return;}let m=words.filter(i=>[i.category,i.word,i.zhuyin,i.meaning,i.note,i.example,i.exampleZhuyin,i.confuse,getWordTags(i).join(" ")].some(x=>(x||"").includes(k)));results.innerHTML=m.length?m.map(createWordCard).join(""):'<div class="empty">找不到耶 🥲</div>';}
 function renderCategoryButtons(){let cats=["全部",...new Set(words.map(w=>w.category))];document.getElementById("categoryButtons").innerHTML=cats.map(c=>`<button class="secondary small" onclick="filterByCategory('${c}')">${c}</button>`).join("");}
 function getWordTags(w){return (w.tags&&w.tags.length)?w.tags:[w.category].filter(Boolean);}
-function renderTagButtons(){let area=document.getElementById("tagButtons");if(!area)return;let tags=[...new Set(words.flatMap(getWordTags))].filter(Boolean).sort();area.innerHTML=tags.length?tags.map(t=>`<button class="secondary small" onclick="filterByTag('${t}')">#${t}</button>`).join(""):'<span class="empty-inline">タグがまだありません</span>';let hotArea=document.getElementById("hotTagButtons");if(hotArea){let hot=["何回も忘れた","声調注意","何度も質問した","就と才","又と再","台湾人よく使う","WOS","夜市"];let visible=hot.filter(t=>tags.includes(t));hotArea.innerHTML=visible.map(t=>`<button class="secondary small" onclick="filterByTag('${t}');document.getElementById('wordList').scrollIntoView({behavior:'smooth'});">#${t}</button>`).join("");}}
-function filterByTag(t){renderWordList(words.filter(w=>getWordTags(w).includes(t)));}
-function filterByCategory(c){renderWordList(c==="全部"?words:words.filter(w=>w.category===c));}
-function showFavorites(){renderWordList(words.filter(w=>favorites.includes(w.word)));}
-function showWeakWords(){renderWordList(words.filter(w=>weakWords.includes(w.word)));}
-function showPriorityWords(){renderWordList([...words].sort((a,b)=>score(b)-score(a)));}
-function clearWeakWords(){if(!confirm("苦手單字と忘れた回数を消す？"))return;weakWords=[];mistakeCounts={};saveAll();renderWordList(words);}
+const tagFilterState={word:new Set(),pattern:new Set(),idiom:new Set()};
+function tagFilterConfig(type){
+  if(type==="pattern")return {items:patterns,areaId:"patternTagButtons",getTags:getPatternTags,render:renderPatternList};
+  if(type==="idiom")return {items:idioms,areaId:"idiomTagButtons",getTags:getIdiomTags,render:renderIdiomList};
+  return {items:words,areaId:"tagButtons",getTags:getWordTags,render:renderWordList};
+}
+function tagFilterLabel(type){return type==="pattern"?"句型":type==="idiom"?"慣用說法":"單字";}
+function renderOneTagFilter(type){
+  const config=tagFilterConfig(type),area=document.getElementById(config.areaId);
+  if(!area)return;
+  const selected=tagFilterState[type];
+  const grouped=window.CHENGCI_DATA_MODEL?window.CHENGCI_DATA_MODEL.groupTags(config.items):[];
+  const resultCount=config.items.filter(item=>[...selected].every(tag=>config.getTags(item).includes(tag))).length;
+  area.innerHTML=`<div class="tag-filter-head"><strong>🏷️ タグで絞る</strong><span>${selected.size?`${selected.size}個選択・`:""}${resultCount}件</span><button class="secondary small" onclick="clearTagFilters('${type}')" ${selected.size?"":"disabled"}>解除</button></div><p class="tag-filter-help">複数選ぶと、すべてのタグが付いた${tagFilterLabel(type)}だけ表示します。</p>${grouped.map((group,index)=>`<details class="tag-group" ${(index===0||group.tags.some(({tag})=>selected.has(tag)))?"open":""}><summary>${group.label}<span>${group.tags.length}種類</span></summary><div class="tag-chip-list">${group.tags.map(({tag,count})=>`<button class="tag-filter-chip ${selected.has(tag)?"active":""}" aria-pressed="${selected.has(tag)}" onclick="toggleTagFilter('${type}','${escapeWordText(tag)}')">#${tag}<small>${count}</small></button>`).join("")}</div></details>`).join("")}`;
+}
+function renderTagButtons(){
+  renderOneTagFilter("word");
+  const hotArea=document.getElementById("hotTagButtons");
+  if(hotArea){
+    const tags=[...new Set(words.flatMap(getWordTags))];
+    const hot=["何回も忘れた","声調注意","何度も質問した","就と才","又と再","台湾人よく使う","WOS","夜市"];
+    hotArea.innerHTML=hot.filter(tag=>tags.includes(tag)).map(tag=>`<button class="secondary small" onclick="filterByTag('${tag}');document.getElementById('wordList').scrollIntoView({behavior:'smooth'});">#${tag}</button>`).join("");
+  }
+}
+function applyTagFilter(type){
+  const config=tagFilterConfig(type),selected=tagFilterState[type];
+  const filtered=config.items.filter(item=>[...selected].every(tag=>config.getTags(item).includes(tag)));
+  config.render(filtered);
+  renderOneTagFilter(type);
+}
+function toggleTagFilter(type,tag){const selected=tagFilterState[type];selected.has(tag)?selected.delete(tag):selected.add(tag);applyTagFilter(type);}
+function clearTagFilters(type,render=true){tagFilterState[type].clear();if(render)applyTagFilter(type);else renderOneTagFilter(type);}
+function filterByTag(tag){tagFilterState.word.clear();tagFilterState.word.add(tag);applyTagFilter("word");}
+function filterByCategory(c){clearTagFilters("word",false);renderWordList(c==="全部"?words:words.filter(w=>w.category===c));}
+function showAllWords(){clearTagFilters("word");}
+function showFavorites(){clearTagFilters("word",false);renderWordList(words.filter(w=>favorites.includes(w.word)));}
+function showWeakWords(){clearTagFilters("word",false);renderWordList(words.filter(w=>weakWords.includes(w.word)));}
+function showPriorityWords(){clearTagFilters("word",false);renderWordList([...words].sort((a,b)=>score(b)-score(a)));}
+function clearWeakWords(){if(!confirm("苦手單字と忘れた回数を消す？"))return;weakWords=[];mistakeCounts={};saveAll();showAllWords();}
 function startQuiz(){let pool=[...words].sort((a,b)=>score(b)-score(a)||Math.random()-.5);let q=pickFromQueue("quiz",pool,w=>w.word)||pool[0];let ans=[q.meaning];while(ans.length<4){let r=words[Math.floor(Math.random()*words.length)].meaning;if(!ans.includes(r))ans.push(r);}ans.sort(()=>Math.random()-.5);currentQuiz=q;quizRuns++;saveAll();document.getElementById("quizArea").innerHTML=`<div class="quiz-card"><span class="tag">${q.category}</span><div class="word">${q.word}</div><div class="zhuyin">${q.zhuyin}</div><div class="audio-row">${audioButton(q.word,"🔊 單字")}${audioButton(q.example,"🔊 例文")}</div><p class="hint">この意味はどれ？</p><div class="quiz-options">${ans.map(a=>`<button onclick="checkAnswer('${a.replace(/'/g,"\\'")}')">${a}</button>`).join("")}</div><div id="quizResult"></div></div>`;if(shouldAutoSpeak())speakText(q.word);}
 function checkAnswer(a){if(!currentQuiz)return;let result=document.getElementById("quizResult");if(a===currentQuiz.meaning){result.innerHTML=`<div class="quiz-result"><span class="correct">⭕ 正解！</span><br>${currentQuiz.example}<br>${currentQuiz.exampleZhuyin}<div class="audio-row">${audioButton(currentQuiz.example,"🔊 例文")}</div></div>`;}else{if(!weakWords.includes(currentQuiz.word))weakWords.push(currentQuiz.word);mistakeCounts[currentQuiz.word]=(mistakeCounts[currentQuiz.word]||0)+1;saveAll();result.innerHTML=`<div class="quiz-result"><span class="wrong">❌ 不正解</span><br>正解：${currentQuiz.meaning}<br>${currentQuiz.example}<br>${currentQuiz.exampleZhuyin}<div class="audio-row">${audioButton(currentQuiz.example,"🔊 例文")}</div><br>⚠️ ${currentQuiz.confuse||currentQuiz.note}</div>`;}}
 function clearQuiz(){document.getElementById("quizArea").innerHTML="";currentQuiz=null;}
@@ -441,7 +473,7 @@ function clearAudioQuiz(){
 }
 
 function renderPhrases(){document.getElementById("phraseList").innerHTML=phrases.map(p=>`<div class="phrase-card"><div class="phrase-main">${p.text}</div><div class="phrase-sub">${p.zhuyin}</div><div class="audio-row">${audioButton(p.text,"🔊 音声")}</div><div class="phrase-meaning">${p.meaning}</div></div>`).join("");}
-function refresh(){renderWordList(words);searchWords();}
+function refresh(){applyTagFilter("word");searchWords();}
 
 function formatDictDate(value){
   if(!value)return '未記録';
@@ -507,7 +539,7 @@ saveAll=function(){
 }
 function patternScore(item){return (patternMistakeCounts[item.pattern]||0)*3+(weakCards.includes(item.pattern)?2:0);}
 function getPatternTags(p){return (p.tags&&p.tags.length)?p.tags:[p.category].filter(Boolean);}
-function toggleWeakPattern(key){weakCards=weakCards.includes(key)?weakCards.filter(w=>w!==key):[...weakCards,key];saveAll();renderPatternList(patterns);}
+function toggleWeakPattern(key){weakCards=weakCards.includes(key)?weakCards.filter(w=>w!==key):[...weakCards,key];saveAll();applyTagFilter("pattern");}
 function createPatternCard(item){
   const tags=getPatternTags(item).map(t=>`<span class="tag hot">#${t}</span>`).join("");
   const top=getPatternTags(item).slice(0,3).map(t=>`<span class="tag hot">#${t}</span>`).join("");
@@ -516,8 +548,9 @@ function createPatternCard(item){
   return `<div class="card pattern-card"><div class="card-top"><div class="tag">${item.category}</div><button class="small star" onclick="toggleWeakPattern('${escapeWordText(item.pattern)}')">${weak}</button></div><div class="word">${item.pattern}</div><div class="zhuyin">${item.zhuyin}</div><div class="audio-row">${audioButton(item.example,"🔊 例文")}</div><div class="meaning">${item.meaning}</div><div class="tag-row top-tags">${top}</div><button class="mobile-more" onclick="toggleCard(this)">例文・瞬間作文を見る</button><div class="details"><div class="example">${item.example}<br><span style="color:#666">${item.exampleZhuyin}</span><br><span class="note">${item.note}</span></div><div class="confuse">⚡ 瞬間作文候補</div><ol class="prompt-list">${promptList}</ol><div class="tag-row">${tags}</div><span class="priority">復習優先度：${patternScore(item)} / 間違えた回数：${patternMistakeCounts[item.pattern]||0}</span></div></div>`;
 }
 function renderPatternList(list=patterns){const area=document.getElementById("patternList"); if(area) area.innerHTML=list.length?list.map(createPatternCard).join(""):'<div class="empty">找不到耶 🥲</div>';}
-function showPatternPriority(){renderPatternList([...patterns].sort((a,b)=>patternScore(b)-patternScore(a)));}
-function renderPatternTagButtons(){let area=document.getElementById("patternTagButtons"); if(!area)return; let tags=[...new Set(patterns.flatMap(getPatternTags))].sort(); area.innerHTML=tags.map(t=>`<button class="secondary small" onclick="renderPatternList(patterns.filter(p=>getPatternTags(p).includes('${t}'))) ">#${t}</button>`).join("");}
+function showPatternPriority(){clearTagFilters("pattern",false);renderPatternList([...patterns].sort((a,b)=>patternScore(b)-patternScore(a)));}
+function showAllPatterns(){clearTagFilters("pattern");}
+function renderPatternTagButtons(){renderOneTagFilter("pattern");}
 function wordCompositionPool(){return words.map(w=>({type:"word",category:w.category,source:w.word,ja:w.meaning,answer:w.word,zhuyin:w.zhuyin}));}
 function normalizeCompositionText(text){
   return String(text||"")
@@ -628,11 +661,11 @@ async function refreshOfflineCache(){
   }
   setOfflineStatus('オフライン用データを更新中…');
   try{
-    const currentCache='chengci-v6-4-0-offline';
+    const currentCache='chengci-v6-5-0-offline';
     const keys=await caches.keys();
     await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!==currentCache).map(k=>caches.delete(k)));
     const cache=await caches.open(currentCache);
-    await cache.addAll(['./','./index.html?v=6.4.0','./css/style.css?v=6.4.0','./js/app.js?v=6.4.0','./js/data-model.js?v=6.4.0','./data/words.js?v=6.4.0','./data/zhuyin-dict.js?v=6.4.0','./js/zhuyin-lite.js?v=6.4.0','./manifest.json?v=6.4.0','./version.json','./CHANGELOG.md','./assets/icon.svg']);
+    await cache.addAll(['./','./index.html?v=6.5.0','./css/style.css?v=6.5.0','./js/app.js?v=6.5.0','./js/data-model.js?v=6.5.0','./data/words.js?v=6.5.0','./data/zhuyin-dict.js?v=6.5.0','./js/zhuyin-lite.js?v=6.5.0','./manifest.json?v=6.5.0','./version.json','./CHANGELOG.md','./assets/icon.svg']);
     setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
   }catch(e){
     setOfflineStatus('保存更新に失敗しました。ネット接続がある時にもう一度試してね。');
@@ -640,7 +673,7 @@ async function refreshOfflineCache(){
 }
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./service-worker.js?v=6.4.0').then(async(reg)=>{
+    navigator.serviceWorker.register('./service-worker.js?v=6.5.0').then(async(reg)=>{
       await reg.update();
       if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
       setOfflineStatus('オフライン保存OK。初回読み込み後は電波なしでも使えます。', true);
@@ -664,15 +697,16 @@ const v54SaveAll=saveAll;
 saveAll=function(){localStorage.setItem("weakIdioms",JSON.stringify(weakIdioms));localStorage.setItem("idiomMistakeCounts",JSON.stringify(idiomMistakeCounts));v54SaveAll();}
 const v54UpdateStats=updateStats;
 updateStats=function(){v54UpdateStats();const el=document.getElementById("idiomCount");if(el)el.textContent=idioms.length;}
-function toggleWeakIdiom(key){weakIdioms=weakIdioms.includes(key)?weakIdioms.filter(x=>x!==key):[...weakIdioms,key];saveAll();renderIdiomList(idioms);}
+function toggleWeakIdiom(key){weakIdioms=weakIdioms.includes(key)?weakIdioms.filter(x=>x!==key):[...weakIdioms,key];saveAll();applyTagFilter("idiom");}
 function createIdiomCard(item){
  const tags=getIdiomTags(item).map(t=>`<span class="tag hot">#${t}</span>`).join("");
  const weak=weakIdioms.includes(idiomKey(item))?"苦手解除":"苦手登録";
  return `<div class="card idiom-card"><div class="card-top"><div class="tag">${item.category}</div><button class="small star" onclick="toggleWeakIdiom('${escapeWordText(idiomKey(item))}')">${weak}</button></div><div class="word">${item.text}</div><div class="zhuyin">${item.zhuyin}</div><div class="audio-row">${audioButton(item.text,"🔊 音声")}</div><div class="meaning">${item.meaning}</div><button class="mobile-more" onclick="toggleCard(this)">使い方メモを見る</button><div class="details"><div class="example"><span class="note">${item.note||""}</span></div><div class="tag-row">${tags}</div><span class="priority">復習優先度：${idiomScore(item)} / 間違えた回数：${idiomMistakeCounts[idiomKey(item)]||0}</span></div></div>`;
 }
 function renderIdiomList(list=idioms){const area=document.getElementById("idiomList");if(area)area.innerHTML=list.length?list.map(createIdiomCard).join(""):'<div class="empty">找不到耶 🥲</div>';}
-function showIdiomPriority(){renderIdiomList([...idioms].sort((a,b)=>idiomScore(b)-idiomScore(a)));}
-function renderIdiomTagButtons(){const area=document.getElementById("idiomTagButtons");if(!area)return;const tags=[...new Set(idioms.flatMap(getIdiomTags))].sort();area.innerHTML=tags.map(t=>`<button class="secondary small" onclick="renderIdiomList(idioms.filter(i=>getIdiomTags(i).includes('${t}')))">#${t}</button>`).join("");}
+function showIdiomPriority(){clearTagFilters("idiom",false);renderIdiomList([...idioms].sort((a,b)=>idiomScore(b)-idiomScore(a)));}
+function showAllIdioms(){clearTagFilters("idiom");}
+function renderIdiomTagButtons(){renderOneTagFilter("idiom");}
 function idiomCompositionPool(){return idioms.map(i=>({type:"idiom",category:i.category,source:i.text,ja:i.meaning,answer:i.text,zhuyin:i.zhuyin}));}
 function typeLabel(t){return t==="pattern"?"句型":t==="idiom"?"慣用說法":"單字";}
 startComposition=function(mode="mix"){
@@ -701,7 +735,7 @@ searchWords=function(){let k=document.getElementById("searchInput").value.trim()
 window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
 
 // Ver.5.7.0 app update manager
-const CHENGCI_APP_VERSION = '6.4.0';
+const CHENGCI_APP_VERSION = '6.5.0';
 let pendingAppVersion = null;
 let updateReloading = false;
 
@@ -797,7 +831,7 @@ async function applyAppUpdate(){
     }
     if('caches' in window){
       const keys=await caches.keys();
-      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-4-0-offline').map(k=>caches.delete(k)));
+      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-5-0-offline').map(k=>caches.delete(k)));
     }
     updateReloading=true;
     setTimeout(()=>location.replace(`./?updated=${Date.now()}`),900);
