@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>澄詞｜あゆあん台湾華語</title>
-  <link rel="manifest" href="manifest.json?v=6.5.0" />
+  <link rel="manifest" href="manifest.json?v=6.6.0" />
   <meta name="theme-color" content="#4f8f88" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="澄詞" />
-  <link rel="apple-touch-icon" href="assets/icon.svg?v=6.5.0" />
-  <link rel="stylesheet" href="css/style.css?v=6.5.0" />
+  <link rel="apple-touch-icon" href="assets/icon.svg?v=6.6.0" />
+  <link rel="stylesheet" href="css/style.css?v=6.6.0" />
 </head>
 <body>
   <div id="dictUpdateToast" class="dict-update-toast" hidden></div>
@@ -34,6 +34,7 @@
   <h2 class="section-title">🏠 すぐ使う</h2>
   <p class="hint">今日はここから。検索・瞬間作文・クイズ・復習優先にすぐ飛べます。</p>
   <div class="quick-grid">
+    <button onclick="scrollToPanel('studyScopePanel')">🏷️<span>学習範囲</span></button>
     <button onclick="scrollToPanel('searchPanel')">🔍<span>検索</span></button>
     <button onclick="scrollToPanel('compositionPanel')">🎯<span>瞬間作文</span></button>
     <button onclick="scrollToPanel('quizPanel')">🎲<span>ランダムクイズ</span></button>
@@ -42,6 +43,21 @@
     <button class="secondary" onclick="showTab('pronunciation')">🔊<span>発音チェック</span></button>
   </div>
 </section>
+      <section class="panel study-scope-panel" id="studyScopePanel">
+      <h2 class="section-title">🏷️ 今回の学習範囲</h2>
+      <p class="hint">①対象を選ぶ → ②タグで範囲を絞る → ③クイズを選ぶ。ここで選んだ範囲は各クイズで共通して使います。</p>
+      <div id="studyScopeTypeButtons" class="study-scope-types"></div>
+      <div id="studyScopeTagButtons" class="tag-filter study-scope-tags"></div>
+      <div id="studyScopeSummary" class="study-scope-summary" aria-live="polite"></div>
+      <div class="study-scope-launchers">
+        <button onclick="launchStudyQuiz('quiz')">🎲 意味4択</button>
+        <button onclick="launchStudyQuiz('composition')">🎯 瞬間作文</button>
+        <button onclick="launchStudyQuiz('audio-choice')">🎧 音→中文を選ぶ</button>
+        <button onclick="launchStudyQuiz('audio-typing')">⌨️ 音→中文を書く</button>
+        <button class="secondary" onclick="resetStudyScope()">範囲をリセット</button>
+      </div>
+      <p class="study-scope-note">音からクイズは、選んだ範囲内の單字だけが対象です。</p>
+    </section>
       <section class="panel search-first" id="searchPanel">
       <h2 class="section-title">🔍 單字搜尋</h2>
       <div class="search-box"><input id="searchInput" type="text" placeholder="例：好像 / ㄏㄠˇ / #声調注意 / 就と才" oninput="searchWords()" /></div>
@@ -164,9 +180,9 @@
       <section class="panel app-info-panel">
   <h2 class="section-title">ℹ️ アプリ情報</h2>
   <div class="app-version-card">
-    <div><span class="app-label">📱 澄詞</span><strong>Ver.<span id="appVersion">6.5.0</span></strong></div>
+    <div><span class="app-label">📱 澄詞</span><strong>Ver.<span id="appVersion">6.6.0</span></strong></div>
     <div id="updateState" class="update-state state-unchecked">⚪ 未確認</div>
-    <div class="app-build-date">リリース：2026-08-05</div>
+    <div class="app-build-date">リリース：2026-08-08</div>
   </div>
   <div class="button-row">
     <button id="checkUpdateButton" onclick="checkForAppUpdate(true)">🔄 更新を確認</button>
@@ -186,7 +202,7 @@
 </section>
     </section>
   </main>
-  <footer>Ver.6.5.0｜ホーム画面版から更新を確認できます</footer>
+  <footer>Ver.6.6.0｜ホーム画面版から更新を確認できます</footer>
 
   <div id="updateModal" class="update-modal" hidden>
     <div class="update-modal-backdrop" onclick="closeUpdateModal()"></div>
@@ -200,6 +216,6 @@
       </div>
     </section>
   </div>
-  <script src="data/words.js?v=6.5.0"></script><script src="js/data-model.js?v=6.5.0"></script><script src="data/zhuyin-dict.js?v=6.5.0"></script><script src="js/zhuyin-lite.js?v=6.5.0"></script><script src="js/app.js?v=6.5.0"></script>
+  <script src="data/words.js?v=6.6.0"></script><script src="js/data-model.js?v=6.6.0"></script><script src="data/zhuyin-dict.js?v=6.6.0"></script><script src="js/zhuyin-lite.js?v=6.6.0"></script><script src="js/app.js?v=6.6.0"></script>
 </body>
 </html>
