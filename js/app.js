@@ -661,11 +661,11 @@ async function refreshOfflineCache(){
   }
   setOfflineStatus('オフライン用データを更新中…');
   try{
-    const currentCache='chengci-v6-5-0-offline';
+    const currentCache='chengci-v6-6-0-offline';
     const keys=await caches.keys();
     await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!==currentCache).map(k=>caches.delete(k)));
     const cache=await caches.open(currentCache);
-    await cache.addAll(['./','./index.html?v=6.5.0','./css/style.css?v=6.5.0','./js/app.js?v=6.5.0','./js/data-model.js?v=6.5.0','./data/words.js?v=6.5.0','./data/zhuyin-dict.js?v=6.5.0','./js/zhuyin-lite.js?v=6.5.0','./manifest.json?v=6.5.0','./version.json','./CHANGELOG.md','./assets/icon.svg']);
+    await cache.addAll(['./','./index.html?v=6.6.0','./css/style.css?v=6.6.0','./js/app.js?v=6.6.0','./js/data-model.js?v=6.6.0','./data/words.js?v=6.6.0','./data/zhuyin-dict.js?v=6.6.0','./js/zhuyin-lite.js?v=6.6.0','./manifest.json?v=6.6.0','./version.json','./CHANGELOG.md','./assets/icon.svg']);
     setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
   }catch(e){
     setOfflineStatus('保存更新に失敗しました。ネット接続がある時にもう一度試してね。');
@@ -673,7 +673,7 @@ async function refreshOfflineCache(){
 }
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./service-worker.js?v=6.5.0').then(async(reg)=>{
+    navigator.serviceWorker.register('./service-worker.js?v=6.6.0').then(async(reg)=>{
       await reg.update();
       if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
       setOfflineStatus('オフライン保存OK。初回読み込み後は電波なしでも使えます。', true);
@@ -735,7 +735,7 @@ searchWords=function(){let k=document.getElementById("searchInput").value.trim()
 window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
 
 // Ver.5.7.0 app update manager
-const CHENGCI_APP_VERSION = '6.5.0';
+const CHENGCI_APP_VERSION = '6.6.0';
 let pendingAppVersion = null;
 let updateReloading = false;
 
@@ -831,7 +831,7 @@ async function applyAppUpdate(){
     }
     if('caches' in window){
       const keys=await caches.keys();
-      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-5-0-offline').map(k=>caches.delete(k)));
+      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-6-0-offline').map(k=>caches.delete(k)));
     }
     updateReloading=true;
     setTimeout(()=>location.replace(`./?updated=${Date.now()}`),900);
@@ -864,3 +864,136 @@ window.addEventListener('load',()=>{
   loadChangelog();
   setTimeout(()=>{if(auto)checkForAppUpdate(false);},1300);
 });
+
+// Ver.6.6.0 共通の学習範囲：対象種類＋複数タグ（AND）を全クイズで共有する。
+const STUDY_SCOPE_TYPES=["word","pattern","idiom"];
+const STUDY_SCOPE_LABELS={word:"單字",pattern:"句型",idiom:"慣用說法"};
+const savedStudyScope=(()=>{try{return JSON.parse(localStorage.getItem("chengciStudyScope")||"null");}catch(e){return null;}})();
+const studyScopeState={
+  types:new Set(Array.isArray(savedStudyScope?.types)?savedStudyScope.types.filter(t=>STUDY_SCOPE_TYPES.includes(t)):STUDY_SCOPE_TYPES),
+  tags:new Set(Array.isArray(savedStudyScope?.tags)?savedStudyScope.tags.map(String):[])
+};
+
+function allStudyItems(){return [...words,...patterns,...idioms];}
+function studyItemsOfType(type){return type==="word"?words:type==="pattern"?patterns:type==="idiom"?idioms:[];}
+function studyItemTags(item){return Array.isArray(item.tags)?item.tags:[];}
+function itemMatchesStudyScope(item,type){
+  return studyScopeState.types.has(type)&&[...studyScopeState.tags].every(tag=>studyItemTags(item).includes(tag));
+}
+function scopedStudyItems(type){return studyItemsOfType(type).filter(item=>itemMatchesStudyScope(item,type));}
+function studyScopeSignature(){
+  return `${[...studyScopeState.types].sort().join("-")}|${[...studyScopeState.tags].sort().join("-")||"all"}`;
+}
+function saveStudyScope(){
+  localStorage.setItem("chengciStudyScope",JSON.stringify({types:[...studyScopeState.types],tags:[...studyScopeState.tags]}));
+}
+function clearStudyQueues(){quizQueue=[];audioQuizQueue=[];compositionQueues={mix:[],word:[],pattern:[],idiom:[]};currentQuiz=null;currentAudioQuiz=null;currentComposition=null;}
+function scopeCountByType(){return Object.fromEntries(STUDY_SCOPE_TYPES.map(type=>[type,scopedStudyItems(type).length]));}
+function toggleStudyScopeType(type){
+  studyScopeState.types.has(type)?studyScopeState.types.delete(type):studyScopeState.types.add(type);
+  saveStudyScope();clearStudyQueues();renderStudyScope();
+}
+function toggleStudyScopeTag(tag){
+  studyScopeState.tags.has(tag)?studyScopeState.tags.delete(tag):studyScopeState.tags.add(tag);
+  saveStudyScope();clearStudyQueues();renderStudyScope();
+}
+function clearStudyScopeTags(){studyScopeState.tags.clear();saveStudyScope();clearStudyQueues();renderStudyScope();}
+function resetStudyScope(){studyScopeState.types=new Set(STUDY_SCOPE_TYPES);studyScopeState.tags.clear();saveStudyScope();clearStudyQueues();renderStudyScope();}
+
+function renderStudyScope(){
+  const typeArea=document.getElementById("studyScopeTypeButtons");
+  const tagArea=document.getElementById("studyScopeTagButtons");
+  const summary=document.getElementById("studyScopeSummary");
+  if(!typeArea||!tagArea||!summary)return;
+  typeArea.innerHTML=STUDY_SCOPE_TYPES.map(type=>`<button class="study-scope-type ${studyScopeState.types.has(type)?"active":""}" aria-pressed="${studyScopeState.types.has(type)}" onclick="toggleStudyScopeType('${type}')"><span>${STUDY_SCOPE_LABELS[type]}</span><small>${studyItemsOfType(type).length}件</small></button>`).join("");
+  const grouped=window.CHENGCI_DATA_MODEL?window.CHENGCI_DATA_MODEL.groupTags(allStudyItems()):[];
+  tagArea.innerHTML=`<div class="tag-filter-head"><strong>② タグで絞る</strong><span>${studyScopeState.tags.size?`${studyScopeState.tags.size}個選択`:`全タグ`}</span><button class="secondary small" onclick="clearStudyScopeTags()" ${studyScopeState.tags.size?"":"disabled"}>タグ解除</button></div><p class="tag-filter-help">複数選ぶと、すべてのタグが付いた項目だけが対象になります。</p>${grouped.map((group,index)=>`<details class="tag-group" ${(index===0||group.tags.some(({tag})=>studyScopeState.tags.has(tag)))?"open":""}><summary>${group.label}<span>${group.tags.length}種類</span></summary><div class="tag-chip-list">${group.tags.map(({tag,count})=>`<button class="tag-filter-chip ${studyScopeState.tags.has(tag)?"active":""}" aria-pressed="${studyScopeState.tags.has(tag)}" onclick="toggleStudyScopeTag('${escapeWordText(tag)}')">#${tag}<small>${count}</small></button>`).join("")}</div></details>`).join("")}`;
+  const counts=scopeCountByType(),total=Object.values(counts).reduce((sum,n)=>sum+n,0);
+  const tagText=studyScopeState.tags.size?[...studyScopeState.tags].map(t=>`#${t}`).join(" ＋ "):"タグ指定なし";
+  summary.classList.toggle("is-empty",total===0);
+  summary.innerHTML=`<div>③ ${total?`この範囲からクイズを選べます：合計 ${total}件`:`条件に合う項目がありません`}</div><div class="study-scope-counts"><span>單字 ${counts.word}件</span><span>句型 ${counts.pattern}件</span><span>慣用說法 ${counts.idiom}件</span><span>${escapeHtml(tagText)}</span></div>`;
+}
+
+function showScopeEmpty(areaId,label){
+  const area=document.getElementById(areaId);
+  if(area)area.innerHTML=`<div class="empty">今の学習範囲には${label}がないよ。対象かタグを変えてね。</div>`;
+}
+function launchStudyQuiz(kind){
+  if(kind==="quiz"){startQuiz("mix");document.getElementById("quizPanel")?.scrollIntoView({behavior:"smooth",block:"start"});return;}
+  if(kind==="composition"){startComposition("mix");document.getElementById("compositionPanel")?.scrollIntoView({behavior:"smooth",block:"start"});return;}
+  startAudioQuiz(kind==="audio-typing"?"typing":"choice");
+  document.getElementById("audioQuizPanel")?.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function scopedCompositionPool(mode="mix"){
+  const ws=scopedStudyItems("word").map(w=>({type:"word",category:w.category,source:w.word,ja:w.meaning,answer:w.word,zhuyin:w.zhuyin}));
+  const allowedPatterns=new Set(scopedStudyItems("pattern").map(p=>p.pattern));
+  const ps=compositionPrompts.filter(p=>allowedPatterns.has(p.source));
+  const is=scopedStudyItems("idiom").map(i=>({type:"idiom",category:i.category,source:i.text,ja:i.meaning,answer:i.text,zhuyin:i.zhuyin}));
+  return mode==="word"?ws:mode==="pattern"?ps:mode==="idiom"?is:[...ws,...ps,...is];
+}
+startComposition=function(mode="mix"){
+  const pool=scopedCompositionPool(mode);
+  if(!pool.length){showScopeEmpty("compositionArea",mode==="mix"?"学習項目":typeLabel(mode));return;}
+  const weakPool=pool.filter(a=>a.type==="pattern"?(patternMistakeCounts[a.source]||0)>0:a.type==="idiom"?(idiomMistakeCounts[a.source]||0)>0:(mistakeCounts[a.source]||0)>0);
+  const weighted=[...pool,...weakPool,...weakPool],queueName=`scope-composition-${mode}-${studyScopeSignature()}`;
+  currentComposition=pickFromQueue(queueName,weighted,a=>`${a.type}:${a.source}:${a.ja}`)||pool[0];quizRuns++;saveAll();
+  document.getElementById("compositionArea").innerHTML=`<div class="quiz-card composition-card"><div class="quiz-scope-badge">学習範囲：${pool.length}問</div><br><span class="tag">${typeLabel(currentComposition.type)}：${currentComposition.category}</span><p class="hint">日本語を見て、台湾華語で答えてみて。</p><div class="composition-label">問題</div><div class="composition-ja">${currentComposition.ja}</div><label class="composition-label" for="compositionInput">你的答案</label><textarea id="compositionInput" class="composition-input" rows="3" lang="zh-Hant-TW" inputmode="text" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="ここに中文で入力／音声入力"></textarea><div class="button-row"><button onclick="checkCompositionAnswer()">答え合わせ</button><button onclick="showCompositionAnswer()">答えを見る</button><button class="secondary" onclick="markCompositionMistake()">苦手にする</button><button class="secondary" onclick="startComposition('${mode}')">次の問題</button></div><div id="compositionResult"></div></div>`;
+  setTimeout(()=>document.getElementById("compositionInput")?.focus(),50);
+};
+
+function scopedQuizItems(mode="mix"){
+  const ws=scopedStudyItems("word").map(w=>({type:"word",key:w.word,category:w.category,front:w.word,zhuyin:w.zhuyin,meaning:w.meaning,audio:w.word,note:w.note,example:w.example,exampleZhuyin:w.exampleZhuyin,score:score(w)}));
+  const ps=scopedStudyItems("pattern").map(p=>({type:"pattern",key:p.pattern,category:p.category,front:p.pattern,zhuyin:p.zhuyin,meaning:p.meaning,audio:p.example,note:p.note,example:p.example,exampleZhuyin:p.exampleZhuyin,score:patternScore(p)}));
+  const is=scopedStudyItems("idiom").map(i=>({type:"idiom",key:i.text,category:i.category,front:i.text,zhuyin:i.zhuyin,meaning:i.meaning,audio:i.text,note:i.note,example:i.text,exampleZhuyin:i.zhuyin,score:idiomScore(i)}));
+  return mode==="word"?ws:mode==="pattern"?ps:mode==="idiom"?is:[...ws,...ps,...is];
+}
+startQuiz=function(mode="mix"){
+  const all=scopedQuizItems(mode);
+  if(!all.length){showScopeEmpty("quizArea",mode==="mix"?"学習項目":typeLabel(mode));return;}
+  const pool=[...all].sort((a,b)=>b.score-a.score||Math.random()-.5),queueName=`scope-quiz-${mode}-${studyScopeSignature()}`;
+  const q=pickFromQueue(queueName,pool,x=>`${x.type}:${x.key}`)||pool[0];
+  const distractors=shuffleArray([...new Set(all.map(x=>x.meaning).filter(m=>m&&m!==q.meaning))]).slice(0,3);
+  const ans=shuffleArray([q.meaning,...distractors]);currentQuiz=q;quizRuns++;saveAll();
+  document.getElementById("quizArea").innerHTML=`<div class="quiz-card"><div class="quiz-scope-badge">学習範囲：${all.length}件</div><br><span class="tag">${typeLabel(q.type)}：${q.category}</span><div class="word">${q.front}</div><div class="zhuyin">${q.zhuyin}</div><div class="audio-row">${audioButton(q.audio,"🔊 音声")}</div><p class="hint">この意味はどれ？</p><div class="quiz-options">${ans.map(a=>`<button onclick="checkAnswer('${a.replace(/'/g,"\\'")}')">${a}</button>`).join("")}</div><div id="quizResult"></div></div>`;
+  if(shouldAutoSpeak())speakText(q.audio);
+};
+
+function buildScopedChineseChoices(question,pool){
+  const choices=[question.word],questionLength=Array.from(question.word||"").length;
+  const ranked=pool.filter(w=>w.word&&w.word!==question.word).map(w=>({word:w.word,rank:Math.abs(Array.from(w.word).length-questionLength)+(w.category===question.category?0:2)+((w.zhuyin||"").split(/\s+/)[0]===(question.zhuyin||"").split(/\s+/)[0]?0:1)+Math.random()})).sort((a,b)=>a.rank-b.rank);
+  for(const item of ranked){if(!choices.includes(item.word))choices.push(item.word);if(choices.length>=4)break;}
+  return shuffleArray(choices);
+}
+startAudioQuiz=function(mode="choice"){
+  stopSpeech();audioQuizMode=mode==="typing"?"typing":"choice";localStorage.setItem("audioQuizMode",audioQuizMode);
+  const pool=scopedStudyItems("word").sort((a,b)=>score(b)-score(a)||Math.random()-.5);
+  if(!pool.length){showScopeEmpty("audioQuizArea","單字");return;}
+  currentAudioQuiz=pickFromQueue(`scope-audio-${studyScopeSignature()}`,pool,w=>w.word)||pool[0];quizRuns++;saveAll();
+  const answerArea=audioQuizMode==="choice"?`<p class="audio-quiz-prompt">聞こえた單字はどれ？</p><div class="quiz-options audio-chinese-options">${buildScopedChineseChoices(currentAudioQuiz,pool).map((choice,index)=>`<button lang="zh-Hant-TW" onclick="checkAudioQuizChoice(${index})" data-choice="${encodeURIComponent(choice)}">${escapeHtml(choice)}</button>`).join("")}</div>`:`<p class="audio-quiz-prompt">聞こえた單字を中文で書いてね</p><form class="audio-typing-form" onsubmit="checkAudioQuizTyping(event)"><input id="audioQuizInput" class="audio-quiz-input" type="text" lang="zh-Hant-TW" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="中文を入力" aria-label="聞こえた単語を中文で入力" /><button type="submit">答える</button></form>`;
+  document.getElementById("audioQuizArea").innerHTML=`<div class="quiz-card audio-quiz-card"><div class="quiz-scope-badge">学習範囲：單字 ${pool.length}件</div><br><span class="tag">${audioQuizMode==="choice"?"音 → 中文4択":"音 → 中文入力"}</span><button class="audio-quiz-play" type="button" onclick="replayAudioQuiz()" aria-label="単語を再生">🔊</button>${answerArea}<div id="audioQuizResult"></div></div>`;
+  if(audioQuizMode==="typing")setTimeout(()=>document.getElementById("audioQuizInput")?.focus(),80);
+  setTimeout(()=>speakText(currentAudioQuiz.word),120);
+};
+
+function migrateConsolidatedStudyHistory(){
+  const patternMoves={"越～越～":"越A越B","寧願A，也不願B":"寧願A，也不願意B"};
+  for(const [from,to] of Object.entries(patternMoves)){
+    if(weakCards.includes(from)&&!weakCards.includes(to))weakCards.push(to);
+    if(patternMistakeCounts[from])patternMistakeCounts[to]=(patternMistakeCounts[to]||0)+patternMistakeCounts[from];
+    weakCards=weakCards.filter(key=>key!==from);delete patternMistakeCounts[from];
+  }
+  const idiomMoves={"真的假的？":"真的假的？","這樣不錯耶":"這樣不錯耶！"};
+  for(const [from,to] of Object.entries(idiomMoves)){
+    if(weakCards.includes(from)&&!weakIdioms.includes(to))weakIdioms.push(to);
+    if(patternMistakeCounts[from])idiomMistakeCounts[to]=(idiomMistakeCounts[to]||0)+patternMistakeCounts[from];
+    weakCards=weakCards.filter(key=>key!==from);delete patternMistakeCounts[from];
+  }
+  if(weakIdioms.includes("順便～")&&!weakWords.includes("順便"))weakWords.push("順便");
+  if(idiomMistakeCounts["順便～"])mistakeCounts["順便"]=(mistakeCounts["順便"]||0)+idiomMistakeCounts["順便～"];
+  weakIdioms=weakIdioms.filter(key=>key!=="順便～");delete idiomMistakeCounts["順便～"];
+}
+migrateConsolidatedStudyHistory();
+saveAll();
+
+window.addEventListener("load",renderStudyScope);

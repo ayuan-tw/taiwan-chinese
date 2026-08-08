@@ -1,4 +1,4 @@
-// 澄詞 Ver.6.5 shared learning-item model
+// 澄詞 Ver.6.6 shared learning-item model
 // Adds a stable common ID, type, and normalized tags without changing the
 // existing words / patterns / idioms / phrases arrays used by the app.
 (function(){
@@ -16,7 +16,7 @@
     {
       id:'scene',
       label:'場面・話題',
-      tags:new Set(['WOS','ゲーム','旅行','夜市','買い物','注文','店内会話','台湾生活','天気','仕事','学習','日常','会話','雑談','活動','体調'])
+      tags:new Set(['WOS','ゲーム','旅行','夜市','買い物','注文','店内会話','台湾生活','天気','仕事','学習','作文','日常','会話','雑談','活動','体調'])
     },
     {
       id:'usage',

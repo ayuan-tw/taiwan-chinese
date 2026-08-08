@@ -74,6 +74,26 @@ const v63Words = [
 ];
 for (const item of v63Words) { if (!words.some(w => w.word === item.word)) words.push(item); }
 
+// Ver.6.6.0: 2026-08-08までの追加候補。既存項目は下で統合し、重複追加しない。
+const v66Words = [
+  {category:"会話",word:"派上用場",zhuyin:"ㄆㄞˋ ㄕㄤˋ ㄩㄥˋ ㄔㄤˇ",meaning:"役に立つ／出番が来る",note:"知識・道具・能力が実際の場面で役立つ時に使う。",example:"剛學的說法馬上派上用場了。",exampleZhuyin:"ㄍㄤ ㄒㄩㄝˊ ㄉㄜ˙ ㄕㄨㄛ ㄈㄚˇ ㄇㄚˇ ㄕㄤˋ ㄆㄞˋ ㄕㄤˋ ㄩㄥˋ ㄔㄤˇ ㄌㄜ˙",tags:["会話","学習","台湾人よく使う"]},
+  {category:"感想",word:"好用",zhuyin:"ㄏㄠˇ ㄩㄥˋ",meaning:"使いやすい／便利で役に立つ",note:"物や機能だけでなく、表現についても『使える』と言える。",example:"原來這個說法這麼好用。",exampleZhuyin:"ㄩㄢˊ ㄌㄞˊ ㄓㄜˋ ㄍㄜ˙ ㄕㄨㄛ ㄈㄚˇ ㄓㄜˋ ㄇㄜ˙ ㄏㄠˇ ㄩㄥˋ",tags:["会話","感想","台湾人よく使う"]},
+  {category:"副詞",word:"果然",zhuyin:"ㄍㄨㄛˇ ㄖㄢˊ",meaning:"やっぱり／思ったとおり",note:"予想していたことが実際にそのとおりだった時。竟然＝予想外、と対で覚える。",example:"果然跟我想的一樣。",exampleZhuyin:"ㄍㄨㄛˇ ㄖㄢˊ ㄍㄣ ㄨㄛˇ ㄒㄧㄤˇ ㄉㄜ˙ ㄧˊ ㄧㄤˋ",tags:["会話","副詞","果然と竟然"]},
+  {category:"説明",word:"具體來說",zhuyin:"ㄐㄩˋ ㄊㄧˇ ㄌㄞˊ ㄕㄨㄛ",meaning:"具体的に言うと",note:"前の内容を、例や詳細でもう少し具体的に説明する時。",example:"具體來說，我把「粉粿」聽成別的音。",exampleZhuyin:"ㄐㄩˋ ㄊㄧˇ ㄌㄞˊ ㄕㄨㄛ，ㄨㄛˇ ㄅㄚˇ ㄈㄣˇ ㄍㄨㄛˇ ㄊㄧㄥ ㄔㄥˊ ㄅㄧㄝˊ ㄉㄜ˙ ㄧㄣ",tags:["説明","作文","会話進行"]},
+  {category:"学習",word:"靈感",zhuyin:"ㄌㄧㄥˊ ㄍㄢˇ",meaning:"アイデア／ひらめき",note:"中国語では創作や作文のアイデアにも普通に使う。日本語の『霊的な感覚』より広い。",example:"有靈感的時候，我就先寫下來。",exampleZhuyin:"ㄧㄡˇ ㄌㄧㄥˊ ㄍㄢˇ ㄉㄜ˙ ㄕˊ ㄏㄡˋ，ㄨㄛˇ ㄐㄧㄡˋ ㄒㄧㄢ ㄒㄧㄝˇ ㄒㄧㄚˋ ㄌㄞˊ",tags:["学習","作文"]},
+  {category:"副詞",word:"總是",zhuyin:"ㄗㄨㄥˇ ㄕˋ",meaning:"いつも／毎回そうなる",note:"繰り返し同じ状態になること。都會より『いつもそうだ』という話し手の見方が出やすい。",example:"我總是一下就忘記。",exampleZhuyin:"ㄨㄛˇ ㄗㄨㄥˇ ㄕˋ ㄧˊ ㄒㄧㄚˋ ㄐㄧㄡˋ ㄨㄤˋ ㄐㄧˋ",tags:["会話","副詞"]},
+  {category:"語気",word:"來著",zhuyin:"ㄌㄞˊ ㄓㄜ˙",meaning:"～だっけ／何だったっけ",note:"直前まで知っていたことを思い出そうとする、くだけた確認。文末で使う。",example:"那個字怎麼唸來著？",exampleZhuyin:"ㄋㄚˋ ㄍㄜ˙ ㄗˋ ㄗㄣˇ ㄇㄜ˙ ㄋㄧㄢˋ ㄌㄞˊ ㄓㄜ˙",tags:["会話","確認","カジュアル"]},
+  {category:"機器",word:"當機",zhuyin:"ㄉㄤ ㄐㄧ",meaning:"フリーズする／動かなくなる",note:"台湾でパソコン・スマホ・アプリが固まった時によく使う。",example:"我的手機又當機了。",exampleZhuyin:"ㄨㄛˇ ㄉㄜ˙ ㄕㄡˇ ㄐㄧ ㄧㄡˋ ㄉㄤ ㄐㄧ ㄌㄜ˙",tags:["台湾人よく使う","機器","会話"]}
+];
+for (const item of v66Words) { if (!words.some(w => w.word === item.word)) words.push(item); }
+
+// 「補充一下」は独立項目にせず、基本形「補充」の自然な使用形として統合する。
+const supplementWord=words.find(w=>w.word==="補充");
+if(supplementWord){
+  supplementWord.note="説明を足す時。『補充一下，……』で『ちょっと補足すると／追加で言うと』と自然に切り出せる。";
+  supplementWord.tags=[...new Set([...(supplementWord.tags||[]),"会話進行","説明"])];
+}
+
 
 const phrases = [
   { text: "原來是這樣啊。", zhuyin: "ㄩㄢˊ ㄌㄞˊ ㄕˋ ㄓㄜˋ ㄧㄤˋ ㄚ", meaning: "なるほど、そういうことか。" },
@@ -1129,6 +1149,13 @@ const v54Words = [
 ];
 for (const item of v54Words) { if (!words.some(w => w.word === item.word)) words.push(item); }
 
+// moreExtraWords 読み込み後に「補充一下」の統合内容を確定する。
+const registeredSupplement=words.find(w=>w.word==="補充");
+if(registeredSupplement){
+  registeredSupplement.note="説明を足す時。『補充一下，……』で『ちょっと補足すると／追加で言うと』と自然に切り出せる。";
+  registeredSupplement.tags=[...new Set([...(registeredSupplement.tags||[]),"会話進行","説明"])];
+}
+
 // Ver.3.0: 型カードへ移動するもの
 const patternWords = ["想不出來","想不起來","記得要","好像","吃吃看","用看看","不就好了"];
 for (let i = words.length - 1; i >= 0; i--) {
@@ -1383,6 +1410,52 @@ const v63Patterns = [
   {category:"必要条件", pattern:"總要 A，才 B", zhuyin:"ㄗㄨㄥˇ ㄧㄠˋ A，ㄘㄞˊ B", meaning:"やはりAしてこそB／AしないとBできない", note:"Bに至るには、まずAが必要だという感じ。總要には『少なくとも・やはり』のニュアンスがある。", example:"總要試試看，才知道適不適合。", exampleZhuyin:"ㄗㄨㄥˇ ㄧㄠˋ ㄕˋ ㄕˋ ㄎㄢˋ，ㄘㄞˊ ㄓ ㄉㄠˋ ㄕˋ ㄅㄨˊ ㄕˋ ㄏㄜˊ", tags:["型","必要条件","才"], prompts:[{ja:"試してみないと、合うかどうかわからない",answer:"總要試試看，才知道適不適合。",zhuyin:"ㄗㄨㄥˇ ㄧㄠˋ ㄕˋ ㄕˋ ㄎㄢˋ，ㄘㄞˊ ㄓ ㄉㄠˋ ㄕˋ ㄅㄨˊ ㄕˋ ㄏㄜˊ"}]}
 ];
 for (const item of v63Patterns) { if (!patterns.some(p => p.pattern === item.pattern)) patterns.push(item); }
+
+const v66Patterns = [
+  {category:"結果",pattern:"V＋成＋結果",zhuyin:"V ＋ ㄔㄥˊ ＋ ㄐㄧㄝˊ ㄍㄨㄛˇ",meaning:"Vして、～という結果になる／～と取り違える",note:"聽成・看成・寫成・說成など。成の後ろに、実際になった結果や取り違えた内容を置く。",example:"我把「粉粿」聽成別的音。",exampleZhuyin:"ㄨㄛˇ ㄅㄚˇ ㄈㄣˇ ㄍㄨㄛˇ ㄊㄧㄥ ㄔㄥˊ ㄅㄧㄝˊ ㄉㄜ˙ ㄧㄣ",tags:["結果","作文","学習"],prompts:[{ja:"『粉粿』を別の音に聞き間違えた",answer:"我把「粉粿」聽成別的音。",zhuyin:"ㄨㄛˇ ㄅㄚˇ ㄈㄣˇ ㄍㄨㄛˇ ㄊㄧㄥ ㄔㄥˊ ㄅㄧㄝˊ ㄉㄜ˙ ㄧㄣ"},{ja:"『林』を『凛』と見間違えた",answer:"我把「林」看成「凛」了。",zhuyin:"ㄨㄛˇ ㄅㄚˇ ㄌㄧㄣˊ ㄎㄢˋ ㄔㄥˊ ㄌㄧㄣˇ ㄌㄜ˙"},{ja:"この字を別の字に書き間違えた",answer:"我把這個字寫成別的字了。",zhuyin:"ㄨㄛˇ ㄅㄚˇ ㄓㄜˋ ㄍㄜ˙ ㄗˋ ㄒㄧㄝˇ ㄔㄥˊ ㄅㄧㄝˊ ㄉㄜ˙ ㄗˋ ㄌㄜ˙"}]},
+  {category:"気持ち",pattern:"懶得＋V",zhuyin:"ㄌㄢˇ ㄉㄜ˙ ＋ V",meaning:"面倒でVする気にならない",note:"できないのではなく、面倒・気が進まないのでやらない感じ。",example:"我懶得做飯。",exampleZhuyin:"ㄨㄛˇ ㄌㄢˇ ㄉㄜ˙ ㄗㄨㄛˋ ㄈㄢˋ",tags:["会話","気持ち","台湾人よく使う"],prompts:[{ja:"面倒でご飯を作る気にならない",answer:"我懶得做飯。",zhuyin:"ㄨㄛˇ ㄌㄢˇ ㄉㄜ˙ ㄗㄨㄛˋ ㄈㄢˋ"},{ja:"眠すぎてシャワーを浴びるのも面倒",answer:"我太睏了，懶得洗澡。",zhuyin:"ㄨㄛˇ ㄊㄞˋ ㄎㄨㄣˋ ㄌㄜ˙，ㄌㄢˇ ㄉㄜ˙ ㄒㄧˇ ㄗㄠˇ"},{ja:"説明するのも面倒",answer:"我連解釋都懶得解釋。",zhuyin:"ㄨㄛˇ ㄌㄧㄢˊ ㄐㄧㄝˇ ㄕˋ ㄉㄡ ㄌㄢˇ ㄉㄜ˙ ㄐㄧㄝˇ ㄕˋ"}]},
+  {category:"驚き",pattern:"也太～了吧",zhuyin:"ㄧㄝˇ ㄊㄞˋ ～ ㄌㄜ˙ ㄅㄚ",meaning:"さすがに～すぎない？／めっちゃ～だね",note:"驚きやツッコミを強く出す口語。褒める時にも使える。",example:"這也太好吃了吧！",exampleZhuyin:"ㄓㄜˋ ㄧㄝˇ ㄊㄞˋ ㄏㄠˇ ㄔ ㄌㄜ˙ ㄅㄚ",tags:["リアクション","驚き・ツッコミ","会話"],prompts:[{ja:"これおいしすぎない？",answer:"這也太好吃了吧！",zhuyin:"ㄓㄜˋ ㄧㄝˇ ㄊㄞˋ ㄏㄠˇ ㄔ ㄌㄜ˙ ㄅㄚ"},{ja:"今日は暑すぎない？",answer:"今天也太熱了吧！",zhuyin:"ㄐㄧㄣ ㄊㄧㄢ ㄧㄝˇ ㄊㄞˋ ㄖㄜˋ ㄌㄜ˙ ㄅㄚ"},{ja:"それはさすがに大げさすぎるよ",answer:"那也太誇張了吧！",zhuyin:"ㄋㄚˋ ㄧㄝˇ ㄊㄞˋ ㄎㄨㄚ ㄓㄤ ㄌㄜ˙ ㄅㄚ"}]},
+  {category:"強調",pattern:"連 A 都 B",zhuyin:"ㄌㄧㄢˊ A ㄉㄡ B",meaning:"AでさえB／AすらB",note:"意外なAを取り上げ、範囲の広さや程度を強調する。",example:"我連日文版都還沒看過。",exampleZhuyin:"ㄨㄛˇ ㄌㄧㄢˊ ㄖˋ ㄨㄣˊ ㄅㄢˇ ㄉㄡ ㄏㄞˊ ㄇㄟˊ ㄎㄢˋ ㄍㄨㄛˋ",tags:["強調","会話","作文"],prompts:[{ja:"日本語版でさえまだ見たことがない",answer:"我連日文版都還沒看過。",zhuyin:"ㄨㄛˇ ㄌㄧㄢˊ ㄖˋ ㄨㄣˊ ㄅㄢˇ ㄉㄡ ㄏㄞˊ ㄇㄟˊ ㄎㄢˋ ㄍㄨㄛˋ"},{ja:"この字は台湾人でも知らない",answer:"這個字連台灣人都不知道。",zhuyin:"ㄓㄜˋ ㄍㄜ˙ ㄗˋ ㄌㄧㄢˊ ㄊㄞˊ ㄨㄢ ㄖㄣˊ ㄉㄡ ㄅㄨˋ ㄓ ㄉㄠˋ"},{ja:"忙しくてご飯を食べる時間すらない",answer:"我忙到連吃飯的時間都沒有。",zhuyin:"ㄨㄛˇ ㄇㄤˊ ㄉㄠˋ ㄌㄧㄢˊ ㄔ ㄈㄢˋ ㄉㄜ˙ ㄕˊ ㄐㄧㄢ ㄉㄡ ㄇㄟˊ ㄧㄡˇ"}]},
+  {category:"習慣",pattern:"都會先 A，再 B",zhuyin:"ㄉㄡ ㄏㄨㄟˋ ㄒㄧㄢ A，ㄗㄞˋ B",meaning:"いつも先にAして、それからBする",note:"都會＝いつも～する、先A再B＝まずAしてからB、の組み合わせ。",example:"我都會先看日文版，再看中文版。",exampleZhuyin:"ㄨㄛˇ ㄉㄡ ㄏㄨㄟˋ ㄒㄧㄢ ㄎㄢˋ ㄖˋ ㄨㄣˊ ㄅㄢˇ，ㄗㄞˋ ㄎㄢˋ ㄓㄨㄥ ㄨㄣˊ ㄅㄢˇ",tags:["習慣","順序","学習"],prompts:[{ja:"いつも先に日本語版を見て、それから中国語版を見る",answer:"我都會先看日文版，再看中文版。",zhuyin:"ㄨㄛˇ ㄉㄡ ㄏㄨㄟˋ ㄒㄧㄢ ㄎㄢˋ ㄖˋ ㄨㄣˊ ㄅㄢˇ，ㄗㄞˋ ㄎㄢˋ ㄓㄨㄥ ㄨㄣˊ ㄅㄢˇ"},{ja:"いつも先に音声を聞いて、それから注音を見る",answer:"我都會先聽音檔，再看注音。",zhuyin:"ㄨㄛˇ ㄉㄡ ㄏㄨㄟˋ ㄒㄧㄢ ㄊㄧㄥ ㄧㄣ ㄉㄤˇ，ㄗㄞˋ ㄎㄢˋ ㄓㄨˋ ㄧㄣ"}]}
+];
+for (const item of v66Patterns) { if (!patterns.some(p => p.pattern === item.pattern)) patterns.push(item); }
+
+// 完全一致する句型は、タグと練習文を情報量の多い先頭項目へ統合する。
+const patternByName=new Map();
+for(let i=0;i<patterns.length;i++){
+  const item=patterns[i],existing=patternByName.get(item.pattern);
+  if(!existing){patternByName.set(item.pattern,item);continue;}
+  existing.tags=[...new Set([...(existing.tags||[]),...(item.tags||[])])];
+  const seenPrompts=new Set((existing.prompts||[]).map(p=>`${p.ja}|${p.answer}`));
+  for(const prompt of item.prompts||[]){
+    const key=`${prompt.ja}|${prompt.answer}`;
+    if(!seenPrompts.has(key)){(existing.prompts||(existing.prompts=[])).push(prompt);seenPrompts.add(key);}
+  }
+  patterns.splice(i--,1);
+}
+
+function mergeNamedPatterns(targetName,sourceName){
+  const target=patterns.find(p=>p.pattern===targetName),source=patterns.find(p=>p.pattern===sourceName);
+  if(!target||!source)return;
+  target.tags=[...new Set([...(target.tags||[]),...(source.tags||[])])];
+  const seen=new Set((target.prompts||[]).map(p=>`${p.ja}|${p.answer}`));
+  for(const prompt of source.prompts||[]){const key=`${prompt.ja}|${prompt.answer}`;if(!seen.has(key)){(target.prompts||(target.prompts=[])).push(prompt);seen.add(key);}}
+  patterns.splice(patterns.indexOf(source),1);
+}
+
+// 表記だけが違う同一構文は一つへ。固定リアクションは句型ではなく慣用說法へ整理する。
+mergeNamedPatterns("越A越B","越～越～");
+mergeNamedPatterns("寧願A，也不願意B","寧願A，也不願B");
+for(const fixedExpression of ["真的假的？","這樣不錯耶"]){
+  const index=patterns.findIndex(p=>p.pattern===fixedExpression);
+  if(index>=0)patterns.splice(index,1);
+}
+const redundantIdiomIndex=idioms.findIndex(i=>i.text==="順便～");
+if(redundantIdiomIndex>=0)idioms.splice(redundantIdiomIndex,1);
+
+// 「一下就～」は独立させず、既存の「一～就～」で扱う。
+const immediatePattern=patterns.find(p=>p.pattern==="一～就～");
+if(immediatePattern)immediatePattern.tags=[...new Set([...(immediatePattern.tags||[]),"一下就"] )];
 
 
 const compositionPrompts = patterns.flatMap(p => p.prompts.map(q => ({...q, type:"pattern", source:p.pattern, category:p.category})));

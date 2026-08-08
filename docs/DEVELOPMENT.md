@@ -1,7 +1,7 @@
 # 澄詞 開発管理
 
 ## 現在の正式版
-Ver.6.5.0
+Ver.6.6.0
 
 ## Ver.6のテーマ
 辞書エンジン分離＋リスニング強化
@@ -16,6 +16,7 @@ Ver.6.5.0
 - `service-worker.js`：PWAキャッシュ
 - `js/data-model.js`：共通 ID・種類・タグ分類
 - `docs/TAG_TAXONOMY.md`：タグの分類と絞り込み仕様
+- `docs/PENDING_ADDITIONS.md`：重複整理前の追加候補（追加完了時に0件へ戻す）
 
 ## 変更時の原則
 1. 基本辞書の一括更新は `data/base/dictionary.js`。
