@@ -661,11 +661,11 @@ async function refreshOfflineCache(){
   }
   setOfflineStatus('オフライン用データを更新中…');
   try{
-    const currentCache='chengci-v6-7-0-offline';
+    const currentCache='chengci-v6-7-1-offline';
     const keys=await caches.keys();
     await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!==currentCache).map(k=>caches.delete(k)));
     const cache=await caches.open(currentCache);
-    await cache.addAll(['./','./index.html?v=6.7.0','./css/style.css?v=6.7.0','./js/app.js?v=6.7.0','./js/data-model.js?v=6.7.0','./data/words.js?v=6.7.0','./data/zhuyin-dict.js?v=6.7.0','./js/zhuyin-lite.js?v=6.7.0','./manifest.json?v=6.7.0','./version.json','./CHANGELOG.md','./assets/icon.svg']);
+    await cache.addAll(['./','./index.html?v=6.7.1','./css/style.css?v=6.7.1','./js/app.js?v=6.7.1','./js/data-model.js?v=6.7.1','./data/words.js?v=6.7.1','./data/zhuyin-dict.js?v=6.7.1','./js/zhuyin-lite.js?v=6.7.1','./manifest.json?v=6.7.1','./version.json','./CHANGELOG.md','./assets/icon.svg']);
     setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
   }catch(e){
     setOfflineStatus('保存更新に失敗しました。ネット接続がある時にもう一度試してね。');
@@ -673,7 +673,7 @@ async function refreshOfflineCache(){
 }
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./service-worker.js?v=6.7.0').then(async(reg)=>{
+    navigator.serviceWorker.register('./service-worker.js?v=6.7.1').then(async(reg)=>{
       await reg.update();
       if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
       setOfflineStatus('オフライン保存OK。初回読み込み後は電波なしでも使えます。', true);
@@ -735,7 +735,7 @@ searchWords=function(){let k=document.getElementById("searchInput").value.trim()
 window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
 
 // Ver.5.7.0 app update manager
-const CHENGCI_APP_VERSION = '6.7.0';
+const CHENGCI_APP_VERSION = '6.7.1';
 let pendingAppVersion = null;
 let updateReloading = false;
 
@@ -831,7 +831,7 @@ async function applyAppUpdate(){
     }
     if('caches' in window){
       const keys=await caches.keys();
-      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-7-0-offline').map(k=>caches.delete(k)));
+      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-7-1-offline').map(k=>caches.delete(k)));
     }
     updateReloading=true;
     setTimeout(()=>location.replace(`./?updated=${Date.now()}`),900);
@@ -1028,15 +1028,17 @@ saveAll();
 
 window.addEventListener("load",renderStudyScope);
 
-// Ver.6.7.0「あゆあんの口ぐせ」
+// Ver.6.7「あゆあんの口ぐせ」
 let activeHabitCategory="all";
-function habitAudioButton(text,label="🔊 音声"){
-  if(!text||/[～○]/.test(text))return "";
-  return audioButton(text.replace(/…+/g,"").trim(),label);
+function habitAudioButton(text,label="🔊 音声",exampleText=""){
+  const spoken=(exampleText||text||"").replace(/[～…]+/g,"").trim();
+  if(!spoken||/○/.test(spoken))return "";
+  return audioButton(spoken,label);
 }
 function createHabitCard(item){
-  const variants=(item.variants||[]).map(variant=>`<div class="habit-variant"><span>${escapeHtml(variant.label)}</span><strong lang="zh-Hant-TW">${escapeHtml(variant.text)}</strong><div class="zhuyin">${escapeHtml(variant.zhuyin)}</div>${habitAudioButton(variant.text,"🔊 言い換え")}</div>`).join("");
-  return `<article class="card habit-card"><div class="card-top"><span class="tag">${escapeHtml(item.category)}</span></div><div class="habit-ja">${escapeHtml(item.ja)}</div><div class="habit-arrow">↓ 台湾華語では</div><div class="word" lang="zh-Hant-TW">${escapeHtml(item.primary)}</div><div class="zhuyin">${escapeHtml(item.zhuyin)}</div><div class="audio-row">${habitAudioButton(item.primary)}</div><div class="habit-note">${escapeHtml(item.note||"")}</div>${variants?`<button class="mobile-more" onclick="toggleCard(this)">場面別の言い換えを見る</button><div class="details habit-variants">${variants}</div>`:""}</article>`;
+  const example=item.example?`<div class="habit-example"><span>例文</span><strong lang="zh-Hant-TW">${escapeHtml(item.example)}</strong><div class="zhuyin">${escapeHtml(item.exampleZhuyin||"")}</div><div class="audio-row">${habitAudioButton(item.primary,"🔊 例文",item.example)}</div></div>`:"";
+  const variants=(item.variants||[]).map(variant=>{const variantExample=variant.example?`<div class="habit-example"><span>例文</span><strong lang="zh-Hant-TW">${escapeHtml(variant.example)}</strong><div class="zhuyin">${escapeHtml(variant.exampleZhuyin||"")}</div><div class="audio-row">${habitAudioButton(variant.text,"🔊 例文",variant.example)}</div></div>`:"";return `<div class="habit-variant"><span>${escapeHtml(variant.label)}</span><strong lang="zh-Hant-TW">${escapeHtml(variant.text)}</strong><div class="zhuyin">${escapeHtml(variant.zhuyin)}</div>${variant.example?variantExample:habitAudioButton(variant.text,"🔊 言い換え")}</div>`;}).join("");
+  return `<article class="card habit-card"><div class="card-top"><span class="tag">${escapeHtml(item.category)}</span></div><div class="habit-ja">${escapeHtml(item.ja)}</div><div class="habit-arrow">↓ 台湾華語では</div><div class="word" lang="zh-Hant-TW">${escapeHtml(item.primary)}</div><div class="zhuyin">${escapeHtml(item.zhuyin)}</div>${item.example?example:`<div class="audio-row">${habitAudioButton(item.primary)}</div>`}<div class="habit-note">${escapeHtml(item.note||"")}</div>${variants?`<button class="mobile-more" onclick="toggleCard(this)">場面別の言い換えを見る</button><div class="details habit-variants">${variants}</div>`:""}</article>`;
 }
 function habitItemsForCategory(category=activeHabitCategory){return category==="all"?habits:habits.filter(item=>item.category===category);}
 function renderHabitList(list=habitItemsForCategory()){
