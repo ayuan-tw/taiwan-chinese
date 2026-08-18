@@ -661,11 +661,11 @@ async function refreshOfflineCache(){
   }
   setOfflineStatus('オフライン用データを更新中…');
   try{
-    const currentCache='chengci-v6-6-0-offline';
+    const currentCache='chengci-v6-7-0-offline';
     const keys=await caches.keys();
     await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!==currentCache).map(k=>caches.delete(k)));
     const cache=await caches.open(currentCache);
-    await cache.addAll(['./','./index.html?v=6.6.0','./css/style.css?v=6.6.0','./js/app.js?v=6.6.0','./js/data-model.js?v=6.6.0','./data/words.js?v=6.6.0','./data/zhuyin-dict.js?v=6.6.0','./js/zhuyin-lite.js?v=6.6.0','./manifest.json?v=6.6.0','./version.json','./CHANGELOG.md','./assets/icon.svg']);
+    await cache.addAll(['./','./index.html?v=6.7.0','./css/style.css?v=6.7.0','./js/app.js?v=6.7.0','./js/data-model.js?v=6.7.0','./data/words.js?v=6.7.0','./data/zhuyin-dict.js?v=6.7.0','./js/zhuyin-lite.js?v=6.7.0','./manifest.json?v=6.7.0','./version.json','./CHANGELOG.md','./assets/icon.svg']);
     setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
   }catch(e){
     setOfflineStatus('保存更新に失敗しました。ネット接続がある時にもう一度試してね。');
@@ -673,7 +673,7 @@ async function refreshOfflineCache(){
 }
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./service-worker.js?v=6.6.0').then(async(reg)=>{
+    navigator.serviceWorker.register('./service-worker.js?v=6.7.0').then(async(reg)=>{
       await reg.update();
       if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
       setOfflineStatus('オフライン保存OK。初回読み込み後は電波なしでも使えます。', true);
@@ -735,7 +735,7 @@ searchWords=function(){let k=document.getElementById("searchInput").value.trim()
 window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
 
 // Ver.5.7.0 app update manager
-const CHENGCI_APP_VERSION = '6.6.0';
+const CHENGCI_APP_VERSION = '6.7.0';
 let pendingAppVersion = null;
 let updateReloading = false;
 
@@ -831,7 +831,7 @@ async function applyAppUpdate(){
     }
     if('caches' in window){
       const keys=await caches.keys();
-      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-6-0-offline').map(k=>caches.delete(k)));
+      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-7-0-offline').map(k=>caches.delete(k)));
     }
     updateReloading=true;
     setTimeout(()=>location.replace(`./?updated=${Date.now()}`),900);
@@ -942,6 +942,7 @@ startComposition=function(mode="mix"){
   setTimeout(()=>document.getElementById("compositionInput")?.focus(),50);
 };
 
+let currentQuizMode="mix";
 function scopedQuizItems(mode="mix"){
   const ws=scopedStudyItems("word").map(w=>({type:"word",key:w.word,category:w.category,front:w.word,zhuyin:w.zhuyin,meaning:w.meaning,audio:w.word,note:w.note,example:w.example,exampleZhuyin:w.exampleZhuyin,score:score(w)}));
   const ps=scopedStudyItems("pattern").map(p=>({type:"pattern",key:p.pattern,category:p.category,front:p.pattern,zhuyin:p.zhuyin,meaning:p.meaning,audio:p.example,note:p.note,example:p.example,exampleZhuyin:p.exampleZhuyin,score:patternScore(p)}));
@@ -949,6 +950,7 @@ function scopedQuizItems(mode="mix"){
   return mode==="word"?ws:mode==="pattern"?ps:mode==="idiom"?is:[...ws,...ps,...is];
 }
 startQuiz=function(mode="mix"){
+  currentQuizMode=mode;
   const all=scopedQuizItems(mode);
   if(!all.length){showScopeEmpty("quizArea",mode==="mix"?"学習項目":typeLabel(mode));return;}
   const pool=[...all].sort((a,b)=>b.score-a.score||Math.random()-.5),queueName=`scope-quiz-${mode}-${studyScopeSignature()}`;
@@ -957,6 +959,34 @@ startQuiz=function(mode="mix"){
   const ans=shuffleArray([q.meaning,...distractors]);currentQuiz=q;quizRuns++;saveAll();
   document.getElementById("quizArea").innerHTML=`<div class="quiz-card"><div class="quiz-scope-badge">学習範囲：${all.length}件</div><br><span class="tag">${typeLabel(q.type)}：${q.category}</span><div class="word">${q.front}</div><div class="zhuyin">${q.zhuyin}</div><div class="audio-row">${audioButton(q.audio,"🔊 音声")}</div><p class="hint">この意味はどれ？</p><div class="quiz-options">${ans.map(a=>`<button onclick="checkAnswer('${a.replace(/'/g,"\\'")}')">${a}</button>`).join("")}</div><div id="quizResult"></div></div>`;
   if(shouldAutoSpeak())speakText(q.audio);
+};
+
+// Ver.6.7.0: 回答後に結果を固定し、同じ出題モードの次問へ進める。
+checkAnswer=function(a){
+  if(!currentQuiz)return;
+  const q=currentQuiz,result=document.getElementById("quizResult");
+  const buttons=[...document.querySelectorAll("#quizArea .quiz-options button")];
+  if(buttons.every(button=>button.disabled))return;
+  buttons.forEach(button=>{
+    button.disabled=true;
+    if(button.textContent===q.meaning)button.classList.add("answer-correct");
+    else if(button.textContent===a)button.classList.add("answer-wrong");
+  });
+  const isCorrect=a===q.meaning;
+  if(!isCorrect){
+    if(q.type==="pattern"){
+      if(!weakCards.includes(q.key))weakCards.push(q.key);
+      patternMistakeCounts[q.key]=(patternMistakeCounts[q.key]||0)+1;
+    }else if(q.type==="idiom"){
+      if(!weakIdioms.includes(q.key))weakIdioms.push(q.key);
+      idiomMistakeCounts[q.key]=(idiomMistakeCounts[q.key]||0)+1;
+    }else{
+      if(!weakWords.includes(q.key))weakWords.push(q.key);
+      mistakeCounts[q.key]=(mistakeCounts[q.key]||0)+1;
+    }
+    saveAll();
+  }
+  result.innerHTML=`<div class="quiz-result"><span class="${isCorrect?"correct":"wrong"}">${isCorrect?"⭕ 正解！":"❌ 不正解"}</span>${isCorrect?"":`<br>正解：${q.meaning}`}<br>${q.example||q.front}<br>${q.exampleZhuyin||q.zhuyin}${q.note?`<div class="note">${q.note}</div>`:""}<div class="audio-row">${audioButton(q.audio,"🔊 音声")}</div><div class="button-row audio-next-row"><button onclick="startQuiz(currentQuizMode)">次の問題へ →</button></div></div>`;
 };
 
 function buildScopedChineseChoices(question,pool){
@@ -997,3 +1027,34 @@ migrateConsolidatedStudyHistory();
 saveAll();
 
 window.addEventListener("load",renderStudyScope);
+
+// Ver.6.7.0「あゆあんの口ぐせ」
+let activeHabitCategory="all";
+function habitAudioButton(text,label="🔊 音声"){
+  if(!text||/[～○]/.test(text))return "";
+  return audioButton(text.replace(/…+/g,"").trim(),label);
+}
+function createHabitCard(item){
+  const variants=(item.variants||[]).map(variant=>`<div class="habit-variant"><span>${escapeHtml(variant.label)}</span><strong lang="zh-Hant-TW">${escapeHtml(variant.text)}</strong><div class="zhuyin">${escapeHtml(variant.zhuyin)}</div>${habitAudioButton(variant.text,"🔊 言い換え")}</div>`).join("");
+  return `<article class="card habit-card"><div class="card-top"><span class="tag">${escapeHtml(item.category)}</span></div><div class="habit-ja">${escapeHtml(item.ja)}</div><div class="habit-arrow">↓ 台湾華語では</div><div class="word" lang="zh-Hant-TW">${escapeHtml(item.primary)}</div><div class="zhuyin">${escapeHtml(item.zhuyin)}</div><div class="audio-row">${habitAudioButton(item.primary)}</div><div class="habit-note">${escapeHtml(item.note||"")}</div>${variants?`<button class="mobile-more" onclick="toggleCard(this)">場面別の言い換えを見る</button><div class="details habit-variants">${variants}</div>`:""}</article>`;
+}
+function habitItemsForCategory(category=activeHabitCategory){return category==="all"?habits:habits.filter(item=>item.category===category);}
+function renderHabitList(list=habitItemsForCategory()){
+  const area=document.getElementById("habitList");
+  if(area)area.innerHTML=list.length?list.map(createHabitCard).join(""):'<div class="empty">この分類にはまだカードがないよ。</div>';
+}
+function renderHabitCategoryButtons(){
+  const area=document.getElementById("habitCategoryButtons");if(!area)return;
+  const categories=[...new Set(habits.map(item=>item.category))];
+  area.innerHTML=["all",...categories].map(category=>`<button class="tag-filter-chip ${activeHabitCategory===category?"active":""}" onclick="filterHabits('${escapeWordText(category)}')">${category==="all"?`全部 ${habits.length}`:`${escapeHtml(category)} ${habits.filter(item=>item.category===category).length}`}</button>`).join("");
+}
+function filterHabits(category){activeHabitCategory=category;renderHabitCategoryButtons();renderHabitList();}
+function showAllHabits(){filterHabits("all");}
+function showRandomHabit(){
+  const pool=habitItemsForCategory();if(!pool.length)return;
+  renderHabitList([pool[Math.floor(Math.random()*pool.length)]]);
+}
+window.addEventListener("load",()=>{
+  const count=document.getElementById("habitCount");if(count)count.textContent=habits.length;
+  renderHabitCategoryButtons();renderHabitList();
+});
