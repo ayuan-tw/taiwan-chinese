@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>澄詞｜あゆあん台湾華語</title>
-  <link rel="manifest" href="manifest.json?v=6.6.0" />
+  <link rel="manifest" href="manifest.json?v=6.7.0" />
   <meta name="theme-color" content="#4f8f88" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="澄詞" />
-  <link rel="apple-touch-icon" href="assets/icon.svg?v=6.6.0" />
-  <link rel="stylesheet" href="css/style.css?v=6.6.0" />
+  <link rel="apple-touch-icon" href="assets/icon.svg?v=6.7.0" />
+  <link rel="stylesheet" href="css/style.css?v=6.7.0" />
 </head>
 <body>
   <div id="dictUpdateToast" class="dict-update-toast" hidden></div>
@@ -26,6 +26,7 @@
       <button class="stat-card stat-link" type="button" onclick="jumpToStudyPanel('wordListPanel')" aria-label="單字一覧へ移動"><span id="totalCount">0</span><p>登録單字</p><small>一覧へ →</small></button>
       <button class="stat-card stat-link" type="button" onclick="jumpToStudyPanel('patternPanel')" aria-label="句型カードへ移動"><span id="patternCount">0</span><p>登録句型</p><small>一覧へ →</small></button>
       <button class="stat-card stat-link" type="button" onclick="jumpToStudyPanel('idiomPanel')" aria-label="慣用說法へ移動"><span id="idiomCount">0</span><p>慣用說法</p><small>一覧へ →</small></button>
+      <button class="stat-card stat-link" type="button" onclick="jumpToStudyPanel('habitPanel')" aria-label="あゆあんの口ぐせへ移動"><span id="habitCount">0</span><p>口ぐせ</p><small>一覧へ →</small></button>
       <div class="stat-card"><span id="favoriteCount">0</span><p>お気に入り</p></div>
       <div class="stat-card"><span id="weakCount">0</span><p>苦手卡</p></div>
       <div class="stat-card"><span id="quizCount">0</span><p>クイズ回数</p></div>
@@ -40,6 +41,7 @@
     <button onclick="scrollToPanel('quizPanel')">🎲<span>ランダムクイズ</span></button>
     <button onclick="scrollToPanel('audioQuizPanel')">🎧<span>音からクイズ</span></button>
     <button onclick="scrollToPanel('priorityPanel')">📌<span>復習優先</span></button>
+    <button onclick="jumpToStudyPanel('habitPanel')">💬<span>口ぐせ</span></button>
     <button class="secondary" onclick="showTab('pronunciation')">🔊<span>発音チェック</span></button>
   </div>
 </section>
@@ -101,6 +103,13 @@
     </section>
     </section>
     <section class="tab-page" id="tab-study">
+      <section class="panel habit-panel" id="habitPanel">
+      <h2 class="section-title">💬 あゆあんの口ぐせ</h2>
+      <p class="hint">日本語でつい出る口ぐせから、場面に合う台湾華語を取り出すコーナー。「なんか」「ていうか」などは一語一訳にせず、働きごとに分けています。</p>
+      <div class="button-row"><button onclick="showAllHabits()">全部表示</button><button onclick="showRandomHabit()">🎲 1枚引く</button></div>
+      <div class="tag-filter habit-filters" id="habitCategoryButtons"></div>
+      <div id="habitList" class="cards habit-list"></div>
+    </section>
       <section class="panel" id="patternPanel">
       <h2 class="section-title">🧩 句型卡</h2>
       <p class="hint">台湾人との雑談で実際に使いそうな型だけ集めたコーナー。</p>
@@ -180,9 +189,9 @@
       <section class="panel app-info-panel">
   <h2 class="section-title">ℹ️ アプリ情報</h2>
   <div class="app-version-card">
-    <div><span class="app-label">📱 澄詞</span><strong>Ver.<span id="appVersion">6.6.0</span></strong></div>
+    <div><span class="app-label">📱 澄詞</span><strong>Ver.<span id="appVersion">6.7.0</span></strong></div>
     <div id="updateState" class="update-state state-unchecked">⚪ 未確認</div>
-    <div class="app-build-date">リリース：2026-08-08</div>
+    <div class="app-build-date">リリース：2026-08-18</div>
   </div>
   <div class="button-row">
     <button id="checkUpdateButton" onclick="checkForAppUpdate(true)">🔄 更新を確認</button>
@@ -202,7 +211,7 @@
 </section>
     </section>
   </main>
-  <footer>Ver.6.6.0｜ホーム画面版から更新を確認できます</footer>
+  <footer>Ver.6.7.0｜ホーム画面版から更新を確認できます</footer>
 
   <div id="updateModal" class="update-modal" hidden>
     <div class="update-modal-backdrop" onclick="closeUpdateModal()"></div>
@@ -216,6 +225,6 @@
       </div>
     </section>
   </div>
-  <script src="data/words.js?v=6.6.0"></script><script src="js/data-model.js?v=6.6.0"></script><script src="data/zhuyin-dict.js?v=6.6.0"></script><script src="js/zhuyin-lite.js?v=6.6.0"></script><script src="js/app.js?v=6.6.0"></script>
+  <script src="data/words.js?v=6.7.0"></script><script src="js/data-model.js?v=6.7.0"></script><script src="data/zhuyin-dict.js?v=6.7.0"></script><script src="js/zhuyin-lite.js?v=6.7.0"></script><script src="js/app.js?v=6.7.0"></script>
 </body>
 </html>
