@@ -758,3 +758,4 @@ body{
 .habit-example>span{display:block;margin-bottom:4px;color:var(--muted);font-size:.76rem;font-weight:800}
 .habit-example>strong{display:block;color:var(--dark);font-size:1rem;line-height:1.55}
 @media(max-width:520px){.habit-list{grid-template-columns:1fr}.habit-card .word{font-size:1.34rem}}
+@media(max-width:640px){.habit-card .habit-variants{display:none}.habit-card.open .habit-variants{display:grid}}
