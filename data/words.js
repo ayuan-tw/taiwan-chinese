@@ -87,6 +87,20 @@ const v66Words = [
 ];
 for (const item of v66Words) { if (!words.some(w => w.word === item.word)) words.push(item); }
 
+// Ver.6.7.0: 最新の追加候補と「あゆあんの口ぐせ」から、
+// 通常の学習対象として独立して覚える価値がある語だけを追加する。
+const v67Words = [
+  {category:"文具",word:"貼紙",zhuyin:"ㄊㄧㄝ ㄓˇ",meaning:"ステッカー／シール",note:"台湾ではシールやステッカーをまとめて貼紙と言う。",example:"我買了台灣限定的貼紙。",exampleZhuyin:"ㄨㄛˇ ㄇㄞˇ ㄌㄜ˙ ㄊㄞˊ ㄨㄢ ㄒㄧㄢˋ ㄉㄧㄥˋ ㄉㄜ˙ ㄊㄧㄝ ㄓˇ",tags:["文具","買い物","旅行"]},
+  {category:"計算",word:"加起來",zhuyin:"ㄐㄧㄚ ㄑㄧˇ ㄌㄞˊ",meaning:"合わせると／合計すると",note:"数・量・時間などを全部合わせた結果を言う。",example:"這些加起來多少錢？",exampleZhuyin:"ㄓㄜˋ ㄒㄧㄝ ㄐㄧㄚ ㄑㄧˇ ㄌㄞˊ ㄉㄨㄛ ㄕㄠˇ ㄑㄧㄢˊ",tags:["会話","買い物","計算"]},
+  {category:"話題",word:"至於",zhuyin:"ㄓˋ ㄩˊ",meaning:"～については／～のほうは",note:"前の話題と分けて、別の対象を取り上げる時に使う。",example:"至於超市嘛，我覺得全家的店員比較親切。",exampleZhuyin:"ㄓˋ ㄩˊ ㄔㄠ ㄕˋ ㄇㄚ˙，ㄨㄛˇ ㄐㄩㄝˊ ㄉㄜ˙ ㄑㄩㄢˊ ㄐㄧㄚ ㄉㄜ˙ ㄉㄧㄢˋ ㄩㄢˊ ㄅㄧˇ ㄐㄧㄠˋ ㄑㄧㄣ ㄑㄧㄝˋ",tags:["会話進行","話題転換","接続詞"]},
+  {category:"話題",word:"對了",zhuyin:"ㄉㄨㄟˋ ㄌㄜ˙",meaning:"そういえば／あ、そうだ",note:"思い出したことを新しく出す時の自然な切り出し。",example:"對了，我還有一件事想問。",exampleZhuyin:"ㄉㄨㄟˋ ㄌㄜ˙，ㄨㄛˇ ㄏㄞˊ ㄧㄡˇ ㄧˊ ㄐㄧㄢˋ ㄕˋ ㄒㄧㄤˇ ㄨㄣˋ",tags:["会話進行","話題転換","台湾人よく使う"]},
+  {category:"語気",word:"就是",zhuyin:"ㄐㄧㄡˋ ㄕˋ",meaning:"その／つまり／なんかさ",note:"説明を始めたり、言葉を探しながら話をつないだりする。文脈によって意味が変わる。",example:"就是……我不知道怎麼說。",exampleZhuyin:"ㄐㄧㄡˋ ㄕˋ……ㄨㄛˇ ㄅㄨˋ ㄓ ㄉㄠˋ ㄗㄣˇ ㄇㄜ˙ ㄕㄨㄛ",tags:["間つなぎ","会話進行","台湾人よく使う"]},
+  {category:"語気",word:"那個",zhuyin:"ㄋㄚˋ ㄍㄜ˙",meaning:"あの／えーっと",note:"物を指すほか、言葉を探す時の間つなぎにも使う。",example:"那個……我想問一下。",exampleZhuyin:"ㄋㄚˋ ㄍㄜ˙……ㄨㄛˇ ㄒㄧㄤˇ ㄨㄣˋ ㄧˊ ㄒㄧㄚˋ",tags:["間つなぎ","会話進行","台湾人よく使う"]},
+  {category:"逆接",word:"不過",zhuyin:"ㄅㄨˊ ㄍㄨㄛˋ",meaning:"でも／ただし／とはいえ",note:"但是より少しやわらかく、会話で補足や逆接を入れやすい。",example:"也是啦，不過我還是有點擔心。",exampleZhuyin:"ㄧㄝˇ ㄕˋ ㄌㄚ˙，ㄅㄨˊ ㄍㄨㄛˋ ㄨㄛˇ ㄏㄞˊ ㄕˋ ㄧㄡˇ ㄉㄧㄢˇ ㄉㄢ ㄒㄧㄣ",tags:["会話進行","逆接","台湾人よく使う"]},
+  {category:"言い直し",word:"應該說",zhuyin:"ㄧㄥ ㄍㄞ ㄕㄨㄛ",meaning:"というか／正確に言うと",note:"直前の言い方を、より正確な表現へ言い直す時に使う。",example:"應該說，我不是不想去，只是太累了。",exampleZhuyin:"ㄧㄥ ㄍㄞ ㄕㄨㄛ，ㄨㄛˇ ㄅㄨˊ ㄕˋ ㄅㄨˋ ㄒㄧㄤˇ ㄑㄩˋ，ㄓˇ ㄕˋ ㄊㄞˋ ㄌㄟˋ ㄌㄜ˙",tags:["言い直し","会話進行","説明"]}
+];
+for (const item of v67Words) { if (!words.some(w => w.word === item.word)) words.push(item); }
+
 // 「補充一下」は独立項目にせず、基本形「補充」の自然な使用形として統合する。
 const supplementWord=words.find(w=>w.word==="補充");
 if(supplementWord){
@@ -107,6 +121,60 @@ const phrases = [
   { text: "最近工作忙翻了。", zhuyin: "ㄗㄨㄟˋ ㄐㄧㄣˋ ㄍㄨㄥ ㄗㄨㄛˋ ㄇㄤˊ ㄈㄢ ㄌㄜ˙", meaning: "最近仕事がめちゃくちゃ忙しい。" },
   { text: "記得開泡泡。", zhuyin: "ㄐㄧˋ ㄉㄜ˙ ㄎㄞ ㄆㄠˋ ㄆㄠˋ", meaning: "シールド張るの忘れないで。" },
   { text: "我可能會晚一點到。", zhuyin: "ㄨㄛˇ ㄎㄜˇ ㄋㄥˊ ㄏㄨㄟˋ ㄨㄢˇ ㄧˋ ㄉㄧㄢˇ ㄉㄠˋ", meaning: "少し遅れるかも。" }
+];
+
+// 日本語の口ぐせを起点に、場面に合う台湾華語を取り出す専用カード。
+// 通常の單字・句型との重複は意図的な参照であり、学習項目 ID には含めない。
+const habits = [
+  {category:"話題転換",ja:"そういえば",primary:"對了",zhuyin:"ㄉㄨㄟˋ ㄌㄜ˙",note:"思い出したことを出す時。雑談的に話題を変えるなら「話說」。",variants:[{label:"雑談的な転換",text:"話說",zhuyin:"ㄏㄨㄚˋ ㄕㄨㄛ"}]},
+  {category:"話題転換",ja:"ちなみに",primary:"順帶一提",zhuyin:"ㄕㄨㄣˋ ㄉㄞˋ ㄧˋ ㄊㄧˊ",note:"関連情報を付け足す。説明の補足なら「補充一下」。",variants:[{label:"説明を補足",text:"補充一下",zhuyin:"ㄅㄨˇ ㄔㄨㄥ ㄧˊ ㄒㄧㄚˋ"}]},
+  {category:"話題転換",ja:"全然関係ないけど",primary:"雖然跟現在的話題完全沒關係，不過……",zhuyin:"ㄙㄨㄟ ㄖㄢˊ ㄍㄣ ㄒㄧㄢˋ ㄗㄞˋ ㄉㄜ˙ ㄏㄨㄚˋ ㄊㄧˊ ㄨㄢˊ ㄑㄩㄢˊ ㄇㄟˊ ㄍㄨㄢ ㄒㄧˋ，ㄅㄨˊ ㄍㄨㄛˋ……",note:"唐突な話題転換をあえて宣言する言い方。"},
+  {category:"話題転換",ja:"～といえば",primary:"說到～",zhuyin:"ㄕㄨㄛ ㄉㄠˋ～",note:"前に出た言葉から関連話題を広げる。"},
+  {category:"話題転換",ja:"～については／～のほうは",primary:"至於～",zhuyin:"ㄓˋ ㄩˊ～",note:"話題を分け、別の対象を取り上げる。"},
+  {category:"話題転換",ja:"ところで",primary:"話說",zhuyin:"ㄏㄨㄚˋ ㄕㄨㄛ",note:"雑談で自然に別の話へ移る。",variants:[{label:"思い出した時",text:"對了",zhuyin:"ㄉㄨㄟˋ ㄌㄜ˙"}]},
+  {category:"話題転換",ja:"じゃあ／それなら",primary:"那就～",zhuyin:"ㄋㄚˋ ㄐㄧㄡˋ～",note:"前の話を受けて、次の行動や結論へ進む。"},
+  {category:"話題転換",ja:"とりあえず",primary:"先～再說",zhuyin:"ㄒㄧㄢ～ㄗㄞˋ ㄕㄨㄛ",note:"細かいことは後にして、まず行動する。",variants:[{label:"まとめて切り出す",text:"總之先～",zhuyin:"ㄗㄨㄥˇ ㄓ ㄒㄧㄢ～"}]},
+  {category:"話題転換",ja:"まあ、とにかく",primary:"反正",zhuyin:"ㄈㄢˇ ㄓㄥˋ",note:"細かい事情はともかく、という感じ。要約なら「總之」。",variants:[{label:"要約・結論",text:"總之",zhuyin:"ㄗㄨㄥˇ ㄓ"}]},
+  {category:"話題転換",ja:"逆に",primary:"反而",zhuyin:"ㄈㄢˇ ㄦˊ",note:"予想や前の内容と反対の結果。話題の別側面なら「倒是」。",variants:[{label:"別の側面",text:"倒是",zhuyin:"ㄉㄠˋ ㄕˋ"}]},
+  {category:"話題転換",ja:"そう考えると",primary:"這樣想的話",zhuyin:"ㄓㄜˋ ㄧㄤˋ ㄒㄧㄤˇ ㄉㄜ˙ ㄏㄨㄚˋ",note:"前の内容を受けて考え直す。"},
+  {category:"間つなぎ",ja:"なんかさー……",primary:"就是啊……",zhuyin:"ㄐㄧㄡˋ ㄕˋ ㄚ……",note:"話し始めながら内容を探す。",variants:[{label:"えーっと",text:"那個……",zhuyin:"ㄋㄚˋ ㄍㄜ˙……"}]},
+  {category:"間つなぎ",ja:"なんていうか",primary:"怎麼說呢……",zhuyin:"ㄗㄣˇ ㄇㄜ˙ ㄕㄨㄛ ㄋㄜ˙……",note:"ぴったりの言葉を探しながら話す。"},
+  {category:"間つなぎ",ja:"なんか～な気がする",primary:"總覺得……",zhuyin:"ㄗㄨㄥˇ ㄐㄩㄝˊ ㄉㄜ˙……",note:"根拠ははっきりしないが、そう感じる。"},
+  {category:"間つなぎ",ja:"なんか知らないけど",primary:"不知道為什麼……",zhuyin:"ㄅㄨˋ ㄓ ㄉㄠˋ ㄨㄟˋ ㄕㄣˊ ㄇㄜ˙……",note:"理由が分からないことを前置きする。"},
+  {category:"間つなぎ",ja:"なんか～みたい",primary:"好像……",zhuyin:"ㄏㄠˇ ㄒㄧㄤˋ……",note:"見た感じや推測を断定せずに言う。"},
+  {category:"間つなぎ",ja:"なんかもう……",primary:"感覺已經……",zhuyin:"ㄍㄢˇ ㄐㄩㄝˊ ㄧˇ ㄐㄧㄥ……",note:"困惑や感情が積み重なった感じ。",variants:[{label:"ちょっと～すぎる",text:"真的有點……",zhuyin:"ㄓㄣ ㄉㄜ˙ ㄧㄡˇ ㄉㄧㄢˇ……"}]},
+  {category:"言い直し",ja:"ていうか／というより",primary:"應該說……",zhuyin:"ㄧㄥ ㄍㄞ ㄕㄨㄛ……",note:"より正確な言い方に直す。",variants:[{label:"別の言い方なら",text:"或者說……",zhuyin:"ㄏㄨㄛˋ ㄓㄜˇ ㄕㄨㄛ……"}]},
+  {category:"言い直し",ja:"ていうかさー",primary:"是說……",zhuyin:"ㄕˋ ㄕㄨㄛ……",note:"台湾口語的な話題転換や軽いツッコミ。",variants:[{label:"話題転換",text:"話說……",zhuyin:"ㄏㄨㄚˋ ㄕㄨㄛ……"}]},
+  {category:"言い直し",ja:"違う違う",primary:"不是不是",zhuyin:"ㄅㄨˊ ㄕˋ ㄅㄨˊ ㄕˋ",note:"相手の理解をやわらかく訂正する。",variants:[{label:"自分の間違い",text:"不對不對",zhuyin:"ㄅㄨˊ ㄉㄨㄟˋ ㄅㄨˊ ㄉㄨㄟˋ"}]},
+  {category:"言い直し",ja:"いや、そうじゃなくて",primary:"不是，我不是那個意思。",zhuyin:"ㄅㄨˊ ㄕˋ，ㄨㄛˇ ㄅㄨˊ ㄕˋ ㄋㄚˋ ㄍㄜ˙ ㄧˋ ㄙ˙",note:"自分の意図と違って伝わった時。"},
+  {category:"言い直し",ja:"いや、私が言いたいのは",primary:"不是，我是說……",zhuyin:"ㄅㄨˊ ㄕˋ，ㄨㄛˇ ㄕˋ ㄕㄨㄛ……",note:"会話を止めず、言いたかった内容へ戻す。"},
+  {category:"言い直し",ja:"私の言いたいことは",primary:"我的意思是……",zhuyin:"ㄨㄛˇ ㄉㄜ˙ ㄧˋ ㄙ˙ ㄕˋ……",note:"自分の意図を説明する。"},
+  {category:"言い直し",ja:"～って言いたかった",primary:"我是想說……",zhuyin:"ㄨㄛˇ ㄕˋ ㄒㄧㄤˇ ㄕㄨㄛ……",note:"先ほど言えなかった内容や意図を示す。"},
+  {category:"言い直し",ja:"あ、間違えた",primary:"啊，我說錯了。",zhuyin:"ㄚ，ㄨㄛˇ ㄕㄨㄛ ㄘㄨㄛˋ ㄌㄜ˙",note:"自分の発言をすぐ訂正する。"},
+  {category:"言い直し",ja:"つまり／要するに",primary:"簡單來說……",zhuyin:"ㄐㄧㄢˇ ㄉㄢ ㄌㄞˊ ㄕㄨㄛ……",note:"内容を短くまとめ直す。",variants:[{label:"つまり",text:"也就是說……",zhuyin:"ㄧㄝˇ ㄐㄧㄡˋ ㄕˋ ㄕㄨㄛ……"}]},
+  {category:"言い直し",ja:"どっちかというと",primary:"真要說的話……",zhuyin:"ㄓㄣ ㄧㄠˋ ㄕㄨㄛ ㄉㄜ˙ ㄏㄨㄚˋ……",note:"無理にどちらか選ぶなら、という前置き。",variants:[{label:"～に近い",text:"比較像……",zhuyin:"ㄅㄧˇ ㄐㄧㄠˋ ㄒㄧㄤˋ……"}]},
+  {category:"思い出す",ja:"○○ってなんだっけ？",primary:"○○是什麼來著？",zhuyin:"○○ ㄕˋ ㄕㄣˊ ㄇㄜ˙ ㄌㄞˊ ㄓㄜ˙",note:"知っていたはずの内容を思い出そうとする。"},
+  {category:"思い出す",ja:"なんて言うんだっけ？",primary:"怎麼說來著？",zhuyin:"ㄗㄣˇ ㄇㄜ˙ ㄕㄨㄛ ㄌㄞˊ ㄓㄜ˙",note:"言い方を思い出せない時。"},
+  {category:"思い出す",ja:"あ、○○だったか",primary:"原來是○○啊。",zhuyin:"ㄩㄢˊ ㄌㄞˊ ㄕˋ○○ ㄚ",note:"答えを知って『それだったか』と納得する。"},
+  {category:"思い出す",ja:"また忘れてる",primary:"我又忘了。",zhuyin:"ㄨㄛˇ ㄧㄡˋ ㄨㄤˋ ㄌㄜ˙",note:"繰り返し忘れた時のひとこと。"},
+  {category:"思い出す",ja:"すぐ忘れちゃう",primary:"我很快就忘記了。",zhuyin:"ㄨㄛˇ ㄏㄣˇ ㄎㄨㄞˋ ㄐㄧㄡˋ ㄨㄤˋ ㄐㄧˋ ㄌㄜ˙",note:"覚えても短時間で忘れる。"},
+  {category:"思い出す",ja:"思い出せない",primary:"我想不起來。",zhuyin:"ㄨㄛˇ ㄒㄧㄤˇ ㄅㄨˋ ㄑㄧˇ ㄌㄞˊ",note:"記憶にあるものが出てこない。"},
+  {category:"思い出す",ja:"ちょっと考えさせて",primary:"讓我想一下。",zhuyin:"ㄖㄤˋ ㄨㄛˇ ㄒㄧㄤˇ ㄧˊ ㄒㄧㄚˋ",note:"答える前に少し時間を取る。"},
+  {category:"リアクション",ja:"そうそう！",primary:"對對對！",zhuyin:"ㄉㄨㄟˋ ㄉㄨㄟˋ ㄉㄨㄟˋ",note:"相手が自分の言いたいことを当てた時の強い同意。"},
+  {category:"リアクション",ja:"うんうん",primary:"嗯嗯。",zhuyin:"ㄣˋ ㄣˋ",note:"相手の話を聞いている相づち。"},
+  {category:"リアクション",ja:"あー、そういうことか",primary:"啊～原來是這樣。",zhuyin:"ㄚ～ㄩㄢˊ ㄌㄞˊ ㄕˋ ㄓㄜˋ ㄧㄤˋ",note:"説明を聞いて仕組みや理由が分かった時。"},
+  {category:"リアクション",ja:"確かに／それはそう",primary:"對耶。",zhuyin:"ㄉㄨㄟˋ ㄧㄝˊ",note:"言われて気づいた同意。少し認める感じなら「也是啦」。",variants:[{label:"一部同意",text:"也是啦。",zhuyin:"ㄧㄝˇ ㄕˋ ㄌㄚ˙"}]},
+  {category:"リアクション",ja:"へー、そうなんだ",primary:"是喔～",zhuyin:"ㄕˋ ㄛ˙",note:"軽い驚きや相づち。"},
+  {category:"リアクション",ja:"マジで？",primary:"真的假的？",zhuyin:"ㄓㄣ ㄉㄜ˙ ㄐㄧㄚˇ ㄉㄜ˙",note:"台湾で非常によく使うカジュアルな驚き。"},
+  {category:"リアクション",ja:"まさか！",primary:"不會吧！",zhuyin:"ㄅㄨˊ ㄏㄨㄟˋ ㄅㄚ˙",note:"その場の驚き。文として続けるなら「沒想到……」。",variants:[{label:"予想外の結果",text:"沒想到……",zhuyin:"ㄇㄟˊ ㄒㄧㄤˇ ㄉㄠˋ……"}]},
+  {category:"リアクション",ja:"やっぱり",primary:"果然",zhuyin:"ㄍㄨㄛˇ ㄖㄢˊ",note:"予想どおりなら「果然」。迷った末の結論なら「還是」。",variants:[{label:"結局・やはり",text:"還是",zhuyin:"ㄏㄞˊ ㄕˋ"}]},
+  {category:"リアクション",ja:"ないんかーい！",primary:"結果沒有喔！",zhuyin:"ㄐㄧㄝˊ ㄍㄨㄛˇ ㄇㄟˊ ㄧㄡˇ ㄛ˙",note:"期待したのに無かった時の軽いツッコミ。",variants:[{label:"意外にも無い",text:"竟然沒有！",zhuyin:"ㄐㄧㄥˋ ㄖㄢˊ ㄇㄟˊ ㄧㄡˇ"}]},
+  {category:"会話進行",ja:"ねえねえ／聞いてよー",primary:"我跟你說……",zhuyin:"ㄨㄛˇ ㄍㄣ ㄋㄧˇ ㄕㄨㄛ……",note:"親しい相手に話を切り出す。複数人へ注目を求めるなら「你們聽我說」。",variants:[{label:"複数人に",text:"你們聽我說！",zhuyin:"ㄋㄧˇ ㄇㄣ˙ ㄊㄧㄥ ㄨㄛˇ ㄕㄨㄛ"}]},
+  {category:"会話進行",ja:"えーっと",primary:"那個……",zhuyin:"ㄋㄚˋ ㄍㄜ˙……",note:"言葉を探すための間つなぎ。",variants:[{label:"声だけの間",text:"嗯……",zhuyin:"ㄣ……"}]},
+  {category:"会話進行",ja:"でもさー",primary:"可是啊……",zhuyin:"ㄎㄜˇ ㄕˋ ㄚ……",note:"相手の話を受けつつ反対側を出す。",variants:[{label:"やわらかい補足",text:"不過啊……",zhuyin:"ㄅㄨˊ ㄍㄨㄛˋ ㄚ……"}]},
+  {category:"会話進行",ja:"だからさー",primary:"所以啊……",zhuyin:"ㄙㄨㄛˇ ㄧˇ ㄚ……",note:"理由や結論をあらためて続ける。"},
+  {category:"会話進行",ja:"ということは",primary:"所以說……",zhuyin:"ㄙㄨㄛˇ ㄧˇ ㄕㄨㄛ……",note:"前の内容から結論を導く。"},
+  {category:"会話進行",ja:"まあいいか",primary:"算了。",zhuyin:"ㄙㄨㄢˋ ㄌㄜ˙",note:"追究や行動をやめる感じ。問題ないと受け流すなら「也沒關係啦」。",variants:[{label:"問題ない",text:"也沒關係啦。",zhuyin:"ㄧㄝˇ ㄇㄟˊ ㄍㄨㄢ ㄒㄧˋ ㄌㄚ˙"}]}
 ];
 
 
@@ -420,6 +488,15 @@ const idioms = [
     ]
   }
 ];
+
+const v67Idioms = [
+  {category:"間つなぎ",text:"怎麼說呢……",zhuyin:"ㄗㄣˇ ㄇㄜ˙ ㄕㄨㄛ ㄋㄜ˙",meaning:"なんていうか……",note:"言葉を探しながら、少し考える時間を作る自然な間つなぎ。",tags:["あゆあんの口ぐせ","間つなぎ","会話進行"]},
+  {category:"言い直し",text:"不是，我是說……",zhuyin:"ㄅㄨˊ ㄕˋ，ㄨㄛˇ ㄕˋ ㄕㄨㄛ",meaning:"いや、私が言いたいのは……",note:"誤解された時や、自分の言い方をその場で直す時に使う。",tags:["あゆあんの口ぐせ","言い直し","会話進行"]},
+  {category:"同意・逆接",text:"也是啦，不過……",zhuyin:"ㄧㄝˇ ㄕˋ ㄌㄚ˙，ㄅㄨˊ ㄍㄨㄛˋ",meaning:"それはそうだけど、でも……",note:"相手にいったん同意してから、自分の考えや心配を続ける。",tags:["あゆあんの口ぐせ","逆接","会話進行"]},
+  {category:"話の続き",text:"然後啊……",zhuyin:"ㄖㄢˊ ㄏㄡˋ ㄚ",meaning:"それでさ……",note:"出来事の続きを、くだけた調子で話す時に使う。",tags:["あゆあんの口ぐせ","間つなぎ","会話進行"]},
+  {category:"間つなぎ",text:"就是那個……",zhuyin:"ㄐㄧㄡˋ ㄕˋ ㄋㄚˋ ㄍㄜ˙",meaning:"ほら、あの……／つまり、その……",note:"言いたい物や言葉がすぐに出ない時の間つなぎ。",tags:["あゆあんの口ぐせ","間つなぎ","会話進行"]}
+];
+for (const item of v67Idioms) { if (!idioms.some(i => i.text === item.text)) idioms.push(item); }
 
 // Ver.2.0: あゆあん苦手単語パック Vol.1 + tags/confuse
 const enrich = {
@@ -1419,6 +1496,12 @@ const v66Patterns = [
   {category:"習慣",pattern:"都會先 A，再 B",zhuyin:"ㄉㄡ ㄏㄨㄟˋ ㄒㄧㄢ A，ㄗㄞˋ B",meaning:"いつも先にAして、それからBする",note:"都會＝いつも～する、先A再B＝まずAしてからB、の組み合わせ。",example:"我都會先看日文版，再看中文版。",exampleZhuyin:"ㄨㄛˇ ㄉㄡ ㄏㄨㄟˋ ㄒㄧㄢ ㄎㄢˋ ㄖˋ ㄨㄣˊ ㄅㄢˇ，ㄗㄞˋ ㄎㄢˋ ㄓㄨㄥ ㄨㄣˊ ㄅㄢˇ",tags:["習慣","順序","学習"],prompts:[{ja:"いつも先に日本語版を見て、それから中国語版を見る",answer:"我都會先看日文版，再看中文版。",zhuyin:"ㄨㄛˇ ㄉㄡ ㄏㄨㄟˋ ㄒㄧㄢ ㄎㄢˋ ㄖˋ ㄨㄣˊ ㄅㄢˇ，ㄗㄞˋ ㄎㄢˋ ㄓㄨㄥ ㄨㄣˊ ㄅㄢˇ"},{ja:"いつも先に音声を聞いて、それから注音を見る",answer:"我都會先聽音檔，再看注音。",zhuyin:"ㄨㄛˇ ㄉㄡ ㄏㄨㄟˋ ㄒㄧㄢ ㄊㄧㄥ ㄧㄣ ㄉㄤˇ，ㄗㄞˋ ㄎㄢˋ ㄓㄨˋ ㄧㄣ"}]}
 ];
 for (const item of v66Patterns) { if (!patterns.some(p => p.pattern === item.pattern)) patterns.push(item); }
+
+const v67Patterns = [
+  {category:"時間",pattern:"很快就～",zhuyin:"ㄏㄣˇ ㄎㄨㄞˋ ㄐㄧㄡˋ～",meaning:"すぐに～する／すぐ～になる",note:"変化や行動までの時間が短いことを表す。『一～就～』はAするとすぐBという出来事の接続なので別の型。",example:"我很快就忘記了。",exampleZhuyin:"ㄨㄛˇ ㄏㄣˇ ㄎㄨㄞˋ ㄐㄧㄡˋ ㄨㄤˋ ㄐㄧˋ ㄌㄜ˙",tags:["あゆあんの口ぐせ","時間","会話"],prompts:[{ja:"私はすぐ忘れちゃう",answer:"我很快就忘記了。",zhuyin:"ㄨㄛˇ ㄏㄣˇ ㄎㄨㄞˋ ㄐㄧㄡˋ ㄨㄤˋ ㄐㄧˋ ㄌㄜ˙"},{ja:"薬を飲んだらすぐ良くなった",answer:"吃藥以後，很快就好多了。",zhuyin:"ㄔ ㄧㄠˋ ㄧˇ ㄏㄡˋ，ㄏㄣˇ ㄎㄨㄞˋ ㄐㄧㄡˋ ㄏㄠˇ ㄉㄨㄛ ㄌㄜ˙"}]},
+  {category:"理由不明",pattern:"不知道為什麼～",zhuyin:"ㄅㄨˋ ㄓ ㄉㄠˋ ㄨㄟˋ ㄕㄣˊ ㄇㄜ˙～",meaning:"なぜか～／なんか知らないけど～",note:"理由は説明できないが、実際にそう感じたり起きたりしている時。『不知道是不是～』は原因の候補を推測する型。",example:"不知道為什麼，我今天一直很睏。",exampleZhuyin:"ㄅㄨˋ ㄓ ㄉㄠˋ ㄨㄟˋ ㄕㄣˊ ㄇㄜ˙，ㄨㄛˇ ㄐㄧㄣ ㄊㄧㄢ ㄧˋ ㄓˊ ㄏㄣˇ ㄎㄨㄣˋ",tags:["あゆあんの口ぐせ","理由","会話"],prompts:[{ja:"なぜか今日はずっと眠い",answer:"不知道為什麼，我今天一直很睏。",zhuyin:"ㄅㄨˋ ㄓ ㄉㄠˋ ㄨㄟˋ ㄕㄣˊ ㄇㄜ˙，ㄨㄛˇ ㄐㄧㄣ ㄊㄧㄢ ㄧˋ ㄓˊ ㄏㄣˇ ㄎㄨㄣˋ"},{ja:"なぜかすぐ日本語が出ちゃう",answer:"不知道為什麼，我很快就會說出日文。",zhuyin:"ㄅㄨˋ ㄓ ㄉㄠˋ ㄨㄟˋ ㄕㄣˊ ㄇㄜ˙，ㄨㄛˇ ㄏㄣˇ ㄎㄨㄞˋ ㄐㄧㄡˋ ㄏㄨㄟˋ ㄕㄨㄛ ㄔㄨ ㄖˋ ㄨㄣˊ"}]}
+];
+for (const item of v67Patterns) { if (!patterns.some(p => p.pattern === item.pattern)) patterns.push(item); }
 
 // 完全一致する句型は、タグと練習文を情報量の多い先頭項目へ統合する。
 const patternByName=new Map();
