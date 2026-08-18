@@ -738,3 +738,20 @@ body{
   .study-scope-type{flex:1 1 calc(50% - 10px);min-width:0}
   .study-scope-launchers{grid-template-columns:1fr}
 }
+
+/* Ver.6.7.0 あゆあんの口ぐせ */
+.habit-panel{border-top:4px solid #d78d76}
+.habit-filters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 18px}
+.habit-list{grid-template-columns:repeat(auto-fit,minmax(270px,1fr))}
+.habit-card{position:relative;border-color:rgba(215,141,118,.42);background:linear-gradient(180deg,#fff 0%,#fffaf7 100%)}
+.habit-ja{margin:10px 0 4px;font-size:1.18rem;font-weight:900;color:var(--dark)}
+.habit-arrow{margin:7px 0;color:var(--muted);font-size:.78rem;font-weight:800}
+.habit-card .word{font-size:1.48rem;line-height:1.45}
+.habit-note{margin-top:12px;padding:10px 12px;border-radius:12px;background:#fff2ec;color:var(--dark);font-size:.9rem;line-height:1.65}
+.habit-variants{display:grid;gap:10px;margin-top:10px}
+.habit-variant{padding:11px 12px;border:1px solid rgba(215,141,118,.3);border-radius:12px;background:#fff}
+.habit-variant>span{display:block;margin-bottom:4px;color:var(--muted);font-size:.76rem;font-weight:800}
+.habit-variant>strong{display:block;font-size:1.08rem;color:var(--main-dark)}
+.habit-variant .zhuyin{margin:4px 0 8px;font-size:.88rem}
+.habit-variant .audio-row{margin-top:6px}
+@media(max-width:520px){.habit-list{grid-template-columns:1fr}.habit-card .word{font-size:1.34rem}}

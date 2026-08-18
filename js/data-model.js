@@ -1,4 +1,4 @@
-// 澄詞 Ver.6.6 shared learning-item model
+// 澄詞 Ver.6.7 shared learning-item model
 // Adds a stable common ID, type, and normalized tags without changing the
 // existing words / patterns / idioms / phrases arrays used by the app.
 (function(){
@@ -11,17 +11,17 @@
     {
       id:'learning',
       label:'学習メモ',
-      tags:new Set(['Sランク','毎日使う','何回も忘れた','何度も質問した','声調注意','発音注意','r注意','リスニング','課題文','型候補'])
+      tags:new Set(['Sランク','毎日使う','何回も忘れた','何度も質問した','声調注意','発音注意','r注意','リスニング','課題文','型候補','あゆあんの口ぐせ'])
     },
     {
       id:'scene',
       label:'場面・話題',
-      tags:new Set(['WOS','ゲーム','旅行','夜市','買い物','注文','店内会話','台湾生活','天気','仕事','学習','作文','日常','会話','雑談','活動','体調'])
+      tags:new Set(['WOS','ゲーム','旅行','夜市','買い物','注文','店内会話','台湾生活','天気','仕事','学習','作文','日常','会話','雑談','活動','体調','文具','計算'])
     },
     {
       id:'usage',
       label:'使い方',
-      tags:new Set(['台湾人よく使う','カジュアル','あゆあん語録','会話進行','リアクション','驚き・ツッコミ','理解・納得','差・問題なし','返答','共感','注意'])
+      tags:new Set(['台湾人よく使う','カジュアル','あゆあん語録','会話進行','リアクション','驚き・ツッコミ','理解・納得','差・問題なし','返答','共感','注意','話題転換','間つなぎ','言い直し'])
     },
     {id:'grammar',label:'文法・意味',tags:new Set()}
   ];
