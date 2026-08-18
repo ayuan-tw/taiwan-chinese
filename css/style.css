@@ -754,4 +754,7 @@ body{
 .habit-variant>strong{display:block;font-size:1.08rem;color:var(--main-dark)}
 .habit-variant .zhuyin{margin:4px 0 8px;font-size:.88rem}
 .habit-variant .audio-row{margin-top:6px}
+.habit-example{margin-top:10px;padding:10px 12px;border-radius:12px;background:#f7fbfa;border:1px solid rgba(79,143,136,.24)}
+.habit-example>span{display:block;margin-bottom:4px;color:var(--muted);font-size:.76rem;font-weight:800}
+.habit-example>strong{display:block;color:var(--dark);font-size:1rem;line-height:1.55}
 @media(max-width:520px){.habit-list{grid-template-columns:1fr}.habit-card .word{font-size:1.34rem}}
