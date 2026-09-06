@@ -12,7 +12,9 @@
 │  └─ style.css
 ├─ js/
 │  ├─ app.js
+│  ├─ data-model.js
 │  ├─ dictionary-loader.js
+│  ├─ shortcut-export.js
 │  └─ zhuyin-lite.js
 ├─ data/
 │  ├─ base/
