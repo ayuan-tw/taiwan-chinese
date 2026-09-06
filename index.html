@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>澄詞｜あゆあん台湾華語</title>
-  <link rel="manifest" href="manifest.json?v=6.7.2" />
+  <link rel="manifest" href="manifest.json?v=6.8.0" />
   <meta name="theme-color" content="#4f8f88" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="澄詞" />
-  <link rel="apple-touch-icon" href="assets/icon.svg?v=6.7.2" />
-  <link rel="stylesheet" href="css/style.css?v=6.7.2" />
+  <link rel="apple-touch-icon" href="assets/icon.svg?v=6.8.0" />
+  <link rel="stylesheet" href="css/style.css?v=6.8.0" />
 </head>
 <body>
   <div id="dictUpdateToast" class="dict-update-toast" hidden></div>
@@ -42,6 +42,7 @@
     <button onclick="scrollToPanel('audioQuizPanel')">🎧<span>音からクイズ</span></button>
     <button onclick="scrollToPanel('priorityPanel')">📌<span>復習優先</span></button>
     <button onclick="jumpToStudyPanel('habitPanel')">💬<span>口ぐせ</span></button>
+    <button onclick="scrollToPanel('shortcutExportPanel')">📤<span>書き出し</span></button>
     <button class="secondary" onclick="showTab('pronunciation')">🔊<span>発音チェック</span></button>
   </div>
 </section>
@@ -59,6 +60,32 @@
         <button class="secondary" onclick="resetStudyScope()">範囲をリセット</button>
       </div>
       <p class="study-scope-note">音からクイズは、選んだ範囲内の單字だけが対象です。</p>
+    </section>
+      <section class="panel shortcut-export-panel" id="shortcutExportPanel">
+      <h2 class="section-title">📤 ショートカット用書き出し</h2>
+      <p class="hint">選んだ学習データを「中文｜注音｜日本語」で1行ずつ書き出します。コピーまたは共有して、iPhoneショートカットで使えます。</p>
+      <div class="export-controls">
+        <label>範囲
+          <select id="shortcutExportScope" onchange="renderShortcutExportOptions(); buildShortcutExportText();">
+            <option value="tag">タグ</option>
+            <option value="priority">復習優先度</option>
+            <option value="habit">口ぐせ</option>
+            <option value="pattern">句型</option>
+          </select>
+        </label>
+        <label id="shortcutExportDetailLabel">指定
+          <select id="shortcutExportDetail" onchange="buildShortcutExportText()"></select>
+        </label>
+        <label class="check-label export-example-toggle"><input id="shortcutExportExamples" type="checkbox" onchange="buildShortcutExportText()" /> 例文・具体例も含める</label>
+      </div>
+      <div id="shortcutExportSummary" class="study-scope-summary" aria-live="polite"></div>
+      <textarea id="shortcutExportOutput" class="shortcut-export-output" rows="8" readonly aria-label="ショートカット用書き出しデータ" placeholder="条件を選ぶと、ここに書き出しデータが表示されます。"></textarea>
+      <div class="button-row shortcut-export-actions">
+        <button onclick="copyShortcutExport()">📋 コピー</button>
+        <button onclick="shareShortcutExport()">共有</button>
+        <button class="secondary" onclick="downloadShortcutExport()">.txt保存</button>
+      </div>
+      <div id="shortcutExportStatus" class="offline-status" aria-live="polite"></div>
     </section>
       <section class="panel search-first" id="searchPanel">
       <h2 class="section-title">🔍 單字搜尋</h2>
@@ -189,9 +216,9 @@
       <section class="panel app-info-panel">
   <h2 class="section-title">ℹ️ アプリ情報</h2>
   <div class="app-version-card">
-    <div><span class="app-label">📱 澄詞</span><strong>Ver.<span id="appVersion">6.7.2</span></strong></div>
+    <div><span class="app-label">📱 澄詞</span><strong>Ver.<span id="appVersion">6.8.0</span></strong></div>
     <div id="updateState" class="update-state state-unchecked">⚪ 未確認</div>
-    <div class="app-build-date">リリース：2026-08-18</div>
+    <div class="app-build-date">リリース：2026-09-06</div>
   </div>
   <div class="button-row">
     <button id="checkUpdateButton" onclick="checkForAppUpdate(true)">🔄 更新を確認</button>
@@ -211,7 +238,7 @@
 </section>
     </section>
   </main>
-  <footer>Ver.6.7.2｜ホーム画面版から更新を確認できます</footer>
+  <footer>Ver.6.8.0｜ホーム画面版から更新を確認できます</footer>
 
   <div id="updateModal" class="update-modal" hidden>
     <div class="update-modal-backdrop" onclick="closeUpdateModal()"></div>
@@ -225,6 +252,6 @@
       </div>
     </section>
   </div>
-  <script src="data/words.js?v=6.7.2"></script><script src="js/data-model.js?v=6.7.2"></script><script src="data/zhuyin-dict.js?v=6.7.2"></script><script src="js/zhuyin-lite.js?v=6.7.2"></script><script src="js/app.js?v=6.7.2"></script>
+  <script src="data/words.js?v=6.8.0"></script><script src="js/data-model.js?v=6.8.0"></script><script src="data/zhuyin-dict.js?v=6.8.0"></script><script src="js/zhuyin-lite.js?v=6.8.0"></script><script src="js/app.js?v=6.8.0"></script><script src="js/shortcut-export.js?v=6.8.0"></script>
 </body>
 </html>
