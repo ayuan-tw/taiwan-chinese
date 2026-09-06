@@ -661,11 +661,11 @@ async function refreshOfflineCache(){
   }
   setOfflineStatus('オフライン用データを更新中…');
   try{
-    const currentCache='chengci-v6-7-2-offline';
+    const currentCache='chengci-v6-8-0-offline';
     const keys=await caches.keys();
     await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!==currentCache).map(k=>caches.delete(k)));
     const cache=await caches.open(currentCache);
-    await cache.addAll(['./','./index.html?v=6.7.2','./css/style.css?v=6.7.2','./js/app.js?v=6.7.2','./js/data-model.js?v=6.7.2','./data/words.js?v=6.7.2','./data/zhuyin-dict.js?v=6.7.2','./js/zhuyin-lite.js?v=6.7.2','./manifest.json?v=6.7.2','./version.json','./CHANGELOG.md','./assets/icon.svg']);
+    await cache.addAll(['./','./index.html?v=6.8.0','./css/style.css?v=6.8.0','./js/app.js?v=6.8.0','./js/shortcut-export.js?v=6.8.0','./js/data-model.js?v=6.8.0','./data/words.js?v=6.8.0','./data/zhuyin-dict.js?v=6.8.0','./js/zhuyin-lite.js?v=6.8.0','./manifest.json?v=6.8.0','./version.json','./CHANGELOG.md','./assets/icon.svg']);
     setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
   }catch(e){
     setOfflineStatus('保存更新に失敗しました。ネット接続がある時にもう一度試してね。');
@@ -673,7 +673,7 @@ async function refreshOfflineCache(){
 }
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./service-worker.js?v=6.7.2').then(async(reg)=>{
+    navigator.serviceWorker.register('./service-worker.js?v=6.8.0').then(async(reg)=>{
       await reg.update();
       if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
       setOfflineStatus('オフライン保存OK。初回読み込み後は電波なしでも使えます。', true);
@@ -735,7 +735,7 @@ searchWords=function(){let k=document.getElementById("searchInput").value.trim()
 window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
 
 // Ver.5.7.0 app update manager
-const CHENGCI_APP_VERSION = '6.7.2';
+const CHENGCI_APP_VERSION = '6.8.0';
 let pendingAppVersion = null;
 let updateReloading = false;
 
@@ -831,7 +831,7 @@ async function applyAppUpdate(){
     }
     if('caches' in window){
       const keys=await caches.keys();
-      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-7-2-offline').map(k=>caches.delete(k)));
+      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-8-0-offline').map(k=>caches.delete(k)));
     }
     updateReloading=true;
     setTimeout(()=>location.replace(`./?updated=${Date.now()}`),900);
