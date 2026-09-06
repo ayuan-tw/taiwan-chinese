@@ -171,6 +171,70 @@ input {
   margin: 8px 0 0;
 }
 
+.export-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 18px 0 12px;
+}
+
+.export-controls label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.export-controls select {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: white;
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.export-controls .export-example-toggle {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  color: var(--ink);
+}
+
+.export-example-toggle input {
+  width: auto;
+}
+
+.shortcut-export-output {
+  width: 100%;
+  min-height: 180px;
+  margin: 12px 0;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--ink);
+  font: 0.92rem/1.65 "Hiragino Sans", "Yu Gothic", "Noto Sans TC", sans-serif;
+  resize: vertical;
+}
+
+.shortcut-export-actions {
+  margin-top: 4px;
+}
+
+@media (max-width: 560px) {
+  .export-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .export-controls .export-example-toggle {
+    grid-column: auto;
+  }
+}
+
 .result-area {
   margin-top: 18px;
 }

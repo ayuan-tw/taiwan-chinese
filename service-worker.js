@@ -1,10 +1,11 @@
-const CACHE_NAME = 'chengci-v6-7-2-offline';
-const APP_VERSION = '6.7.2';
+const CACHE_NAME = 'chengci-v6-8-0-offline';
+const APP_VERSION = '6.8.0';
 const OFFLINE_ASSETS = [
   './',
   './index.html',
   './css/style.css',
   './js/app.js',
+  './js/shortcut-export.js',
   './js/data-model.js',
   './data/words.js',
   './data/zhuyin-dict.js',

@@ -1,4 +1,4 @@
-// 澄詞 Ver.6.7 shared learning-item model
+// 澄詞 Ver.6.8 shared learning-item model
 // Adds a stable common ID, type, and normalized tags without changing the
 // existing words / patterns / idioms / phrases arrays used by the app.
 (function(){
