@@ -3,6 +3,8 @@
 let availableVoices=[];
 let audioPrefs=JSON.parse(localStorage.getItem("audioPrefs")||"{}");
 let speechRepeatTimer=null;
+let speechWatchTimer=null;
+let activeSpeechUtterance=null;
 let speechRunId=0;
 let freeSpeakPrefs=JSON.parse(localStorage.getItem("freeSpeakPrefs")||"{}");
 
@@ -60,14 +62,16 @@ function pickChineseVoice(){
     const v=availableVoices.find(v=>v.voiceURI===selected);
     if(v)return v;
   }
-  return availableVoices.find(v=>/zh[-_]?TW/i.test(v.lang||""))
-      || availableVoices.find(v=>/zh[-_]?Hant/i.test(v.lang||""))
-      || availableVoices.find(v=>/zh[-_]?HK/i.test(v.lang||""))
-      || availableVoices.find(v=>/^zh/i.test(v.lang||""))
-      || null;
+  // 自動選択時はvoiceを固定せず、lang="zh-TW"からOSに選ばせる。
+  return null;
 }
 function prepareSpeechText(text){
   return String(text||"").replace(/[ㄅ-ㄩˊˇˋ˙\s]+/g," ").trim();
+}
+function reportSpeechState(message,urgent=false){
+  const status=document.getElementById("freeSpeakStatus");
+  if(status)status.textContent=message;
+  if(urgent&&typeof showAppToast==="function")showAppToast(message);
 }
 function speakText(text, options={}){
   const clean=prepareSpeechText(text);
@@ -76,9 +80,12 @@ function speakText(text, options={}){
     alert("このブラウザは音声読み上げに対応していないみたい。Chrome / Safariで試してね。");
     return;
   }
-  if(typeof window.releaseSpeechRecognitionForPlayback==="function")window.releaseSpeechRecognitionForPlayback();
-  window.speechSynthesis.cancel();
+  const synth=window.speechSynthesis;
+  // 通常の読み上げは音声認識から完全に独立させる。
+  // iPhone Safariでは空のキューへのcancel()が次のspeak()を止める場合があるため、再生中だけ停止する。
+  if(synth.speaking||synth.pending)synth.cancel();
   if(speechRepeatTimer)clearTimeout(speechRepeatTimer);
+  if(speechWatchTimer)clearTimeout(speechWatchTimer);
   const repeat=Math.max(1,Math.min(Number(options.repeat||1),10));
   const gap=Math.max(0,Number(options.gap||0));
   const runId=++speechRunId;
@@ -88,18 +95,42 @@ function speakText(text, options={}){
     u.lang="zh-TW";
     u.rate=getSpeechRate();
     u.pitch=1;
+    u.volume=1;
     const voice=pickChineseVoice();
     if(voice)u.voice=voice;
+    activeSpeechUtterance=u;
+    u.onstart=()=>{
+      if(runId!==speechRunId)return;
+      if(speechWatchTimer){clearTimeout(speechWatchTimer);speechWatchTimer=null;}
+      reportSpeechState(`🔊 読み上げ中（${u.voice?u.voice.name:"自動音声"}）`);
+    };
     u.onend=()=>{
       if(runId!==speechRunId)return;
+      if(speechWatchTimer){clearTimeout(speechWatchTimer);speechWatchTimer=null;}
+      activeSpeechUtterance=null;
       if(count<repeat){
         speechRepeatTimer=setTimeout(()=>speakOne(count+1),gap);
-      }
+      }else reportSpeechState("✅ 読み上げが完了しました");
     };
-    u.onerror=()=>{};
-    window.speechSynthesis.speak(u);
+    u.onerror=event=>{
+      if(runId!==speechRunId)return;
+      if(speechWatchTimer){clearTimeout(speechWatchTimer);speechWatchTimer=null;}
+      activeSpeechUtterance=null;
+      reportSpeechState(`⚠️ 読み上げエラー：${event.error||"不明"}`,true);
+    };
+    reportSpeechState("🔊 読み上げを準備しています…");
+    speechWatchTimer=setTimeout(()=>{
+      if(runId!==speechRunId||!activeSpeechUtterance)return;
+      reportSpeechState(`⚠️ 音声が開始していません（voices:${synth.getVoices().length} / paused:${synth.paused} / pending:${synth.pending}）`,true);
+    },1800);
+    try{
+      synth.speak(u);
+    }catch(error){
+      if(speechWatchTimer){clearTimeout(speechWatchTimer);speechWatchTimer=null;}
+      activeSpeechUtterance=null;
+      reportSpeechState(`⚠️ 読み上げ例外：${error&&error.message?error.message:"不明"}`,true);
+    }
   };
-  // iPhoneで正常に動作していたVer.6.8.0と同じ cancel → speak の経路を使う。
   speakOne(1);
 }
 function stopSpeech(){
@@ -108,6 +139,11 @@ function stopSpeech(){
     clearTimeout(speechRepeatTimer);
     speechRepeatTimer=null;
   }
+  if(speechWatchTimer){
+    clearTimeout(speechWatchTimer);
+    speechWatchTimer=null;
+  }
+  activeSpeechUtterance=null;
   if("speechSynthesis" in window)window.speechSynthesis.cancel();
 }
 function stopFreeSpeech(){
@@ -171,7 +207,6 @@ function speakFreeText(){
   saveFreeSpeakPrefs();
   const repeat=getFreeSpeakRepeat();
   speakText(text,{repeat,gap:getFreeSpeakGap()});
-  if(status)status.innerHTML=`<span class="correct">読み上げ中${repeat>1?`（${repeat}回）`:""}：</span><span class="free-speak-preview">${escapeHtml(text).slice(0,80)}${text.length>80?"…":""}</span>`;
 }
 async function pasteFreeText(){
   const el=document.getElementById("freeSpeakText");
@@ -665,11 +700,11 @@ async function refreshOfflineCache(){
   }
   setOfflineStatus('オフライン用データを更新中…');
   try{
-    const currentCache='chengci-v6-9-3-offline';
+    const currentCache='chengci-v6-9-4-offline';
     const keys=await caches.keys();
     await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!==currentCache).map(k=>caches.delete(k)));
     const cache=await caches.open(currentCache);
-    await cache.addAll(['./','./index.html?v=6.9.3','./css/style.css?v=6.9.3','./js/app.js?v=6.9.3','./js/shortcut-export.js?v=6.9.3','./js/data-model.js?v=6.9.3','./data/words.js?v=6.9.3','./data/zhuyin-dict.js?v=6.9.3','./js/zhuyin-lite.js?v=6.9.3','./js/speech-recognition.js?v=6.9.3','./manifest.json?v=6.9.3','./version.json','./CHANGELOG.md','./assets/icon.svg']);
+    await cache.addAll(['./','./index.html?v=6.9.4','./css/style.css?v=6.9.4','./js/app.js?v=6.9.4','./js/shortcut-export.js?v=6.9.4','./js/data-model.js?v=6.9.4','./data/words.js?v=6.9.4','./data/zhuyin-dict.js?v=6.9.4','./js/zhuyin-lite.js?v=6.9.4','./js/speech-recognition.js?v=6.9.4','./manifest.json?v=6.9.4','./version.json','./CHANGELOG.md','./assets/icon.svg']);
     setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
   }catch(e){
     setOfflineStatus('保存更新に失敗しました。ネット接続がある時にもう一度試してね。');
@@ -677,7 +712,7 @@ async function refreshOfflineCache(){
 }
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./service-worker.js?v=6.9.3').then(async(reg)=>{
+    navigator.serviceWorker.register('./service-worker.js?v=6.9.4').then(async(reg)=>{
       await reg.update();
       if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
       setOfflineStatus('オフライン保存OK。初回読み込み後は電波なしでも使えます。', true);
@@ -739,7 +774,7 @@ searchWords=function(){let k=document.getElementById("searchInput").value.trim()
 window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
 
 // Ver.5.7.0 app update manager
-const CHENGCI_APP_VERSION = '6.9.3';
+const CHENGCI_APP_VERSION = '6.9.4';
 let pendingAppVersion = null;
 let updateReloading = false;
 
@@ -835,7 +870,7 @@ async function applyAppUpdate(){
     }
     if('caches' in window){
       const keys=await caches.keys();
-      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-9-3-offline').map(k=>caches.delete(k)));
+      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-9-4-offline').map(k=>caches.delete(k)));
     }
     updateReloading=true;
     setTimeout(()=>location.replace(`./?updated=${Date.now()}`),900);
