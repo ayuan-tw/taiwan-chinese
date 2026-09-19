@@ -3,7 +3,6 @@
 let availableVoices=[];
 let audioPrefs=JSON.parse(localStorage.getItem("audioPrefs")||"{}");
 let speechRepeatTimer=null;
-let speechStartTimer=null;
 let speechRunId=0;
 let freeSpeakPrefs=JSON.parse(localStorage.getItem("freeSpeakPrefs")||"{}");
 
@@ -77,13 +76,12 @@ function speakText(text, options={}){
     alert("このブラウザは音声読み上げに対応していないみたい。Chrome / Safariで試してね。");
     return;
   }
-  const releasedRecognition=typeof window.releaseSpeechRecognitionForPlayback==="function"
-    ?window.releaseSpeechRecognitionForPlayback()
-    :false;
+  if(typeof window.releaseSpeechRecognitionForPlayback==="function"){
+    window.releaseSpeechRecognitionForPlayback();
+  }
   window.speechSynthesis.cancel();
   window.speechSynthesis.resume();
   if(speechRepeatTimer)clearTimeout(speechRepeatTimer);
-  if(speechStartTimer)clearTimeout(speechStartTimer);
   const repeat=Math.max(1,Math.min(Number(options.repeat||1),10));
   const gap=Math.max(0,Number(options.gap||0));
   const runId=++speechRunId;
@@ -105,21 +103,12 @@ function speakText(text, options={}){
     window.speechSynthesis.resume();
     window.speechSynthesis.speak(u);
   };
-  // iPhoneではマイク終了直後、音声出力が読み上げへ戻るまで少し時間が必要。
-  // cancel()直後のspeak()も無音になることがあるため、通常時も短く間を置く。
-  speechStartTimer=setTimeout(()=>{
-    speechStartTimer=null;
-    if(runId!==speechRunId)return;
-    window.speechSynthesis.resume();
-    speakOne(1);
-  },releasedRecognition?280:80);
+  // iPhone Safariはユーザー操作から遅延すると読み上げを拒否することがある。
+  // 🔊を押した同じイベント内で同期的にキューへ入れる。
+  speakOne(1);
 }
 function stopSpeech(options={}){
   speechRunId++;
-  if(speechStartTimer){
-    clearTimeout(speechStartTimer);
-    speechStartTimer=null;
-  }
   if(speechRepeatTimer){
     clearTimeout(speechRepeatTimer);
     speechRepeatTimer=null;
@@ -684,11 +673,11 @@ async function refreshOfflineCache(){
   }
   setOfflineStatus('オフライン用データを更新中…');
   try{
-    const currentCache='chengci-v6-9-1-offline';
+    const currentCache='chengci-v6-9-2-offline';
     const keys=await caches.keys();
     await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!==currentCache).map(k=>caches.delete(k)));
     const cache=await caches.open(currentCache);
-    await cache.addAll(['./','./index.html?v=6.9.1','./css/style.css?v=6.9.1','./js/app.js?v=6.9.1','./js/shortcut-export.js?v=6.9.1','./js/data-model.js?v=6.9.1','./data/words.js?v=6.9.1','./data/zhuyin-dict.js?v=6.9.1','./js/zhuyin-lite.js?v=6.9.1','./js/speech-recognition.js?v=6.9.1','./manifest.json?v=6.9.1','./version.json','./CHANGELOG.md','./assets/icon.svg']);
+    await cache.addAll(['./','./index.html?v=6.9.2','./css/style.css?v=6.9.2','./js/app.js?v=6.9.2','./js/shortcut-export.js?v=6.9.2','./js/data-model.js?v=6.9.2','./data/words.js?v=6.9.2','./data/zhuyin-dict.js?v=6.9.2','./js/zhuyin-lite.js?v=6.9.2','./js/speech-recognition.js?v=6.9.2','./manifest.json?v=6.9.2','./version.json','./CHANGELOG.md','./assets/icon.svg']);
     setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
   }catch(e){
     setOfflineStatus('保存更新に失敗しました。ネット接続がある時にもう一度試してね。');
@@ -696,7 +685,7 @@ async function refreshOfflineCache(){
 }
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./service-worker.js?v=6.9.1').then(async(reg)=>{
+    navigator.serviceWorker.register('./service-worker.js?v=6.9.2').then(async(reg)=>{
       await reg.update();
       if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
       setOfflineStatus('オフライン保存OK。初回読み込み後は電波なしでも使えます。', true);
@@ -758,7 +747,7 @@ searchWords=function(){let k=document.getElementById("searchInput").value.trim()
 window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
 
 // Ver.5.7.0 app update manager
-const CHENGCI_APP_VERSION = '6.9.1';
+const CHENGCI_APP_VERSION = '6.9.2';
 let pendingAppVersion = null;
 let updateReloading = false;
 
@@ -854,7 +843,7 @@ async function applyAppUpdate(){
     }
     if('caches' in window){
       const keys=await caches.keys();
-      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-9-1-offline').map(k=>caches.delete(k)));
+      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-9-2-offline').map(k=>caches.delete(k)));
     }
     updateReloading=true;
     setTimeout(()=>location.replace(`./?updated=${Date.now()}`),900);
