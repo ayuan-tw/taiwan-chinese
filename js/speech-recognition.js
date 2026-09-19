@@ -1,4 +1,4 @@
-// 澄詞 Ver.6.9.1: 台湾華語の音声認識・文字起こし・お手本比較
+// 澄詞 Ver.6.9.2: 台湾華語の音声認識・文字起こし・お手本比較
 (function(){
   const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   let recognition=null;
