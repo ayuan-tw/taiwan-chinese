@@ -1,5 +1,5 @@
-const CACHE_NAME = 'chengci-v6-8-0-offline';
-const APP_VERSION = '6.8.0';
+const CACHE_NAME = 'chengci-v6-9-0-offline';
+const APP_VERSION = '6.9.0';
 const OFFLINE_ASSETS = [
   './',
   './index.html',
@@ -10,6 +10,7 @@ const OFFLINE_ASSETS = [
   './data/words.js',
   './data/zhuyin-dict.js',
   './js/zhuyin-lite.js',
+  './js/speech-recognition.js',
   './manifest.json',
   './assets/icon.svg',
   './version.json',

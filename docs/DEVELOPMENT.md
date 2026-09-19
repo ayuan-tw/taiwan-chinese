@@ -1,7 +1,7 @@
 # 澄詞 開発管理
 
 ## 現在の正式版
-Ver.6.8.0
+Ver.6.9.0
 
 ## Ver.6のテーマ
 辞書エンジン分離＋リスニング強化
@@ -16,6 +16,7 @@ Ver.6.8.0
 - `service-worker.js`：PWAキャッシュ
 - `js/data-model.js`：共通 ID・種類・タグ分類
 - `js/shortcut-export.js`：ショートカット用テキストの絞り込み・整形・コピー・共有・保存
+- `js/speech-recognition.js`：台湾華語の文字起こし・お手本比較・ブラウザ対応判定
 - `docs/TAG_TAXONOMY.md`：タグの分類と絞り込み仕様
 - `docs/PENDING_ADDITIONS.md`：重複整理前の追加候補（追加完了時に0件へ戻す）
 

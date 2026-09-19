@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>澄詞｜あゆあん台湾華語</title>
-  <link rel="manifest" href="manifest.json?v=6.8.0" />
+  <link rel="manifest" href="manifest.json?v=6.9.0" />
   <meta name="theme-color" content="#4f8f88" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="澄詞" />
-  <link rel="apple-touch-icon" href="assets/icon.svg?v=6.8.0" />
-  <link rel="stylesheet" href="css/style.css?v=6.8.0" />
+  <link rel="apple-touch-icon" href="assets/icon.svg?v=6.9.0" />
+  <link rel="stylesheet" href="css/style.css?v=6.9.0" />
 </head>
 <body>
   <div id="dictUpdateToast" class="dict-update-toast" hidden></div>
@@ -197,6 +197,7 @@
       </div>
       <div class="button-row free-speak-buttons">
         <button onclick="speakFreeText()">🔊 読み上げ</button>
+        <button onclick="startSpeechPracticeFromFreeText()">🎙 読んでみる</button>
         <button class="stop-button" onclick="stopFreeSpeech()">⏹ 停止</button>
         <button class="secondary" onclick="showFreeSpeakZhuyin()">📖 注音表示</button>
         <button class="secondary" onclick="pasteFreeText()">📋 貼り付け</button>
@@ -211,14 +212,32 @@
       <div id="freeSpeakStatus" class="free-speak-status"></div>
       <div id="freeSpeakZhuyin" class="free-speak-zhuyin" hidden></div>
     </section>
+      <section class="panel speech-practice-panel" id="speechPracticePanel">
+      <h2 class="section-title">🎙 読んで文字起こし</h2>
+      <p class="hint">マイクで読んだ台湾華語を文字にします。お手本がある場合は、認識結果との違いも表示します。</p>
+      <div id="speechRecognitionSupport" class="speech-support" aria-live="polite"></div>
+      <div class="speech-target-box">
+        <span>お手本</span>
+        <div id="speechPracticeTarget" class="speech-target" lang="zh-Hant-TW"></div>
+      </div>
+      <div class="button-row speech-practice-actions">
+        <button id="speechPracticeStart" onclick="startSpeechPracticeFromFreeText()">🎙 認識開始</button>
+        <button id="speechPracticeStop" class="stop-button" onclick="stopSpeechRecognition()">⏹ 認識終了</button>
+        <button class="secondary" onclick="clearSpeechRecognition()">🗑 結果を消す</button>
+      </div>
+      <div id="speechPracticeStatus" class="speech-practice-status" aria-live="polite"></div>
+      <div id="speechPracticeTranscript" class="speech-transcript" aria-live="polite"></div>
+      <div id="speechPracticeResult" class="speech-practice-result"></div>
+      <p class="speech-privacy-note">※ ブラウザによっては音声が認識サービスへ送信されます。通常はネット接続とマイク許可が必要です。</p>
+    </section>
     </section>
     <section class="tab-page" id="tab-settings">
       <section class="panel app-info-panel">
   <h2 class="section-title">ℹ️ アプリ情報</h2>
   <div class="app-version-card">
-    <div><span class="app-label">📱 澄詞</span><strong>Ver.<span id="appVersion">6.8.0</span></strong></div>
+    <div><span class="app-label">📱 澄詞</span><strong>Ver.<span id="appVersion">6.9.0</span></strong></div>
     <div id="updateState" class="update-state state-unchecked">⚪ 未確認</div>
-    <div class="app-build-date">リリース：2026-09-06</div>
+    <div class="app-build-date">リリース：2026-09-19</div>
   </div>
   <div class="button-row">
     <button id="checkUpdateButton" onclick="checkForAppUpdate(true)">🔄 更新を確認</button>
@@ -238,7 +257,7 @@
 </section>
     </section>
   </main>
-  <footer>Ver.6.8.0｜ホーム画面版から更新を確認できます</footer>
+  <footer>Ver.6.9.0｜ホーム画面版から更新を確認できます</footer>
 
   <div id="updateModal" class="update-modal" hidden>
     <div class="update-modal-backdrop" onclick="closeUpdateModal()"></div>
@@ -252,6 +271,6 @@
       </div>
     </section>
   </div>
-  <script src="data/words.js?v=6.8.0"></script><script src="js/data-model.js?v=6.8.0"></script><script src="data/zhuyin-dict.js?v=6.8.0"></script><script src="js/zhuyin-lite.js?v=6.8.0"></script><script src="js/app.js?v=6.8.0"></script><script src="js/shortcut-export.js?v=6.8.0"></script>
+  <script src="data/words.js?v=6.9.0"></script><script src="js/data-model.js?v=6.9.0"></script><script src="data/zhuyin-dict.js?v=6.9.0"></script><script src="js/zhuyin-lite.js?v=6.9.0"></script><script src="js/speech-recognition.js?v=6.9.0"></script><script src="js/app.js?v=6.9.0"></script><script src="js/shortcut-export.js?v=6.9.0"></script>
 </body>
 </html>

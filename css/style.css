@@ -823,3 +823,38 @@ body{
 .habit-example>strong{display:block;color:var(--dark);font-size:1rem;line-height:1.55}
 @media(max-width:520px){.habit-list{grid-template-columns:1fr}.habit-card .word{font-size:1.34rem}}
 @media(max-width:640px){.habit-card .habit-variants{display:none}.habit-card.open .habit-variants{display:grid}}
+
+/* Ver.6.9.0 台湾華語の音声認識・文字起こし */
+.speech-practice-panel{border-top:4px solid #bf718b;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,247,250,.94))}
+.speech-support{margin:12px 0;padding:10px 12px;border-radius:12px;background:#eef8f5;color:var(--main-dark);font-size:.88rem;font-weight:800;line-height:1.55}
+.speech-support.is-unsupported{background:#fff0f0;color:var(--bad)}
+.speech-target-box{margin:14px 0;padding:14px;border:1px solid rgba(191,113,139,.28);border-radius:16px;background:#fff}
+.speech-target-box>span,.speech-transcript-label,.speech-compare-grid>div>span{display:block;margin-bottom:6px;color:var(--muted);font-size:.78rem;font-weight:800}
+.speech-target{font-size:1.22rem;font-weight:900;line-height:1.7;color:var(--dark);word-break:break-word}
+.speech-target.is-empty{font-size:.92rem;font-weight:700;color:var(--muted)}
+.speech-practice-actions{margin:10px 0}
+.speech-practice-status{min-height:1.5rem;margin:10px 0;text-align:center;line-height:1.6}
+.speech-transcript{min-height:86px;margin:12px 0;padding:14px;border:2px dashed rgba(79,143,136,.35);border-radius:16px;background:#f8fdfc}
+.speech-transcript strong{display:block;font-size:1.28rem;line-height:1.7;color:var(--main-dark);word-break:break-word}
+.speech-transcript-placeholder{display:flex;min-height:56px;align-items:center;justify-content:center;color:var(--muted);font-size:.9rem}
+.speech-practice-result{margin-top:12px}
+.speech-score{display:flex;align-items:baseline;justify-content:center;gap:8px;margin:12px auto;padding:10px 16px;width:max-content;border-radius:999px;background:#eef7fb;color:var(--dark)}
+.speech-score strong{font-size:1.55rem}.speech-score span{font-size:.8rem;font-weight:800}
+.speech-score-good{background:#e7f7f2;color:var(--good)}
+.speech-score-mid{background:#fff8df;color:#896b0c}
+.speech-score-low{background:#fff0f0;color:var(--bad)}
+.speech-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.speech-compare-grid>div{padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.speech-compare-grid p{margin:0;font-size:1.15rem;font-weight:900;line-height:1.8;word-break:break-word}
+.speech-match{color:var(--good);background:#e7f7f2;border-radius:4px}
+.speech-miss{color:var(--bad);background:#ffe4e4;border-radius:4px;text-decoration:underline}
+.speech-extra{color:#8b6410;background:#fff0bd;border-radius:4px}
+.speech-compare-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:12px 0;color:var(--muted);font-size:.78rem;font-weight:800}
+.speech-compare-legend i{display:inline-block;width:13px;height:13px;margin-right:4px;vertical-align:-2px}
+.speech-compare-note,.speech-privacy-note{margin:10px 0 0;color:var(--muted);font-size:.8rem;line-height:1.6}
+.speech-compare-note{text-align:center}
+@media(max-width:520px){
+  .speech-compare-grid{grid-template-columns:1fr}
+  .speech-practice-actions button{flex:1 1 calc(50% - 8px)}
+  .speech-target,.speech-transcript strong{font-size:1.1rem}
+}
