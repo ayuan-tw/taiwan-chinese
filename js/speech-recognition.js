@@ -1,4 +1,4 @@
-// 澄詞 Ver.6.9.0: 台湾華語の音声認識・文字起こし・お手本比較
+// 澄詞 Ver.6.9.1: 台湾華語の音声認識・文字起こし・お手本比較
 (function(){
   const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   let recognition=null;
@@ -113,7 +113,8 @@
       const freeText=document.getElementById("freeSpeakText");
       setTarget(freeText?freeText.value:"");
     }
-    if(typeof stopSpeech==="function")stopSpeech();
+    if(typeof stopSpeech==="function")stopSpeech({resume:false});
+    setStatus("マイクを準備中…「聞いています」が出てから読んでね。");
     finalTranscript="";latestTranscript="";
     renderTranscript("");
     const {result}=getElements();
@@ -173,6 +174,17 @@
     if(recognition&&isListening){recognition.stop();setStatus("認識を終了しています…");}
   }
 
+  function releaseForPlayback(){
+    const session=recognition;
+    recognition=null;
+    setListeningState(false);
+    if(session){
+      try{session.abort();}catch(error){}
+      return true;
+    }
+    return false;
+  }
+
   function clearRecognition(){
     if(recognition&&isListening)recognition.abort();
     recognition=null;setListeningState(false);finalTranscript="";latestTranscript="";targetText="";
@@ -205,6 +217,7 @@
   window.startSpeechPracticeFromFreeText=startFromFreeText;
   window.stopSpeechRecognition=stopRecognition;
   window.clearSpeechRecognition=clearRecognition;
+  window.releaseSpeechRecognitionForPlayback=releaseForPlayback;
   window.CHENGCI_SPEECH_RECOGNITION={supported:!!Recognition,normalizeText,alignText,start:startRecognition};
   window.addEventListener("load",init);
 })();
