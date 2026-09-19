@@ -1,4 +1,4 @@
-// 澄詞 Ver.6.9.2: 台湾華語の音声認識・文字起こし・お手本比較
+// 澄詞 Ver.6.9.3: 台湾華語の音声認識・文字起こし・お手本比較
 (function(){
   const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   let recognition=null;
@@ -113,7 +113,7 @@
       const freeText=document.getElementById("freeSpeakText");
       setTarget(freeText?freeText.value:"");
     }
-    if(typeof stopSpeech==="function")stopSpeech({resume:false});
+    if(typeof stopSpeech==="function")stopSpeech();
     setStatus("マイクを準備中…「聞いています」が出てから読んでね。");
     finalTranscript="";latestTranscript="";
     renderTranscript("");
@@ -143,6 +143,7 @@
     };
     session.onend=()=>{
       if(recognition!==session)return;
+      recognition=null;
       setListeningState(false);
       const text=(finalTranscript||latestTranscript).trim();
       if(text){
@@ -175,6 +176,7 @@
   }
 
   function releaseForPlayback(){
+    if(!recognition||!isListening)return false;
     const session=recognition;
     recognition=null;
     setListeningState(false);
