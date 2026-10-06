@@ -229,7 +229,7 @@ test('backup comparison token changes when another choice advances the alternati
 
 test('shared records upgrade old schema-1 backups and merge favorite removals without resurrection', async () => {
   const a = make(), b = make(); await Promise.all([a.ready, b.ready]);
-  assert.deepEqual(a.getKinds(), ['cards', 'progress', 'favorites', 'study']);
+  assert.deepEqual(a.getKinds(), ['cards', 'progress', 'favorites', 'study', 'remembered']);
   await a.seedShared('legacy-baseline-v1', [{ kind: 'favorites', id: 'word-one', active: true }]);
   const add = await a.prepareNext(); const initial = remote(add);
   await a.applyRemote('favorites', [initial]); await b.applyRemote('favorites', [initial]);

@@ -10,7 +10,11 @@ test('Pages Direct Upload package is module-worker compatible and excludes priva
   const result=spawnSync(process.execPath,[fileURLToPath(new URL('../build-pages.mjs',import.meta.url))],{encoding:'utf8',env:{...process.env,CHENGCI_BUILD_TAG:tag}});
   assert.equal(result.status,0,result.stderr);
   const base=new URL('../pages-public-'+tag+'/',import.meta.url);
-  assert.equal(await readFile(new URL('_worker.js',base),'utf8'),await readFile(new URL('../worker.mjs',import.meta.url),'utf8'));
+  const expectedWorker=(await readFile(new URL('../worker.mjs',import.meta.url),'utf8')).replace("import { vocabularySeed } from './vocabulary-seed.mjs';",'const vocabularySeed = '+JSON.stringify(testing.vocabularySeed)+';');
+  const packagedWorker=await readFile(new URL('_worker.js',base),'utf8');
+  assert.equal(packagedWorker,expectedWorker);
+  assert.doesNotMatch(packagedWorker,/from '\.\/vocabulary-seed\.mjs'/);
+  assert.equal(spawnSync(process.execPath,['--check',fileURLToPath(new URL('_worker.js',base))],{encoding:'utf8'}).status,0);
   assert.deepEqual(JSON.parse(await readFile(new URL('_routes.json',base),'utf8')),{version:1,include:['/*'],exclude:[]});
   for(const forbidden of ['cloudflare','docs','tests','.git','.env','wrangler.jsonc','migrations'])assert.ok(!(await readdir(base)).includes(forbidden));
   const hashes=JSON.parse(await readFile(new URL('asset-revisions.json',base),'utf8'));

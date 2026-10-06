@@ -16,7 +16,7 @@ async function fixture(options = {}) {
   const fetch = async (path, init) => {
     if (path === '/api/config') { server.configCalls++; if (server.failConfig > 0) { server.failConfig--; throw Error('Temporary startup connection failure'); } return reply({ enabled: true }); }
     if (!server.authenticated) return reply({ error: 'login_required' }, 401);
-    if (path === '/api/session') return reply({ authenticated: true, user: { uid: 'owner', email: 'owner@example.test', emailVerified: true }, csrfToken: server.csrf });
+    if (path === '/api/session') return reply({ authenticated: true, user: { uid: 'owner', email: 'owner@example.test', emailVerified: true }, csrfToken: server.csrf, vocabulary: { version: 1, epoch: 1, ready: true } });
     if (init.method === 'POST' && init.headers['X-CSRF-Token'] !== server.csrf) return reply({ error: 'invalid_csrf' }, 403);
     if (path === '/api/logout') {
       server.logoutCalls++;
@@ -28,12 +28,12 @@ async function fixture(options = {}) {
       server.writes++;
       if (server.hangWrites) { server.hangingSignal = init.signal; return new Promise(() => {}); }
       const op = JSON.parse(init.body).operations[0];
-      const response = reply({ results: [{ ...op, status: 'accepted', document: { ...op, schemaVersion: 1, revision: op.baseRevision + 1 } }] });
+      const response = reply({ epoch: 1, results: [{ ...op, status: 'accepted', document: { ...op, schemaVersion: 1, revision: op.baseRevision + 1 } }] });
       if (server.hangBody) { server.hangingSignal = init.signal; response.json = () => new Promise(() => {}); }
       return response;
     }
     if (server.failPull > 0) { server.failPull--; return reply({ error: 'service_unavailable' }, 503); }
-    return reply({ documents: [], cursor: null, checkpoint: 0 });
+    return reply({ epoch: 1, documents: [], cursor: null, checkpoint: 0 });
   };
   const store = createStore({ env, adapter: memoryAdapter(), broadcast: false });
   await store.ready;

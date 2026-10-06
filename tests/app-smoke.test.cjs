@@ -23,7 +23,7 @@ for (const match of html.matchAll(/\bid="([^"]+)"/g)) element(match[1]);
 element('recallRange').value = 'all';
 element('speechRate').value = '0.9';
 element('shortcutExportScope').value = 'tag';
-element('personalListFilter').value = 'mine';
+element('personalListFilter').value = 'all';
 const document = {
   getElementById(id){return elements.get(id) || null;},
   querySelectorAll(){return [];}, querySelector(){return null;},
@@ -39,7 +39,7 @@ const context = {
   CustomEvent: class {constructor(type, options={}){this.type=type;this.detail=options.detail;}},
   setTimeout(){},clearTimeout(){},setInterval(){},clearInterval(){},
   scrollTo(){},alert(){},confirm(){return true;},
-  fetch: async () => ({ok:true,json:async()=>({version:'6.10.2',notes:[]}),text:async()=>''}),
+  fetch: async () => ({ok:true,json:async()=>({version:'6.11.0',notes:[]}),text:async()=>''}),
   URL, Blob, Date, Promise, isSecureContext: false
 };
 context.window = context;

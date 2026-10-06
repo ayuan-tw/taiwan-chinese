@@ -45,3 +45,12 @@ test('draft restored after login cannot silently overwrite a card changed on ano
   assert.equal(after.store.get('card-review').meaning,'other device changed meaning','unseen remote change must remain until explicitly compared');
   assert.ok(after.e('personalMeaning').value==='my unsaved draft'||after.store.list().some(record=>record.id!=='card-review'&&record.meaning==='my unsaved draft'),'draft is retained for comparison or as a separate card');
 });
+
+test('redirected editor draft retains category tags and contrast notes',async()=>{
+  const storage=new Map(),before=await page(storage,1,'same meaning');
+  before.context.ChengciPersonalCards.open('card-review');
+  before.e('personalCategory').value='会話';before.e('personalTags').value='声調注意、例文';before.e('personalConfuse').value='混同しやすい語のメモ';
+  await before.e('personalConnect').listeners.click();await before.e('personalLoginCheckpoint').listeners.click();
+  const after=await page(storage,1,'same meaning');
+  assert.equal(after.e('personalCategory').value,'会話');assert.equal(after.e('personalTags').value,'声調注意、例文');assert.equal(after.e('personalConfuse').value,'混同しやすい語のメモ');
+});

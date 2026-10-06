@@ -114,3 +114,16 @@ A separate `node cloudflare/build-pages.mjs` creates a Pages Advanced Mode direc
 The public OAuth client is used only for Google Identity Services sign-in; no Gmail, Drive, refresh-token, client-secret or admin credential flow is used. Google's [Testing exception](https://support.google.com/cloud/answer/15549945) applies to Sign in with Google without extra OAuth scopes: this request does not require a test-user entry or inherit the seven-day authorization expiry. Google account-specific restrictions can still apply.
 
 The owner personally enters the approved email in the Worker secret `OWNER_EMAIL` before the activation deployment. Without `OWNER_SUB`, every login still requires a valid Google signature, issuer, exact audience, nonce, expiry, `email_verified:true`, and exact match to that configured email. There is no first-visitor ownership claim. After the owner successfully signs in, the D1 Console read `SELECT DISTINCT owner_sub FROM sessions;` reveals only the verified identity identifier, not usable authentication tokens. After confirming it, set `OWNER_SUB` as another private Worker secret through the authorized setup flow. Do not copy the full `/api/session` response into chat, because it includes a CSRF token. No subject is automatically adopted from an arbitrary login attempt.
+
+## Unified word vocabulary (6.11.0)
+
+Version 6.11.0 adds `migrations/0002_unified_vocabulary.sql`
+and a reviewed one-shot owner bootstrap. The schema alone is additive and does
+not reset data. The bootstrap privately archives every prior document before
+resetting learning, seeds the existing 152 stable word IDs without overwriting
+edits/tombstones, and fences stale clients with `X-Chengci-Epoch`. The new
+`remembered` kind is separate from per-round progress. See
+[`docs/UNIFIED_VOCABULARY_MIGRATION.md`](../docs/UNIFIED_VOCABULARY_MIGRATION.md)
+for the exact protocol, recovery, rollout order and verification requirements.
+Schema application, software deployment and the owner's explicit data bootstrap
+are separate steps; publishing the app alone does not reset learning.

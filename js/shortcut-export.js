@@ -47,7 +47,7 @@
   }
 
   function normalRecords(){
-    return [...words.map(wordRecord),...patterns.map(patternRecord),...idioms.map(idiomRecord)];
+    return [...(typeof allVocabularyWords==="function"?allVocabularyWords():window.ChengciPersonalCards?.allWords?.()||words).map(wordRecord),...patterns.map(patternRecord),...idioms.map(idiomRecord)];
   }
 
   function uniqueSorted(values){

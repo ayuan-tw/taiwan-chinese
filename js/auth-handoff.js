@@ -9,8 +9,9 @@
       if(draft==null)return null;
       if(typeof draft!=='object' || Array.isArray(draft) || typeof draft.editorId!=='string' || draft.editorId.length>150 || !draft.fields || typeof draft.fields!=='object')throw new Error('入力の一時保存を読み込めませんでした。');
       const fields={};
-      const limits={word:300,example:8000,zhuyin:1000,meaning:4000,exampleZhuyin:16000,note:8000,pronunciationStatus:20};
+      const limits={word:300,example:8000,zhuyin:1000,meaning:4000,exampleZhuyin:16000,note:8000,pronunciationStatus:20,category:300,confuse:4000};
       for(const [name,limit] of Object.entries(limits)){const value=draft.fields[name] || '';if(typeof value!=='string'||value.length>limit)throw new Error('入力の一時保存の形式が正しくありません。');fields[name]=value;}
+      const tags=draft.fields.tags || [];if(!Array.isArray(tags)||tags.length>100||tags.some(tag=>typeof tag!=='string'||tag.length>100))throw new Error('タグの一時保存を確認できませんでした。');fields.tags=[...tags];
       let baseline=null;
       if(draft.baseline!=null){const b=draft.baseline;if(!Number.isSafeInteger(b.revision)||b.revision<0||typeof b.localVersion!=='string'||b.localVersion.length>200||typeof b.fingerprint!=='string'||b.fingerprint.length>100000||typeof b.deleted!=='boolean')throw new Error('編集前の内容を確認できませんでした。');baseline={revision:b.revision,localVersion:b.localVersion,fingerprint:b.fingerprint,deleted:b.deleted};}
       return {editorId:draft.editorId,fields,baseline};

@@ -7,7 +7,7 @@ const {createSync}=require('../js/cloudflare-sync.js');
 function server() {
   const records=new Map(), calls=[];
   let clock=0;
-  const state={authenticated:true,networkError:false,writeStatus:0,loseAck:false,pageSize:2};
+  const state={authenticated:true,networkError:false,writeStatus:0,loseAck:false,pageSize:2,epoch:1};
   const key=(kind,id)=>kind+':'+id;
   const reply=(data,status=200)=>new Response(status===204?null:JSON.stringify(data),{status,headers:{'Content-Type':'application/json'}});
   function insert(kind,id,data){const old=records.get(key(kind,id));const doc={schemaVersion:1,id,operationId:'remote-'+(++clock),revision:(old?.document.revision||0)+1,deleted:false,updatedAt:new Date().toISOString(),data};records.set(key(kind,id),{kind,sequence:clock,document:doc});return doc;}
@@ -18,9 +18,11 @@ function server() {
     const url=new URL(path,'https://study.example');
     if(url.pathname==='/api/config')return reply({enabled:true,loginUrl:'/auth/login'});
     if(!state.authenticated)return reply({error:'unauthenticated'},401);
-    if(url.pathname==='/api/session')return reply({authenticated:true,user:{uid:'owner-123',email:'owner@example.test',emailVerified:true},csrfToken:'csrf-test',persistent:true,expiresAt:Date.now()+100000});
+    if(url.pathname==='/api/session')return reply({authenticated:true,user:{uid:'owner-123',email:'owner@example.test',emailVerified:true},csrfToken:'csrf-test',persistent:true,expiresAt:Date.now()+100000,vocabulary:{version:state.epoch,epoch:state.epoch,ready:state.epoch===1}});
     if(options.method==='POST')assert.equal(options.headers['X-CSRF-Token'],'csrf-test');
     if(url.pathname==='/api/logout'){state.authenticated=false;return reply(null,204);}
+    if(url.pathname==='/api/vocabulary/bootstrap'){state.epoch=1;for(const [id,row] of records)if(row.kind!=='cards')records.delete(id);return reply({vocabulary:{version:1,epoch:1,ready:true,backupId:'unified-words-v1'}});}
+    if(url.pathname!=='/api/logout' && options.headers['X-Chengci-Epoch']!==String(state.epoch))return reply({error:'vocabulary_epoch_changed'},409);
     if(url.pathname==='/api/sync') {
       if(state.writeStatus)return reply({error:'write denied'},state.writeStatus);
       const results=[];
@@ -31,13 +33,13 @@ function server() {
         else {const document={schemaVersion:1,id:op.id,operationId:op.operationId,revision:op.baseRevision+1,deleted:op.deleted,updatedAt:op.updatedAt,data:op.data};row={kind:op.kind,sequence:++clock,document};records.set(key(op.kind,op.id),row);results.push({kind:op.kind,id:op.id,operationId:op.operationId,status:'accepted',document});}
       }
       if(state.loseAck){state.loseAck=false;throw Error('Lost acknowledgement');}
-      return reply({results});
+      return reply({epoch:state.epoch,results});
     }
     const kind=url.pathname.slice('/api/'.length), since=Number(url.searchParams.get('since')||0),until=Number(url.searchParams.get('until')||clock),cursor=Number(url.searchParams.get('cursor')||0);
     if(since>clock)return reply({error:'checkpoint_ahead'},409);
     const rows=[...records.values()].filter(row=>row.kind===kind&&row.sequence>Math.max(since,cursor)&&row.sequence<=until).sort((a,b)=>a.sequence-b.sequence);
     const page=rows.slice(0,state.pageSize);
-    return reply({documents:page.map(row=>row.document),cursor:rows.length>page.length?String(page.at(-1).sequence):null,checkpoint:until});
+    return reply({epoch:state.epoch,documents:page.map(row=>row.document),cursor:rows.length>page.length?String(page.at(-1).sequence):null,checkpoint:until});
   }
   return {state,records,calls,fetch,insert,get clock(){return clock;}};
 }

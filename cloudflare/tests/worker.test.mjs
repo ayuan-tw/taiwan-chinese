@@ -299,7 +299,7 @@ test('delta clock advances only accepted writes; routine since pulls return only
   const initial = await (await app.request('/api/cards?since=0', opts)).json(); assert.equal(initial.documents.length, 2); assert.equal(initial.checkpoint, 2);
   await testing.applyOperation(app.DB, card('one', 'op-one'), () => NOW); // exact retry
   await testing.applyOperation(app.DB, card('one', 'conflict', 0), () => NOW); // rejected base
-  const unchanged = await (await app.request('/api/cards?since=2', opts)).json(); assert.deepEqual(unchanged, { documents: [], cursor: null, checkpoint: 2 });
+  const unchanged = await (await app.request('/api/cards?since=2', opts)).json(); assert.deepEqual(unchanged, { epoch: 0, documents: [], cursor: null, checkpoint: 2 });
   await testing.applyOperation(app.DB, { ...card('two', 'op-two-deleted', 1), deleted: true }, () => NOW);
   const changed = await (await app.request('/api/cards?since=2', opts)).json(); assert.equal(changed.documents.length, 1); assert.equal(changed.documents[0].id, 'two'); assert.equal(changed.documents[0].deleted, true); assert.equal(changed.checkpoint, 3);
   assert.equal(app.DB.sqlite.prepare('SELECT value FROM sync_clock').get().value, 3); app.DB.close();

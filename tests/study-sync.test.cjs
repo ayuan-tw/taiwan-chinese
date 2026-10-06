@@ -126,7 +126,8 @@ test('four devices converge through actual Cloudflare transport on favorites/rem
   const response = value => ({ ok: true, status: 200, json: async () => clone(value) });
   const fetch = async (path, init) => {
     if (path === '/api/config') return response({ enabled: true });
-    if (path === '/api/session') return response({ authenticated: true, user: { uid: 'same-owner', email: 'owner@example.test', emailVerified: true }, csrfToken: 'csrf' });
+    if (path === '/api/session') return response({ authenticated: true, user: { uid: 'same-owner', email: 'owner@example.test', emailVerified: true }, csrfToken: 'csrf', vocabulary: { version: 1, epoch: 1, ready: true } });
+    assert.equal(init.headers['X-Chengci-Epoch'], '1');
     if (path === '/api/sync') {
       const operation = JSON.parse(init.body).operations[0], key = operation.kind + ':' + operation.id;
       let item = documents.get(key), status = 'accepted';
@@ -134,10 +135,10 @@ test('four devices converge through actual Cloudflare transport on favorites/rem
         if ((item?.document.revision || 0) !== operation.baseRevision) status = 'conflict';
         else { item = { checkpoint: ++clock, document: remote(operation, operation.baseRevision + 1) }; documents.set(key, item); }
       }
-      return response({ results: [{ kind: operation.kind, id: operation.id, operationId: operation.operationId, status, document: item.document }] });
+      return response({ epoch: 1, results: [{ kind: operation.kind, id: operation.id, operationId: operation.operationId, status, document: item.document }] });
     }
     const url = new URL(path, 'https://study.example.test'), kind = url.pathname.split('/').pop(), since = Number(url.searchParams.get('since') || 0);
-    return response({ documents: [...documents].filter(([key, item]) => key.startsWith(kind + ':') && item.checkpoint > since).map(([, item]) => item.document), cursor: null, checkpoint: clock });
+    return response({ epoch: 1, documents: [...documents].filter(([key, item]) => key.startsWith(kind + ':') && item.checkpoint > since).map(([, item]) => item.document), cursor: null, checkpoint: clock });
   };
   const devices = [];
   for (let n = 0; n < 4; n++) {

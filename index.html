@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>澄詞｜あゆあん台湾華語</title>
-  <link rel="manifest" href="manifest.json?v=6.10.2" />
+  <link rel="manifest" href="manifest.json?v=6.11.0" />
   <meta name="theme-color" content="#4f8f88" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="澄詞" />
-  <link rel="apple-touch-icon" href="assets/icon.svg?v=6.10.2" />
-  <link rel="stylesheet" href="css/style.css?v=6.10.2" />
+  <link rel="apple-touch-icon" href="assets/icon.svg?v=6.11.0" />
+  <link rel="stylesheet" href="css/style.css?v=6.11.0" />
 </head>
 <body>
   <div id="dictUpdateToast" class="dict-update-toast" hidden></div>
@@ -65,7 +65,7 @@
     </section>
       <section class="panel recall-panel" id="recallPanel">
       <h2 class="section-title">🃏 思い出す単語帳</h2>
-      <p class="hint">表は繁體字だけ。読めるか考えてから、注音・声調・意味・元の例文をめくって確認。</p>
+      <p class="hint">「覚えた」にチェックした単語は出題から外れます。繁體字を見て考えてから、注音・声調・意味・例文をめくって確認。</p>
       <div class="recall-controls"><label for="recallRange">出題</label><select id="recallRange"><option value="all">今の学習範囲の單字</option><option value="pending">未練習・まだの單字</option></select><button id="recallStart" type="button">練習を始める</button></div>
       <div id="recallSummary" class="study-scope-summary" aria-live="polite"></div>
       <div id="recallArea"></div>
@@ -73,13 +73,13 @@
     </section>
       <section class="panel personal-cards-panel" id="personalCardsPanel">
       <h2 class="section-title" id="personalEditorTitle">単語を追加</h2>
-      <p class="hint">単語と、見かけた文を貼って追加。注音は端末内の辞書から候補を入れます。</p>
+      <p class="hint">単語と、見かけた文を貼って追加。既存の単語も、單字一覧から例文・注音・意味を編集できます。</p>
       <p class="personal-offline-notice">📦 オフラインで追加した内容を次回も使うには、下の「この端末に保存する」をオンにしてね。同期はオンラインに戻ってから行います。</p>
       <form id="personalCardForm" class="personal-card-form">
         <label for="personalWord">覚えたい単語・表現 <span>必須</span></label>
         <input id="personalWord" type="text" lang="zh-Hant-TW" required maxlength="300" autocomplete="off" placeholder="例：敢" />
-        <label for="personalExample">元の例文</label>
-        <textarea id="personalExample" rows="3" lang="zh-Hant-TW" maxlength="2000" placeholder="例：妳還真敢說耶～"></textarea>
+        <label for="personalExample">例文</label>
+        <textarea id="personalExample" rows="3" lang="zh-Hant-TW" maxlength="8000" placeholder="例：妳還真敢說耶～"></textarea>
         <details id="personalDetails" class="personal-details">
           <summary>注音・意味を確認／編集する</summary>
           <label for="personalZhuyin">注音の候補</label>
@@ -88,9 +88,15 @@
           <label for="personalMeaning">この文での意味（日本語）</label>
           <input id="personalMeaning" type="text" maxlength="4000" placeholder="空欄でも保存できます" />
           <label for="personalExampleZhuyin">例文の注音</label>
-          <textarea id="personalExampleZhuyin" rows="2" maxlength="12000"></textarea>
+          <textarea id="personalExampleZhuyin" rows="2" maxlength="16000"></textarea>
           <label for="personalNote">メモ</label>
-          <textarea id="personalNote" rows="2" maxlength="4000"></textarea>
+          <textarea id="personalNote" rows="2" maxlength="8000"></textarea>
+          <label for="personalCategory">分類</label>
+          <input id="personalCategory" type="text" maxlength="300" placeholder="例：会話、買い物" />
+          <label for="personalTags">タグ（「、」かカンマで区切る）</label>
+          <input id="personalTags" type="text" maxlength="10000" placeholder="例：台湾人よく使う、声調注意" />
+          <label for="personalConfuse">混同しやすい点</label>
+          <textarea id="personalConfuse" rows="2" maxlength="4000"></textarea>
           <button id="personalSuggest" class="secondary" type="button">注音の候補を入れる</button>
           <p class="personal-help">多音字・軽声は文脈でずれることがあります。意味は既存カードにある場合だけ候補を入れます。新しい語の意味をAIで生成する機能は、まだありません。</p>
         </details>
@@ -102,16 +108,20 @@
         <label class="check-label"><input id="personalRememberDevice" type="checkbox" /> この端末に保存する（自分専用の端末）</label>
         <p id="personalLocalStatus" class="personal-help"></p>
         <p class="personal-help">職場や共有PCではオフがおすすめ。同期は澄詞を開いてオンラインの間に行います。</p>
+        <p id="vocabularyRecoveryNotice" class="personal-help">移行前から端末に保存していたデータは、復元用の控えとして残ります。端末保存をオフにしても、その控えは削除されません。</p>
         <div class="button-row"><button id="personalConnect" type="button" disabled>Googleで連携</button><button id="personalDisconnect" class="secondary" type="button" hidden>連携を解除</button><button id="personalSyncRetry" class="secondary" type="button" hidden>同期を再試行</button></div>
         <p id="personalSyncStatus" role="status" aria-live="polite">同期設定を確認しています…</p>
         <button id="personalLoginCheckpoint" type="button" hidden>このタブに一時保存してログイン</button>
         <div id="personalProgressConflicts"></div>
-        <details class="personal-backup"><summary>バックアップ・読み込み</summary><p class="personal-help">追加・編集したカードと単語帳の進捗をJSONファイルに保存できます。読み込みは今のカードへ統合します。</p><div class="button-row"><button id="personalExport" class="secondary" type="button">バックアップを保存</button><button id="personalImport" class="secondary" type="button">ファイルを読み込む</button><input id="personalImportFile" type="file" accept="application/json,.json" hidden /></div></details>
+        <div id="vocabularySetupPanel" class="vocabulary-setup">
+          <h4>単語の保存先を統一</h4>
+          <p class="personal-help">ログイン後、元の単語と追加した単語をCloudflareへ統一できます。単語・編集内容は残し、お気に入り・学習記録・「覚えた」のチェックは、移行前の控えを作ってリセットします。</p>
+          <button id="vocabularyBootstrap" type="button" disabled>単語を統一する</button>
+          <p id="vocabularyStatus" role="status" aria-live="polite">移行状態を確認しています…</p>
+        </div>
+        <details class="personal-backup"><summary>バックアップ・読み込み</summary><p class="personal-help">現在の単語・学習記録と、移行前の控えをJSONファイルに保存できます。旧版の学習記録を読み込んでも、リセット後の学習には自動で戻しません。</p><div class="button-row"><button id="personalExport" class="secondary" type="button">現在のバックアップを保存</button><button id="vocabularyArchiveExport" class="secondary" type="button">移行前の控えを保存</button><button id="personalImport" class="secondary" type="button">ファイルを読み込む</button><input id="personalImportFile" type="file" accept="application/json,.json" hidden /></div></details>
       </div>
-      <h3>自分の単語帳</h3>
-      <p class="personal-help">ここでの追加・編集は「思い出す単語帳」に反映されます。元の辞書カードも引き続き使えます。</p>
-      <div class="personal-list-controls"><label for="personalListFilter">表示</label><select id="personalListFilter"><option value="mine">追加・編集したカード</option><option value="all">元の單字もすべて</option><option value="deleted">非表示・削除済み</option></select><input id="personalListSearch" type="search" aria-label="自分の単語帳を検索" placeholder="単語・意味・例文で検索" /><span id="personalListCount"></span></div>
-      <div id="personalCardList" class="personal-card-list"></div>
+      <button class="secondary" type="button" onclick="jumpToStudyPanel('wordListPanel')">單字一覧で探す・編集する</button>
     </section>
       <section class="panel shortcut-export-panel" id="shortcutExportPanel">
       <h2 class="section-title">📤 ショートカット用書き出し</h2>
@@ -204,7 +214,20 @@
       <div id="idiomList" class="cards result-area"></div>
     </section>
       <section class="panel" id="phrasePanel"><h2 class="section-title">🗣️ あゆあん語録</h2><p class="hint">そのまま会話で使えそうな文だけ集めたコーナー。</p><div id="phraseList" class="phrase-list"></div></section>
-      <section class="panel" id="wordListPanel"><h2 class="section-title">📘 單字一覧</h2><div class="tag-filter" id="tagButtons"></div><div class="button-row category-buttons" id="categoryButtons"></div><div class="button-row"><button class="secondary" onclick="showFavorites()">⭐ お気に入りだけ</button><button class="secondary" onclick="showWeakWords()">🔁 苦手單字だけ</button><button class="secondary" onclick="showPriorityWords()">🔥 復習優先順</button><button class="secondary" onclick="clearWeakWords()">苦手リストを消す</button><button class="secondary" onclick="showAllWords()">全部表示</button></div><div id="wordList" class="cards"></div></section>
+      <section class="panel vocabulary-list-panel" id="wordListPanel">
+        <h2 class="section-title">📘 單字一覧</h2>
+        <p class="hint">元からある単語も、自分で追加した単語も、ここで検索・編集できます。「覚えた」にチェックしても一覧には残り、外すとまた練習できます。</p>
+        <div class="personal-list-controls">
+          <label for="personalListFilter">表示</label>
+          <select id="personalListFilter"><option value="all">すべての単語</option><option value="unremembered">まだ覚えていない単語</option><option value="remembered">覚えた単語</option><option value="deleted">削除済み</option></select>
+          <input id="personalListSearch" type="search" aria-label="すべての単語を検索" placeholder="単語・意味・例文・タグで検索" />
+          <span id="personalListCount" role="status" aria-live="polite"></span>
+        </div>
+        <div class="tag-filter" id="tagButtons"></div>
+        <div class="button-row category-buttons" id="categoryButtons"></div>
+        <div class="button-row"><button class="secondary" onclick="showFavorites()">⭐ お気に入りだけ</button><button class="secondary" onclick="showWeakWords()">🔁 苦手單字だけ</button><button class="secondary" onclick="showPriorityWords()">🔥 復習優先順</button><button class="secondary" onclick="clearWeakWords()">苦手リストを消す</button><button class="secondary" onclick="showAllWords()">全部表示</button></div>
+        <div id="wordList" class="cards"></div>
+      </section>
     </section>
     <section class="tab-page" id="tab-pronunciation">
       <section class="panel audio-panel">
@@ -287,7 +310,7 @@
       <section class="panel app-info-panel">
   <h2 class="section-title">ℹ️ アプリ情報</h2>
   <div class="app-version-card">
-    <div><span class="app-label">📱 澄詞</span><strong>Ver.<span id="appVersion">6.10.2</span></strong></div>
+    <div><span class="app-label">📱 澄詞</span><strong>Ver.<span id="appVersion">6.11.0</span></strong></div>
     <div id="updateState" class="update-state state-unchecked">⚪ 未確認</div>
     <div class="app-build-date">リリース：2026-10-06</div>
   </div>
@@ -318,7 +341,7 @@
 </section>
     </section>
   </main>
-  <footer>Ver.6.10.2｜ホーム画面版から更新を確認できます</footer>
+  <footer>Ver.6.11.0｜ホーム画面版から更新を確認できます</footer>
 
   <div id="updateModal" class="update-modal" hidden>
     <div class="update-modal-backdrop" onclick="closeUpdateModal()"></div>
@@ -332,15 +355,15 @@
       </div>
     </section>
   </div>
-  <script src="data/words.js?v=6.10.2"></script><script src="js/data-model.js?v=6.10.2"></script><script src="data/zhuyin-dict.js?v=6.10.2"></script><script src="js/zhuyin-lite.js?v=6.10.2"></script><script src="js/speech-recognition.js?v=6.10.2"></script><script src="js/app.js?v=6.10.2"></script><script src="js/shortcut-export.js?v=6.10.2"></script>
-  <script src="sync-config.js?v=6.10.2"></script>
-  <script src="js/card-store.js?v=6.10.2"></script>
-  <script src="js/cloudflare-sync.js?v=6.10.2"></script>
-  <script src="js/study-sync.js?v=6.10.2"></script>
-  <script src="js/auth-handoff.js?v=6.10.2"></script>
-  <script src="js/legacy-migration.js?v=6.10.2"></script>
-  <script src="js/migration-ui.js?v=6.10.2"></script>
-  <script src="js/personal-cards.js?v=6.10.2"></script>
-  <script src="js/recall-cards.js?v=6.10.2"></script>
+  <script src="data/words.js?v=6.11.0"></script><script src="js/data-model.js?v=6.11.0"></script><script src="data/zhuyin-dict.js?v=6.11.0"></script><script src="js/zhuyin-lite.js?v=6.11.0"></script><script src="js/speech-recognition.js?v=6.11.0"></script><script src="js/app.js?v=6.11.0"></script><script src="js/shortcut-export.js?v=6.11.0"></script>
+  <script src="sync-config.js?v=6.11.0"></script>
+  <script src="js/card-store.js?v=6.11.0"></script>
+  <script src="js/cloudflare-sync.js?v=6.11.0"></script>
+  <script src="js/study-sync.js?v=6.11.0"></script>
+  <script src="js/auth-handoff.js?v=6.11.0"></script>
+  <script src="js/legacy-migration.js?v=6.11.0"></script>
+  <script src="js/migration-ui.js?v=6.11.0"></script>
+  <script src="js/personal-cards.js?v=6.11.0"></script>
+  <script src="js/recall-cards.js?v=6.11.0"></script>
 </body>
 </html>

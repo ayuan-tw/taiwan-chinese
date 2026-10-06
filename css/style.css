@@ -916,3 +916,23 @@ body{
 @media(max-width:480px){.personal-sync-box{padding:14px;}.personal-item-header{flex-direction:column;}.personal-list-controls label{width:100%;}}
 
 .personal-offline-notice {border-left:4px solid var(--main);background:#e2f1f7;padding:14px 16px;line-height:1.8;color:#254e60;border-radius:4px;}
+
+/* Unified vocabulary: one management list and an independent remembered state. */
+.vocabulary-list-panel{border-top:4px solid var(--main)}
+.vocabulary-list-panel .personal-list-controls{margin:16px 0}
+.vocabulary-list-panel .personal-list-controls input{min-width:min(200px,100%);min-height:44px}
+.vocabulary-list-panel .personal-list-controls select{min-height:44px}
+.vocabulary-list-panel #personalListCount{color:var(--muted);font-size:.88rem;white-space:nowrap}
+.vocabulary-setup{margin:18px 0;padding:16px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.vocabulary-setup h4{margin:0 0 8px;color:var(--main-dark)}
+.vocabulary-setup[hidden]{display:none}
+.vocabulary-management,.personal-management-extra{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.vocabulary-remembered,.remembered-control,.personal-remembered-control{display:flex;gap:9px;align-items:center;min-height:44px;line-height:1.5;color:var(--main-dark);font-weight:700;cursor:pointer}
+.vocabulary-remembered input,.remembered-control input,.personal-remembered-control input{flex:0 0 auto;width:20px;height:20px;accent-color:var(--main)}
+.card.is-remembered{border-color:#9fbbb4}
+.card.is-remembered .vocabulary-remembered{color:#365d52}
+.vocabulary-management .button-row{margin-top:8px}
+@media(max-width:480px){.vocabulary-setup{padding:12px}.vocabulary-list-panel .personal-list-controls input{flex-basis:100%;width:100%}}
+
+.personal-management-extra .personal-state{display:inline-block;margin-right:10px}
+.personal-management-extra .personal-conflict{margin-bottom:10px}

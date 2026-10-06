@@ -1,10 +1,10 @@
 // D1's documented prepare/bind/batch interface over Node's real SQLite engine.
 // This verifies SQL behavior, not Cloudflare's distributed service/runtime.
 import { DatabaseSync } from 'node:sqlite';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 export function createDB() {
   const sqlite = new DatabaseSync(':memory:');
-  sqlite.exec(readFileSync(new URL('../migrations/0001_initial.sql', import.meta.url), 'utf8'));
+  for (const name of readdirSync(new URL('../migrations/', import.meta.url)).filter(name => name.endsWith('.sql')).sort()) sqlite.exec(readFileSync(new URL('../migrations/' + name, import.meta.url), 'utf8'));
   function statement(sql, parameters = []) {
     return {
       bind(...values) { return statement(sql, values); },

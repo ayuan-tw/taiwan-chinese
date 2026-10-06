@@ -9,7 +9,7 @@ const configuration = JSON.parse(read('cloudflare/wrangler.jsonc'));
 const version = JSON.parse(read('version.json')).version;
 
 test('activation changes the cache identity and every runtime asset reference together', () => {
-  assert.equal(version, '6.10.2');
+  assert.equal(version, '6.11.0');
   const cacheName = 'chengci-v' + version.replaceAll('.', '-') + '-offline';
   assert.ok(read('service-worker.js').includes("const CACHE_NAME = '" + cacheName + "'"));
   assert.ok(read('service-worker.js').includes("const APP_VERSION = '" + version + "'"));

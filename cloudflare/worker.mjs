@@ -1,4 +1,5 @@
 /* Same-origin, single-owner sync. No secrets or authenticated data in static assets. */
+import { vocabularySeed } from './vocabulary-seed.mjs';
 const SESSION_COOKIE = '__Host-chengci-session';
 const FLOW_COOKIE = '__Host-chengci-login';
 const JWKS_URL = 'https://www.googleapis.com/oauth2/v3/certs';
@@ -10,7 +11,10 @@ const MAX_BODY = 1024 * 1024;
 // 10 operations x 4 SQL statements + session lookup stays below D1 Free's
 // documented 50-query invocation limit. Never assume a paid account.
 const MAX_OPERATIONS = 10;
-const KINDS = ['cards', 'progress', 'favorites', 'study'];
+const KINDS = ['cards', 'progress', 'favorites', 'study', 'remembered'];
+const VOCABULARY_VERSION = 1;
+const VOCABULARY_BACKUP = 'unified-words-v1';
+const documentTable = kind => kind === 'remembered' ? 'remembered_documents' : 'documents';
 const FIELDS = { word: 300, zhuyin: 1000, meaning: 4000, example: 8000, exampleZhuyin: 16000, note: 8000 };
 const ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,149}$/;
 const SECRET = /^[A-Za-z0-9_-]{43}$/;
@@ -102,16 +106,25 @@ function validateOperation(value) {
   if (!KINDS.includes(kind) || !validId(id) || !validId(operationId) || !Number.isSafeInteger(baseRevision) || baseRevision < 0 || baseRevision >= Number.MAX_SAFE_INTEGER || typeof deleted !== 'boolean' || !validDate(updatedAt)) fail(400, 'invalid_operation');
   let normalized;
   if (kind === 'cards') {
-    exactKeys(data, [...Object.keys(FIELDS), 'pronunciationStatus']); normalized = {};
+    const extraFields = ['category', 'tags', 'confuse'].filter(key => plain(data) && Object.hasOwn(data, key));
+    exactKeys(data, [...Object.keys(FIELDS), 'pronunciationStatus', ...extraFields]); normalized = {};
     for (const [field, limit] of Object.entries(FIELDS)) { if (typeof data[field] !== 'string' || data[field].length > limit) fail(400, 'invalid_card'); normalized[field] = data[field].trim(); }
     if ((!deleted && !normalized.word) || !['candidate', 'confirmed', 'missing'].includes(data.pronunciationStatus)) fail(400, 'invalid_card');
     normalized.pronunciationStatus = data.pronunciationStatus;
+    for (const [key, limit] of [['category', 300], ['confuse', 4000]]) if (Object.hasOwn(data, key)) {
+      if (typeof data[key] !== 'string' || data[key].length > limit) fail(400, 'invalid_card');
+      normalized[key] = data[key].trim();
+    }
+    if (Object.hasOwn(data, 'tags')) {
+      if (!Array.isArray(data.tags) || data.tags.length > 100 || data.tags.some(tag => typeof tag !== 'string' || tag.length > 100)) fail(400, 'invalid_card');
+      normalized.tags = [...new Set(data.tags.map(tag => tag.trim()).filter(Boolean))];
+    }
   } else if (kind === 'progress') {
     exactKeys(data, ['result', 'attempts', 'updatedAt']);
     if (!['read', 'notyet'].includes(data.result) || !Number.isSafeInteger(data.attempts) || data.attempts < 0 || data.attempts > 1000000000 || !validDate(data.updatedAt)) fail(400, 'invalid_progress');
     normalized = { result: data.result, attempts: data.attempts, updatedAt: data.updatedAt };
   } else {
-    const fields = kind === 'favorites' ? ['adds', 'removes'] : ['counts', 'cleared', 'adds', 'removes'];
+    const fields = ['favorites', 'remembered'].includes(kind) ? ['adds', 'removes'] : ['counts', 'cleared', 'adds', 'removes'];
     exactKeys(data, fields);
     if (deleted) fail(400, 'invalid_vector_record');
     normalized = {};
@@ -128,34 +141,41 @@ function validateOperation(value) {
   return { kind, id, operationId, baseRevision, deleted, updatedAt, data: normalized };
 }
 function documentFromRow(row) {
-  if (!row) return null;
+  if (!row || !row.id) return null;
   return { schemaVersion: 1, id: row.id, operationId: row.operation_id, revision: row.revision, deleted: row.deleted === 1, updatedAt: row.updated_at, data: JSON.parse(row.data_json) };
 }
 
 // Each compare-and-set plus immutable idempotency receipt is one D1 transaction.
 // No read-then-write race, last-write-wins, or hard deletion of user records.
-async function applyOperation(db, operation, now) {
+async function applyOperation(db, operation, now, expectedEpoch = 0) {
   const op = validateOperation(operation);
   const requestHash = await sha256(JSON.stringify(op));
   const revision = op.baseRevision + 1;
+  const table = documentTable(op.kind);
   const batch = await db.batch([
-    db.prepare(`INSERT INTO documents (kind, id, operation_id, revision, deleted, updated_at, data_json)
+    db.prepare(`INSERT INTO ${table} (kind, id, operation_id, revision, deleted, updated_at, data_json)
       SELECT ?, ?, ?, ?, ?, ?, ?
       WHERE NOT EXISTS (SELECT 1 FROM operation_receipts WHERE operation_id = ?)
-        AND (? = 0 OR EXISTS (SELECT 1 FROM documents WHERE kind = ? AND id = ? AND revision = ?))
+        AND (SELECT epoch FROM vocabulary_state WHERE singleton = 1) = ?
+        AND (? = 0 OR EXISTS (SELECT 1 FROM ${table} WHERE kind = ? AND id = ? AND revision = ?))
       ON CONFLICT(kind, id) DO UPDATE SET operation_id = excluded.operation_id, revision = excluded.revision,
         deleted = excluded.deleted, updated_at = excluded.updated_at, data_json = excluded.data_json
-      WHERE documents.revision = ?`).bind(op.kind, op.id, op.operationId, revision, Number(op.deleted), op.updatedAt, JSON.stringify(op.data), op.operationId, op.baseRevision, op.kind, op.id, op.baseRevision, op.baseRevision),
+      WHERE ${table}.revision = ?`).bind(op.kind, op.id, op.operationId, revision, Number(op.deleted), op.updatedAt, JSON.stringify(op.data), op.operationId, expectedEpoch, op.baseRevision, op.kind, op.id, op.baseRevision, op.baseRevision),
     db.prepare(`INSERT INTO operation_receipts (operation_id, request_hash, kind, id, document_json, created_at)
       SELECT ?, ?, kind, id, json_object('schemaVersion', 1, 'id', id, 'operationId', operation_id,
         'revision', revision, 'deleted', json(CASE WHEN deleted = 1 THEN 'true' ELSE 'false' END),
         'updatedAt', updated_at, 'data', json(data_json)), ?
-      FROM documents WHERE kind = ? AND id = ? AND operation_id = ? AND revision = ?
-      ON CONFLICT(operation_id) DO NOTHING`).bind(op.operationId, requestHash, seconds(now), op.kind, op.id, op.operationId, revision),
-    db.prepare('SELECT request_hash, document_json FROM operation_receipts WHERE operation_id = ?').bind(op.operationId),
-    db.prepare('SELECT * FROM documents WHERE kind = ? AND id = ?').bind(op.kind, op.id)
+      FROM ${table} WHERE kind = ? AND id = ? AND operation_id = ? AND revision = ?
+        AND changes() = 1
+        AND (SELECT epoch FROM vocabulary_state WHERE singleton = 1) = ?
+      ON CONFLICT(operation_id) DO NOTHING`).bind(op.operationId, requestHash, seconds(now), op.kind, op.id, op.operationId, revision, expectedEpoch),
+    db.prepare(`SELECT request_hash, document_json, EXISTS(SELECT 1 FROM retired_learning_operations retired WHERE retired.operation_id = operation_receipts.operation_id) AS retired FROM operation_receipts WHERE operation_id = ?`).bind(op.operationId),
+    db.prepare(`SELECT documents.*, state.epoch AS vocabulary_epoch FROM vocabulary_state state
+      LEFT JOIN ${table} documents ON documents.kind = ? AND documents.id = ? WHERE state.singleton = 1`).bind(op.kind, op.id)
   ]);
+  if (batch[3].results?.[0]?.vocabulary_epoch !== expectedEpoch) fail(409, 'vocabulary_epoch_changed');
   const receipt = batch[2].results?.[0];
+  if (receipt?.retired) fail(409, 'retired_learning_operation');
   if (receipt && !equal(receipt.request_hash, requestHash)) fail(409, 'operation_id_reused');
   const document = receipt ? JSON.parse(receipt.document_json) : documentFromRow(batch[3].results?.[0]);
   return { kind: op.kind, id: op.id, operationId: op.operationId, status: receipt ? 'accepted' : 'conflict', document };
@@ -286,6 +306,79 @@ async function staticAsset(request, env) {
   return new Response(response.body, { status: response.status, headers: resultHeaders });
 }
 
+function vocabularyFromRow(row) {
+  if (!row || !Number.isSafeInteger(row.epoch) || ![0, VOCABULARY_VERSION].includes(row.version)) fail(503, 'vocabulary_schema_required');
+  return { version: row.version, epoch: row.epoch, ready: row.version === VOCABULARY_VERSION, backupId: row.backup_id || null, migratedAt: row.migrated_at || null };
+}
+async function vocabularyState(db) { return vocabularyFromRow(await db.prepare('SELECT * FROM vocabulary_state WHERE singleton = 1').first()); }
+function requireEpoch(request, vocabulary) {
+  const raw = request.headers.get('X-Chengci-Epoch');
+  if (raw === null && vocabulary.epoch === 0) return 0; // Temporary pre-migration compatibility only.
+  if (!/^(?:0|[1-9][0-9]{0,15})$/.test(raw || '') || !Number.isSafeInteger(Number(raw)) || Number(raw) !== vocabulary.epoch) fail(409, 'vocabulary_epoch_changed');
+  return Number(raw);
+}
+async function bootstrapVocabulary(db, now) {
+  const timestamp = new Date(now()).toISOString();
+  // The seed is trusted build-time source, not supplied by a device. One JSON
+  // binding avoids D1's 100-parameter limit. Tests cap its encoded size below 2MB.
+  const seed = JSON.stringify(vocabularySeed);
+  const batch = await db.batch([
+    db.prepare(`INSERT INTO vocabulary_backups (id, created_at, previous_epoch, document_count)
+      SELECT ?, ?, epoch, (SELECT COUNT(*) FROM documents) + (SELECT COUNT(*) FROM remembered_documents)
+      FROM vocabulary_state WHERE singleton = 1 AND version = 0`).bind(VOCABULARY_BACKUP, timestamp),
+    db.prepare(`INSERT INTO vocabulary_backup_documents
+      (backup_id, kind, id, operation_id, revision, deleted, updated_at, data_json, change_seq)
+      SELECT ?, kind, id, operation_id, revision, deleted, updated_at, data_json, change_seq FROM documents
+      WHERE (SELECT version FROM vocabulary_state WHERE singleton = 1) = 0
+      UNION ALL
+      SELECT ?, kind, id, operation_id, revision, deleted, updated_at, data_json, change_seq FROM remembered_documents
+      WHERE (SELECT version FROM vocabulary_state WHERE singleton = 1) = 0`).bind(VOCABULARY_BACKUP, VOCABULARY_BACKUP),
+    // Supplement only fields that did not exist in the legacy card schema.
+    // A tombstone stays a tombstone, and every user-authored lexical field wins.
+    db.prepare(`UPDATE documents SET
+      data_json = json_set(data_json,
+        '$.category', COALESCE(json_extract(data_json, '$.category'), (SELECT json_extract(value, '$.data.category') FROM json_each(?) WHERE json_extract(value, '$.id') = documents.id)),
+        '$.tags', json(COALESCE(json_extract(data_json, '$.tags'), (SELECT json_extract(value, '$.data.tags') FROM json_each(?) WHERE json_extract(value, '$.id') = documents.id))),
+        '$.confuse', COALESCE(json_extract(data_json, '$.confuse'), (SELECT json_extract(value, '$.data.confuse') FROM json_each(?) WHERE json_extract(value, '$.id') = documents.id))),
+      operation_id = 'bootstrap-v1-' || id, revision = revision + 1, updated_at = ?
+      WHERE kind = 'cards' AND (SELECT version FROM vocabulary_state WHERE singleton = 1) = 0
+        AND id IN (SELECT json_extract(value, '$.id') FROM json_each(?))
+        AND (json_type(data_json, '$.category') IS NULL OR json_type(data_json, '$.tags') IS NULL OR json_type(data_json, '$.confuse') IS NULL)`)
+      .bind(seed, seed, seed, timestamp, seed),
+    db.prepare(`INSERT INTO documents (kind, id, operation_id, revision, deleted, updated_at, data_json)
+      SELECT 'cards', json_extract(value, '$.id'), 'seed-v1-' || json_extract(value, '$.id'), 1, 0, ?, json_extract(value, '$.data')
+      FROM json_each(?) WHERE (SELECT version FROM vocabulary_state WHERE singleton = 1) = 0
+      ON CONFLICT(kind, id) DO NOTHING`).bind(timestamp, seed),
+    db.prepare(`INSERT OR IGNORE INTO retired_learning_operations (operation_id)
+      SELECT operation_id FROM operation_receipts WHERE kind != 'cards'
+      AND (SELECT version FROM vocabulary_state WHERE singleton = 1) = 0`),
+    db.prepare(`DELETE FROM documents WHERE kind IN ('progress', 'favorites', 'study')
+      AND (SELECT version FROM vocabulary_state WHERE singleton = 1) = 0`),
+    db.prepare(`DELETE FROM remembered_documents WHERE (SELECT version FROM vocabulary_state WHERE singleton = 1) = 0`),
+    // A broken backup invariant aborts the complete batch via the epoch CHECK.
+    db.prepare(`UPDATE vocabulary_state SET version = ?, epoch = CASE
+      WHEN (SELECT document_count FROM vocabulary_backups WHERE id = ?) =
+        (SELECT COUNT(*) FROM vocabulary_backup_documents WHERE backup_id = ?) THEN epoch + 1 ELSE -1 END,
+      migrated_at = ?, backup_id = ? WHERE singleton = 1 AND version = 0`)
+      .bind(VOCABULARY_VERSION, VOCABULARY_BACKUP, VOCABULARY_BACKUP, timestamp, VOCABULARY_BACKUP),
+    db.prepare('SELECT * FROM vocabulary_state WHERE singleton = 1')
+  ]);
+  return vocabularyFromRow(batch.at(-1).results?.[0]);
+}
+async function vocabularyBackup(request, db) {
+  const url = new URL(request.url);
+  if ([...url.searchParams.keys()].some(key => key !== 'cursor' || url.searchParams.getAll(key).length !== 1)) fail(400, 'invalid_backup_cursor');
+  const raw = url.searchParams.get('cursor') || '0';
+  if (!/^(?:0|[1-9][0-9]{0,15})$/.test(raw) || !Number.isSafeInteger(Number(raw))) fail(400, 'invalid_backup_cursor');
+  const backup = await db.prepare('SELECT * FROM vocabulary_backups WHERE id = ?').bind(VOCABULARY_BACKUP).first();
+  if (!backup) fail(404, 'backup_not_found');
+  const rows = (await db.prepare(`SELECT rowid AS backup_cursor, * FROM vocabulary_backup_documents WHERE backup_id = ? AND rowid > ? ORDER BY rowid LIMIT ?`)
+    .bind(VOCABULARY_BACKUP, Number(raw), PAGE_SIZE + 1).all()).results;
+  return { backup: { id: backup.id, createdAt: backup.created_at, previousEpoch: backup.previous_epoch, documentCount: backup.document_count },
+    documents: rows.slice(0, PAGE_SIZE).map(row => ({ kind: row.kind, ...documentFromRow(row) })),
+    cursor: rows.length > PAGE_SIZE ? String(rows[PAGE_SIZE - 1].backup_cursor) : null };
+}
+
 export function createWorker(options = {}) {
   const now = options.now || Date.now;
   const verify = createVerifier(options.fetch || globalThis.fetch, now);
@@ -295,17 +388,17 @@ export function createWorker(options = {}) {
       if (!(path === '/api' || path.startsWith('/api/') || path === '/auth' || path.startsWith('/auth/'))) return staticAsset(request, env);
       try {
         const cfg = config(env);
-        if (path === '/api/config' && request.method === 'GET') return json({ enabled: cfg.enabled, loginUrl: '/auth/login', ...(!cfg.enabled ? { reason: 'not_configured' } : {}) });
+        if (path === '/api/config' && request.method === 'GET') return json({ enabled: cfg.enabled, loginUrl: '/auth/login', vocabularyVersion: VOCABULARY_VERSION, ...(!cfg.enabled ? { reason: 'not_configured' } : {}) });
         if (!cfg.enabled) fail(503, 'sync_disabled');
         if (path === '/auth/login' && request.method === 'GET') return await loginPage(request, env, cfg, now);
         if (path === '/auth/google' && request.method === 'POST') return await googleCallback(request, env, cfg, now, verify);
-        const allowed = { '/api/session': 'GET', '/api/cards': 'GET', '/api/progress': 'GET', '/api/favorites': 'GET', '/api/study': 'GET', '/api/sync': 'POST', '/api/logout': 'POST' }[path];
+        const allowed = { '/api/session': 'GET', '/api/cards': 'GET', '/api/progress': 'GET', '/api/favorites': 'GET', '/api/study': 'GET', '/api/remembered': 'GET', '/api/vocabulary/bootstrap': 'POST', '/api/vocabulary/backup': 'GET', '/api/sync': 'POST', '/api/logout': 'POST' }[path];
         if (!allowed) fail(404, 'not_found');
         if (request.method !== allowed) return json({ error: 'method_not_allowed' }, 405, { Allow: allowed });
         ensureOrigin(request, cfg, allowed === 'POST');
         const session = await getSession(request, env.DB, cfg, now);
         if (allowed === 'POST') requireCsrf(request, session);
-        if (path === '/api/session') return json({ authenticated: true, user: { uid: session.owner_sub, sub: session.owner_sub, email: session.email, emailVerified: true }, csrfToken: session.csrfToken, persistent: !!session.persistent, expiresAt: new Date(session.expires_at * 1000).toISOString() });
+        if (path === '/api/session') return json({ authenticated: true, user: { uid: session.owner_sub, sub: session.owner_sub, email: session.email, emailVerified: true }, csrfToken: session.csrfToken, vocabulary: await vocabularyState(env.DB), persistent: !!session.persistent, expiresAt: new Date(session.expires_at * 1000).toISOString() });
         if (path === '/api/logout') {
           let allDevices = false;
           if (request.body) { const input = await readJSON(request); if (plain(input) && Object.keys(input).length === 0) allDevices = false; else { exactKeys(input, ['allDevices']); if (typeof input.allDevices !== 'boolean') fail(400, 'invalid_logout'); allDevices = input.allDevices; } }
@@ -313,6 +406,14 @@ export function createWorker(options = {}) {
           else await env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?').bind(session.tokenHash).run();
           const response = empty(); response.headers.append('Set-Cookie', cookie(SESSION_COOKIE, '', { maxAge: 0 })); response.headers.append('Set-Cookie', cookie(FLOW_COOKIE, '', { sameSite: 'None', maxAge: 0 })); return response;
         }
+        if (path === '/api/vocabulary/bootstrap') {
+          const input = await readJSON(request); exactKeys(input, ['version']);
+          if (input.version !== VOCABULARY_VERSION) fail(400, 'unsupported_vocabulary_version');
+          return json({ vocabulary: await bootstrapVocabulary(env.DB, now) });
+        }
+        if (path === '/api/vocabulary/backup') return json(await vocabularyBackup(request, env.DB));
+        const vocabulary = await vocabularyState(env.DB);
+        const expectedEpoch = requireEpoch(request, vocabulary);
         if (KINDS.some(kind => path === '/api/' + kind)) {
           const url = new URL(request.url);
           if ([...url.searchParams.keys()].some(key => !['since', 'until', 'cursor'].includes(key) || url.searchParams.getAll(key).length !== 1)) fail(400, 'invalid_checkpoint');
@@ -326,15 +427,19 @@ export function createWorker(options = {}) {
           const since = sequence('since', 0), until = sequence('until', clock), cursor = sequence('cursor', since);
           if (since > clock) fail(409, 'checkpoint_ahead');
           if (until > clock || until < since || cursor < since || cursor > until || (url.searchParams.has('cursor') && !url.searchParams.has('until'))) fail(400, 'invalid_checkpoint');
-          const rows = (await env.DB.prepare('SELECT * FROM documents WHERE kind = ? AND change_seq > ? AND change_seq <= ? ORDER BY change_seq LIMIT ?').bind(path.slice('/api/'.length), Math.max(since, cursor), until, PAGE_SIZE + 1).all()).results;
-          return json({ documents: rows.slice(0, PAGE_SIZE).map(documentFromRow), cursor: rows.length > PAGE_SIZE ? String(rows[PAGE_SIZE - 1].change_seq) : null, checkpoint: until });
+          const kind = path.slice('/api/'.length);
+          const rows = (await env.DB.prepare(`SELECT * FROM ${documentTable(kind)} WHERE kind = ? AND change_seq > ? AND change_seq <= ? ORDER BY change_seq LIMIT ?`).bind(kind, Math.max(since, cursor), until, PAGE_SIZE + 1).all()).results;
+          // A bootstrap between the initial check and page read cannot be
+          // mistaken for an empty delta in the old epoch.
+          if ((await vocabularyState(env.DB)).epoch !== expectedEpoch) fail(409, 'vocabulary_epoch_changed');
+          return json({ epoch: expectedEpoch, documents: rows.slice(0, PAGE_SIZE).map(documentFromRow), cursor: rows.length > PAGE_SIZE ? String(rows[PAGE_SIZE - 1].change_seq) : null, checkpoint: until });
         }
         const input = await readJSON(request); exactKeys(input, ['operations']);
         if (!Array.isArray(input.operations) || input.operations.length < 1 || input.operations.length > MAX_OPERATIONS) fail(400, 'invalid_operations');
         const operations = input.operations.map(validateOperation);
         if (new Set(operations.map(op => op.operationId)).size !== operations.length) fail(400, 'duplicate_operation');
-        const results = []; for (const operation of operations) results.push(await applyOperation(env.DB, operation, now));
-        return json({ results });
+        const results = []; for (const operation of operations) results.push(await applyOperation(env.DB, operation, now, expectedEpoch));
+        return json({ epoch: expectedEpoch, results });
       } catch (error) {
         // Never log JWTs, cookies, personal records, or exception bodies.
         return json({ error: error instanceof HttpError ? error.code : 'service_unavailable' }, error instanceof HttpError ? error.status : 503);
@@ -343,4 +448,4 @@ export function createWorker(options = {}) {
   };
 }
 export default createWorker();
-export const testing = { validateOperation, applyOperation, config, createVerifier, sha256, randomToken, cookie, readCookie, isPublicAsset, getSession, SESSION_COOKIE, FLOW_COOKIE, validOwnerEmail };
+export const testing = { validateOperation, applyOperation, config, createVerifier, sha256, randomToken, cookie, readCookie, isPublicAsset, getSession, SESSION_COOKIE, FLOW_COOKIE, validOwnerEmail, vocabularyState, bootstrapVocabulary, vocabularyBackup, vocabularySeed, VOCABULARY_VERSION };

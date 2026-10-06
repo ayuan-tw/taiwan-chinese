@@ -13,7 +13,16 @@
   let lastCardSignature = '';
   let loginRequired = false;
   let authNavigating = false;
-  const ids = ['personalWord', 'personalExample', 'personalZhuyin', 'personalMeaning', 'personalExampleZhuyin', 'personalNote'];
+  let finishInitialLoad;
+  // Consumers must wait for both device storage and the login checkpoint.
+  // False means the card inventory could not be loaded authoritatively.
+  const initialLoad = new Promise(resolve => { finishInitialLoad = resolve; });
+  const ids = ['personalWord', 'personalExample', 'personalZhuyin', 'personalMeaning', 'personalExampleZhuyin', 'personalNote', 'personalCategory', 'personalTags', 'personalConfuse'];
+  const rememberedWrites = new Map();
+  const rememberedOwnAdds = new Map();
+  let migrationBusy = false;
+  let listView = items=>items;
+  let listViewLabel = '';
   const byId = id => document.getElementById(id);
   const store = () => window.ChengciCardStore;
   const sync = () => window.ChengciCloudSync;
@@ -25,6 +34,7 @@
 
   function effectiveWords() {
     const records = new Map(personalRecords().map(item => [item.id, item]));
+    if (store()?.getVocabulary?.().clientReady) return [...records.values()].filter(item=>!item.deleted).map(item=>({...item,category:item.category || '未分類',tags:item.tags || [],id:item.id,type:'word',isPersonal:true,isOverride:!!baseItem(item.id)}));
     const result = [];
     for (const item of baseWords()) {
       const id = keyOf(item);
@@ -37,6 +47,42 @@
       if (!item.deleted) result.push({category:'追加した單字', tags:['自分で追加'], type:'word', ...item, isPersonal:true, isOverride:false});
     }
     return result;
+  }
+  function isRemembered(id) {
+    const value=store()?.getShared?.('remembered',id);
+    return Object.entries(value?.adds || {}).some(([actor,count])=>count>(value.removes?.[actor] || 0));
+  }
+  function learningWords() { return effectiveWords().filter(item=>!isRemembered(item.id)); }
+  async function setRemembered(id, value) {
+    if(!effectiveItem(id))throw new Error('単語を確認できません。もう一度一覧から選んでね。');
+    // A gesture observes only the epoch and adds visible when it was made.
+    const epoch=store().getVocabulary?.().epoch || 0;
+    const observed={...(store().getShared('remembered',id)?.adds || {})};
+    const previous=rememberedWrites.get(id) || Promise.resolve();
+    const pending=previous.catch(()=>{}).then(async()=>{
+      try {
+        const proposed='remembered-'+(window.crypto?.randomUUID?.() || (Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)));
+        const actor=await store().ensureStudyActorId(proposed);
+        const ownKey=epoch+':'+id+':'+actor;
+        if(value!==true)observed[actor]=Math.max(observed[actor] || 0,rememberedOwnAdds.get(ownKey) || 0);
+        const committed=await store().updateShared(actor,[{kind:'remembered',id,active:value===true,observedAdds:observed}],{expectedEpoch:epoch});
+        if(value===true)rememberedOwnAdds.set(ownKey,committed[0]?.adds?.[actor] || 0);
+        render();
+      } catch(error) {
+        if(error.code==='vocabulary_epoch_changed')await store().archiveStudyQueue({source:'remembered-checkbox',epoch,id,value:value===true,observedAdds:observed});
+        throw error;
+      }
+    });
+    rememberedWrites.set(id,pending);
+    try {await pending;} finally {if(rememberedWrites.get(id)===pending)rememberedWrites.delete(id);}
+  }
+  function managementExtras(item) {
+    const current=store()?.get(item.id) || item;
+    const id=escape(encodeURIComponent(item.id));
+    return `<div class="personal-management-extra"><span class="personal-state">${escape(statusLabel(current))}</span><button class="secondary small" type="button" data-personal-${current.deleted?'restore':'delete'}="${id}">${current.deleted?'一覧に戻す':'削除する'}</button>${conflictView(current)}</div>`;
+  }
+  function deletedRows(items) {
+    return items.map(item=>`<article class="card personal-item"><h3 lang="zh-Hant-TW">${escape(item.word || '削除された単語')}</h3><p>${escape(item.meaning)}</p>${managementExtras(item)}</article>`).join('');
   }
   function deletedItem(item) {
     const base = baseItem(item.id);
@@ -53,6 +99,9 @@
       meaning:byId('personalMeaning').value.trim(),
       exampleZhuyin:byId('personalExampleZhuyin').value.trim(),
       note:byId('personalNote').value.trim(),
+      category:(byId('personalCategory')?.value || '').trim(),
+      tags:[...new Set((byId('personalTags')?.value || '').split(/[,、\n]/).map(value=>value.trim()).filter(Boolean))],
+      confuse:(byId('personalConfuse')?.value || '').trim(),
       pronunciationStatus:byId('personalReadingChecked').checked ? 'confirmed' : (byId('personalZhuyin').value.trim() ? 'candidate' : 'missing')
     };
   }
@@ -61,6 +110,7 @@
   function message(text, error = false) {
     notice = text;
     const area = byId('personalEditorStatus');
+    if (!area) return;
     area.textContent = text;
     area.classList.toggle('personal-error', error);
   }
@@ -79,13 +129,16 @@
     byId('personalMeaning').value = item.meaning || '';
     byId('personalExampleZhuyin').value = item.exampleZhuyin || '';
     byId('personalNote').value = item.note || '';
+    if(byId('personalCategory'))byId('personalCategory').value=item.category || '';
+    if(byId('personalTags'))byId('personalTags').value=(item.tags || []).join('、');
+    if(byId('personalConfuse'))byId('personalConfuse').value=item.confuse || '';
     readingStatus = item.pronunciationStatus || (id ? 'confirmed' : 'candidate');
     byId('personalReadingChecked').checked = readingStatus === 'confirmed';
     byId('personalEditorTitle').textContent = id ? 'カードを編集' : '単語を追加';
     byId('personalSave').textContent = id ? '変更を保存' : '追加する';
     byId('personalCancel').hidden = !id;
     byId('personalDetails').open = !!id;
-    message(id && baseItem(id) ? '元の辞書を残して、自分の単語帳用に編集します。' : '');
+    message(id ? 'この単語の内容を編集します。保存すると一覧・単語帳・学習で同じ内容を使います。' : '');
     originalFingerprint = fingerprint();
     return true;
   }
@@ -132,7 +185,10 @@
       if (!editingId && !saveCopy) {
         const duplicate = effectiveWords().find(item => item.word === fields.word && item.example === fields.example);
         if (duplicate) {
-          const differs = ['zhuyin','meaning','exampleZhuyin','note'].some(key=>String(fields[key] || '') !== String(duplicate[key] || ''));
+          if(!(byId('personalCategory')?.value || '').trim())fields.category=duplicate.category || '';
+          if(!(byId('personalTags')?.value || '').trim())fields.tags=[...(duplicate.tags || [])];
+          if(!(byId('personalConfuse')?.value || '').trim())fields.confuse=duplicate.confuse || '';
+          const differs = ['zhuyin','meaning','exampleZhuyin','note','category','tags','confuse'].some(key=>String(fields[key] || '') !== String(duplicate[key] || ''));
           if (!differs) {message('同じ単語・例文のカードは登録済みです。入力内容はそのまま残しています。');return;}
           if (!window.confirm('同じ単語・例文のカードがあります。今の入力をそのカードに反映して保存しますか？')) {message('入力内容は残しています。下のカードを確認してから保存してね。');return;}
           editingId = duplicate.id;
@@ -153,7 +209,8 @@
       openEditor('', true);
       const state = store().getState();
       message(state.persistence === 'device' ? `「${word}」をこの端末に保存しました。同期の状態は下で確認できます。` : `「${word}」をこの画面に保存しました。同期完了前に閉じないでね。`);
-      byId('personalListFilter').value = 'mine';
+      listView=items=>items;listViewLabel='';
+      byId('personalListFilter').value = 'all';
       render();
       byId('personalWord').focus({preventScroll:true});
     } catch (error) {
@@ -175,9 +232,14 @@
     const otherLabel = item.conflict.source === 'backup' ? 'バックアップ' : 'クラウド';
     const local = item.conflict.local?.data || item.conflict.local || item;
     const remote = item.conflict.remote?.data || item.conflict.remote || {};
-    const version = (label, value) => `<div><h4>${label}</h4><p lang="zh-Hant-TW">${escape(value.word || item.word)}</p><p>${escape(value.zhuyin)}</p><p>${escape(value.meaning || '意味は未入力')}</p><p>${escape(value.example)}</p><p>${escape(value.exampleZhuyin)}</p><p>メモ：${escape(value.note || 'なし')}</p><p>注音：${value.pronunciationStatus === 'confirmed' ? '確認済み' : value.pronunciationStatus === 'missing' ? '未登録' : '自動候補・未確認'}</p><p class="personal-help">更新：${escape(value.updatedAt || '日時なし')}</p>${value.deleted ? '<p>削除されたカード</p>' : ''}</div>`;
+    const version = (label, value) => `<div><h4>${label}</h4><p lang="zh-Hant-TW">${escape(value.word || item.word)}</p><p>${escape(value.zhuyin)}</p><p>${escape(value.meaning || '意味は未入力')}</p><p>${escape(value.example)}</p><p>${escape(value.exampleZhuyin)}</p><p>メモ：${escape(value.note || 'なし')}</p><p>分類：${escape(value.category || '未分類')}</p><p>タグ：${escape((value.tags || []).join('、') || 'なし')}</p><p>混同しやすい語：${escape(value.confuse || 'なし')}</p><p>注音：${value.pronunciationStatus === 'confirmed' ? '確認済み' : value.pronunciationStatus === 'missing' ? '未登録' : '自動候補・未確認'}</p><p class="personal-help">更新：${escape(value.updatedAt || '日時なし')}</p>${value.deleted ? '<p>削除されたカード</p>' : ''}</div>`;
     const id = escape(encodeURIComponent(item.id));
     return `<details class="personal-conflict"><summary>${item.conflict.source === 'backup' ? 'バックアップと変更が重なりました' : '別の端末と変更が重なりました'}。両方を確認する</summary><div class="personal-conflict-versions">${version('この端末の内容',local)}${version(otherLabel+'の内容',remote)}</div><p>どちらも確認してから選んでね。</p><div class="button-row"><button type="button" data-personal-resolve="local" data-id="${id}" data-conflict-token="${escape(item.conflict.comparisonToken)}">この端末の内容を使う</button><button type="button" data-personal-resolve="remote" data-id="${id}" data-conflict-token="${escape(item.conflict.comparisonToken)}">${otherLabel}の内容を使う</button><button class="secondary" type="button" data-personal-resolve="both" data-id="${id}" data-conflict-token="${escape(item.conflict.comparisonToken)}">両方を別カードで残す</button></div></details>`;
+  }
+  function setListView(transform,label='') {
+    listView=typeof transform==='function'?transform:items=>items;
+    listViewLabel=String(label || '');
+    renderList();
   }
   function renderList() {
     const filter = byId('personalListFilter').value;
@@ -185,8 +247,17 @@
     let items = filter === 'deleted' ? personalRecords().filter(item => item.deleted).map(deletedItem) : effectiveWords();
     if (filter !== 'deleted') items.push(...personalRecords().filter(item=>item.deleted && item.conflict).map(deletedItem));
     if (filter === 'mine') items = items.filter(item => item.isPersonal);
-    items = items.filter(item => [item.word,item.zhuyin,item.meaning,item.example].some(value => String(value || '').toLowerCase().includes(query)));
-    byId('personalListCount').textContent = `${items.length}件`;
+    if (filter === 'remembered') items=items.filter(item=>isRemembered(item.id));
+    if (filter === 'unremembered') items=items.filter(item=>!isRemembered(item.id));
+    items=listView(items);
+    items = items.filter(item => [item.word,item.zhuyin,item.meaning,item.example,item.exampleZhuyin,item.note,item.category,item.confuse,(item.tags || []).join(' ')].some(value => String(value || '').toLowerCase().includes(query)));
+    byId('personalListCount').textContent = `${listViewLabel?listViewLabel+' / ':''}${items.length}件`;
+    if(typeof window.renderWordList==='function' && byId('wordList')) {
+      window.renderWordList(items.filter(item=>!item.deleted));
+      const deleted=items.filter(item=>item.deleted);
+      if(deleted.length){if(!items.some(item=>!item.deleted))byId('wordList').innerHTML='';byId('wordList').innerHTML+=deletedRows(deleted);}
+      return;
+    }
     byId('personalCardList').innerHTML = items.length ? items.slice(0, 80).map(item => {
       const id = escape(encodeURIComponent(item.id));
       return `<article class="personal-item"><div class="personal-item-header"><h3 lang="zh-Hant-TW">${escape(item.word || '非表示のカード')}</h3><span class="personal-state">${escape(statusLabel(item))}</span></div><p class="zhuyin">${escape(item.zhuyin)}</p><p>${escape(item.meaning || '意味はあとから入力できます')}</p>${item.example ? `<p class="personal-item-example" lang="zh-Hant-TW">${escape(item.example)}</p>` : ''}<div class="button-row">${item.deleted ? `<button type="button" data-personal-restore="${id}">単語帳に戻す</button>` : `<button class="secondary" type="button" data-personal-edit="${id}">編集</button><button class="secondary" type="button" data-personal-delete="${id}">${baseItem(item.id) ? '単語帳から非表示' : '削除'}</button>`}</div>${conflictView(item)}</article>`;
@@ -207,7 +278,7 @@
     byId('personalSyncRetry').hidden = !cloud.connected;
     const pending = Number(state.pendingCount || 0);
     const conflicts = Number(state.conflictCount || 0);
-    let text = !configured ? 'クラウド同期は設定の準備中です。まだクラウドへ送信していません。' : cloud.connected ? `Google連携中${cloud.accountEmail ? '：'+cloud.accountEmail : ''}。` : 'Googleに連携すると、この単語帳をほかの端末でも使えます。';
+    let text = !configured ? 'クラウド同期は設定の準備中です。まだクラウドへ送信していません。' : cloud.connected ? `Googleログイン済み${cloud.accountEmail ? '：'+cloud.accountEmail : ''}。` : 'Googleに連携すると、この単語帳をほかの端末でも使えます。';
     if(cloud.status === 'offline') text += ' オフラインです。再接続後、澄詞を開いている間に同期します。';
     else if(cloud.status === 'syncing') text += ' 同期しています…';
     else if(cloud.status === 'connecting') text += ' Googleへの接続を確認しています…';
@@ -220,16 +291,51 @@
     if(studyState?.warning)text+=' '+studyState.warning;
     if(studyState?.unsavedCount)text+=` 保存待ちの学習記録が${studyState.unsavedCount}件あります。`;
     byId('personalSyncStatus').textContent = text;
+    renderVocabularyStatus(cloud);
     const progress = (state.conflicts || []).filter(item=>item.kind === 'progress');
     byId('personalProgressConflicts').innerHTML = progress.map(item=>{const word=effectiveItem(item.id)?.word || item.id;const otherLabel=item.source === 'backup' ? 'バックアップ' : 'クラウド';const label=entry=>`${entry.result === 'read' ? '読めた' : 'まだ'}・${Number(entry.attempts) || 0}回（${entry.updatedAt || '日時なし'}）`;const id=escape(encodeURIComponent(item.id));return `<details class="personal-conflict"><summary>「${escape(word)}」の練習記録が重なりました</summary><p>この端末：${escape(label(item.local))}</p><p>${otherLabel}：${escape(label(item.remote))}</p><div class="button-row"><button type="button" data-progress-resolve="local" data-id="${id}" data-conflict-token="${escape(item.comparisonToken)}">この端末の記録を使う</button><button type="button" data-progress-resolve="remote" data-id="${id}" data-conflict-token="${escape(item.comparisonToken)}">${otherLabel}の記録を使う</button></div></details>`;}).join('');
   }
   function render() {
     if (!ready) return;
     renderList();renderSync();
-    const signature = JSON.stringify(effectiveWords().map(item=>[item.id,item.word,item.zhuyin,item.meaning,item.example,item.exampleZhuyin,item.note,item.pronunciationStatus]));
+    const signature = JSON.stringify(effectiveWords().map(item=>[item.id,item.word,item.zhuyin,item.meaning,item.example,item.exampleZhuyin,item.note,item.pronunciationStatus,item.category,item.tags,item.confuse,isRemembered(item.id)]));
     const cardsChanged = signature !== lastCardSignature;
     lastCardSignature = signature;
     window.dispatchEvent(new CustomEvent('chengci-user-cards-changed',{detail:{cardsChanged}}));
+  }
+  function renderVocabularyStatus(cloud) {
+    const panel=byId('vocabularySetupPanel'),status=byId('vocabularyStatus'),button=byId('vocabularyBootstrap');
+    if(!panel || !status || !button)return;
+    const vocabulary=cloud.vocabulary || store().getVocabulary?.() || {};
+    panel.hidden=false;
+    button.hidden=!!vocabulary.clientReady;
+    button.disabled=migrationBusy || !cloud.connected || cloud.status==='offline';
+    button.textContent=vocabulary.ready?'単語帳の準備を再試行':'単語の管理をまとめる';
+    status.textContent=vocabulary.clientReady?'既存の単語も追加した単語も、同じ単語帳で管理しています。':vocabulary.ready?'共有単語帳を読み込んでいます。今ある端末の単語は残しています。':cloud.connected?'初回だけ単語の管理をまとめます。単語と編集内容は残し、お気に入り・練習記録・「覚えた」のチェックをリセットします。変更前の控えも保存します。':'Googleでログインすると、既存の単語と追加した単語をまとめられます。';
+    if(migrationBusy)status.textContent='単語帳をまとめています。読み込みが終わるまで、この画面を開いておいてね。';
+  }
+  async function bootstrapVocabulary() {
+    if(migrationBusy)return;
+    const current=sync()?.getState();
+    if(!current?.connected){message('先にGoogleでログインしてね。',true);return;}
+    if(!current.vocabulary?.ready && !window.confirm('単語と編集内容を残して、単語の管理をまとめます。お気に入り・練習記録・「覚えた」のチェックは一度リセットし、変更前の控えを保存します。進めますか？'))return;
+    migrationBusy=true;renderSync();
+    try {
+      await window.ChengciStudySync?.retry();
+      const result=await sync().bootstrapVocabulary();
+      await window.ChengciStudySync?.reconcileVocabularyEpoch?.();
+      if(result.vocabulary?.clientReady)message('単語の管理をまとめました。既存の単語も一覧から編集できます。');
+      else throw new Error(result.error || '単語帳の準備が終わっていません。今ある内容は残しているので、オンラインで再試行してね。');
+    } catch(error){message(error?.message || '単語帳をまとめられませんでした。今ある内容は残しています。',true);}
+    finally {migrationBusy=false;render();}
+  }
+  async function exportVocabularyArchive() {
+    try {
+      const value=await sync().exportVocabularyArchive();
+      const blob=new Blob([JSON.stringify(value,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob);
+      const link=document.createElement('a');link.href=url;link.download='chengci-before-unification-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
+      message(value.scope==='local-and-server'?'変更前の端末・クラウドの控えを書き出しました。':'この端末の控えだけを書き出しました。クラウドの控えも含めるには、オンラインでログインしてね。');
+    } catch(error){message(error?.message || '控えを書き出せませんでした。部分的なファイルは保存していません。',true);}
   }
   async function changePersistence() {
     if (busy) return;
@@ -295,6 +401,8 @@
     finally {event.target.value='';}
   }
   async function handleAction(event) {
+    const remembered=event.target.closest('[data-personal-remembered]');
+    if(remembered){remembered.disabled=true;try{await setRemembered(decodeURIComponent(remembered.dataset.personalRemembered),remembered.dataset.remembered==='true');}catch(error){message(error?.message || '覚えた記録を保存できませんでした。',true);render();}finally{remembered.disabled=false;}return;}
     const progress = event.target.closest('[data-progress-resolve]');
     if(progress && ready) {try{const id=decodeURIComponent(progress.dataset.id);const token=progress.dataset.conflictToken || store().getConflicts().find(item=>item.kind === 'progress' && item.id === id)?.comparisonToken;await store().resolveConflict(id,progress.dataset.progressResolve,{kind:'progress',expectedComparisonToken:token});render();}catch(error){message(error?.message || '記録を更新できませんでした。',true);}return;}
     const edit = event.target.closest('[data-personal-edit]');
@@ -333,7 +441,7 @@
     byId('personalWord').addEventListener('change',()=>{readingStatus='candidate';byId('personalReadingChecked').checked=false;byId('personalZhuyin').value='';});
     byId('personalExample').addEventListener('change',()=>{byId('personalExampleZhuyin').value='';});
     byId('personalZhuyin').addEventListener('input',()=>{readingStatus='candidate';byId('personalReadingChecked').checked=false;});
-    byId('personalListFilter').addEventListener('change',renderList);
+    byId('personalListFilter').addEventListener('change',()=>{listView=items=>items;listViewLabel='';if(typeof window.clearTagFilters==='function')window.clearTagFilters('word',false);renderList();});
     byId('personalListSearch').addEventListener('input',renderList);
     byId('personalRememberDevice').addEventListener('change',changePersistence);
     byId('personalConnect').addEventListener('click',connect);
@@ -343,11 +451,14 @@
     byId('personalExport').addEventListener('click',exportBackup);
     byId('personalImportFile').addEventListener('change',importBackup);
     byId('personalImport').addEventListener('click',()=>byId('personalImportFile').click());
+    byId('vocabularyBootstrap')?.addEventListener('click',bootstrapVocabulary);
+    byId('vocabularyArchiveExport')?.addEventListener('click',exportVocabularyArchive);
     document.addEventListener('click',handleAction);
     window.addEventListener('beforeunload',event=>{if(authNavigating)return;if(dirty() || (store().getState().persistence !== 'device' && (store().getState().pendingCount || store().getState().conflictCount))){event.preventDefault();event.returnValue='';}});
     store().subscribe(render);
     sync()?.subscribe(renderSync);
     window.ChengciStudySync?.subscribe(renderSync);
+    let handoffLoaded = true;
     try {
       const restored=await window.ChengciAuthHandoff?.restore();
       if(restored){
@@ -358,14 +469,20 @@
           stale=!!savedDraft.editorId && (!baseline || baseline.fingerprint!==fingerprint() || (current?.deleted || false)!==baseline.deleted);
           if(stale){editingRevision=baseline?.revision ?? -1;editingLocalVersion=baseline?.localVersion || 'unverified-handoff';}
           const draft=savedDraft.fields;
-          byId('personalWord').value=draft.word;byId('personalExample').value=draft.example;byId('personalZhuyin').value=draft.zhuyin;byId('personalMeaning').value=draft.meaning;byId('personalExampleZhuyin').value=draft.exampleZhuyin;byId('personalNote').value=draft.note;byId('personalReadingChecked').checked=draft.pronunciationStatus==='confirmed';
+          byId('personalWord').value=draft.word;byId('personalExample').value=draft.example;byId('personalZhuyin').value=draft.zhuyin;byId('personalMeaning').value=draft.meaning;byId('personalExampleZhuyin').value=draft.exampleZhuyin;byId('personalNote').value=draft.note;if(byId('personalCategory'))byId('personalCategory').value=draft.category || '';if(byId('personalTags'))byId('personalTags').value=(draft.tags || []).join('、');if(byId('personalConfuse'))byId('personalConfuse').value=draft.confuse || '';byId('personalReadingChecked').checked=draft.pronunciationStatus==='confirmed';
           byId('personalSaveCopy').hidden=!stale;
         }
         message(stale?'入力を復元しました。ログイン中に別の変更が届いています。最新のカードを比較するか、この入力を別カードとして保存してね。':'ログイン前のカードと入力を復元しました。',stale);
       }
-    }catch(error){message(error?.message || '一時保存を復元できませんでした。元データは残しています。',true);}
+    }catch(error){handoffLoaded=false;message(error?.message || '一時保存を復元できませんでした。元データは残しています。',true);}
     render();
+    return handoffLoaded;
   }
-  window.ChengciPersonalCards = {allWords:effectiveWords,get:effectiveItem,open:openPanel};
-  window.addEventListener('load',init);
+  window.ChengciPersonalCards = {allWords:effectiveWords,learningWords,isRemembered,setRemembered,managementExtras,setListView,refreshList:renderList,get:effectiveItem,open:openPanel,ready:initialLoad};
+  window.addEventListener('load',async()=>{
+    let loaded = false;
+    try { loaded = await init() === true; }
+    catch(error){message(error?.message || 'カードを読み込めませんでした。既存データは残しています。',true);}
+    finally { finishInitialLoad(loaded); }
+  });
 })();
