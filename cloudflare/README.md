@@ -1,6 +1,6 @@
 # 澄詞: same-origin Workers + D1 backend
 
-Status: local implementation only. No Cloudflare/Google account, resource, OAuth grant, secret, deployment, domain change, or production migration has been created or performed. The example is **disabled by default** and includes placeholders. The existing offline app remains independently usable.
+Status: implementation is in draft PR #12. The owner has created the approved D1 database and applied the initial schema. The feature-branch GitHub Actions workflow is prepared for an explicitly approved public test deployment; no deployment success is claimed here. Google login and shared sync remain disabled until separately configured and verified. The example configuration remains **disabled by default** and includes placeholders. The existing GitHub Pages app remains independently usable.
 
 ## Architecture and trust boundaries
 
@@ -95,14 +95,16 @@ wrangler deploy --config wrangler.jsonc
 
 A successful local test suite is not evidence that any of these live checks passed.
 
-## Git-connected Workers build
+## GitHub Actions test deployment
 
-Use the repository root (`/`) as the build root. After the confirmed D1 binding ID is present in the reviewed, non-secret `cloudflare/wrangler.jsonc`:
+The selected path is the official [Cloudflare Wrangler GitHub Action](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/), not Workers Builds. `.github/workflows/deploy-cloudflare-test.yml` runs only for pushes to `codex/chengci-6-10-offline-sync` in `ayuan-tw/taiwan-chinese`. There is no main, pull-request, tag, scheduled or manual-dispatch trigger. Publishing this workflow to that branch starts deployment, so its initial push requires explicit publication approval. Later pushes to the same branch also deploy; review changes accordingly. Moving the trigger to main requires a separate reviewed change and approval.
 
-- Build: `node cloudflare/build-assets.mjs`
-- Deploy: `npx wrangler deploy --config cloudflare/wrangler.jsonc`
-- Production branch: only the reviewed/approved main branch
+The owner enters the deployment token personally in the repository's Actions secret `CLOUDFLARE_API_TOKEN`. The non-secret account ID belongs in the Actions repository **variable** `CLOUDFLARE_ACCOUNT_ID`, not an identically named secret. Never include the token in a file, screenshot, chat, command, client bundle or job output. Only the pinned deployment action receives it; tests, asset building and the exact Wrangler installation run beforehand without it. In the credential-bearing step npm is offline and lifecycle scripts are disabled, so fallback installation cannot run install scripts with the token. The action does not create runtime Worker secrets or apply database migrations.
 
-The deployment config must retain `keep_vars:true`, `assets.directory:"./public"`, binding `ASSETS`, Worker-first routing, and D1 binding `DB`. Dashboard runtime settings remain outside the repository. The example intentionally contains an invalid D1 placeholder and disables workers.dev/previews; it is not a usable deployment config until actual IDs and the approved route are selected. Do not let an initial automatic deployment run against the old repository before the new build files are available.
+Official actions are pinned to reviewed commit SHAs: checkout v7.0.1, setup-node v7.0.0 and wrangler-action v4.1.3. Node 24.19.0 and Wrangler 4.147.0 are exact versions, verified from their upstream release tags. The job grants only `contents:read`, does not persist Git credentials or use dependency caches, and does not cancel an in-flight deployment. A final public branch-tip check rejects reruns of obsolete commits. Any test, build, account-ID or tip-check failure prevents deployment.
+
+The actual `cloudflare/wrangler.jsonc` binds the confirmed `chengci-personal` database and enables the approved workers.dev test route; preview URLs stay disabled. Frontend sync stays disabled, and the backend fails closed without its runtime owner/origin/login configuration. Retain `keep_vars:true` (also passed to deployment), Worker-first routing, approved public asset directory, and binding names `DB` and `ASSETS`. No `vars` block is checked in, so approved dashboard-managed runtime settings remain in place on later deployments. Do not deploy the repository root as static assets.
+
+For local verification, run all tests and `node cloudflare/build-assets.mjs`. The deployment action then runs the equivalent of `wrangler deploy --config cloudflare/wrangler.jsonc --keep-vars` using its pinned version. Before any later manual deployment, confirm the destination and authorization again. A successful workflow is not evidence of real Google sign-in, cross-device sync, iPhone behavior or offline browser acceptance; those remain explicit live checks.
 
 A separate `node cloudflare/build-pages.mjs` creates a Pages Advanced Mode directory with `_worker.js` and `_routes.json` if that route is selected later. Both use the same API and D1 schema. This packaging does not publish anything.
