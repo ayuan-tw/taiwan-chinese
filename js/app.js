@@ -700,11 +700,10 @@ async function refreshOfflineCache(){
   }
   setOfflineStatus('オフライン用データを更新中…');
   try{
-    const currentCache='chengci-v6-10-0-offline';
-    const keys=await caches.keys();
-    await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!==currentCache).map(k=>caches.delete(k)));
+    const currentCache='chengci-v6-10-1-offline';
+    // Cache retirement belongs to service-worker activation, not this page.
     const cache=await caches.open(currentCache);
-    await cache.addAll(['./','./index.html?v=6.10.0','./css/style.css?v=6.10.0','./js/app.js?v=6.10.0','./js/recall-cards.js?v=6.10.0','./sync-config.js?v=6.10.0','./js/card-store.js?v=6.10.0','./js/cloudflare-sync.js?v=6.10.0','./js/study-sync.js?v=6.10.0','./js/auth-handoff.js?v=6.10.0','./js/legacy-migration.js?v=6.10.0','./js/migration-ui.js?v=6.10.0','./js/personal-cards.js?v=6.10.0','./js/shortcut-export.js?v=6.10.0','./js/data-model.js?v=6.10.0','./data/words.js?v=6.10.0','./data/zhuyin-dict.js?v=6.10.0','./js/zhuyin-lite.js?v=6.10.0','./js/speech-recognition.js?v=6.10.0','./manifest.json?v=6.10.0','./version.json','./CHANGELOG.md','./assets/icon.svg']);
+    await cache.addAll(['./','./index.html?v=6.10.1','./css/style.css?v=6.10.1','./js/app.js?v=6.10.1','./js/recall-cards.js?v=6.10.1','./sync-config.js?v=6.10.1','./js/card-store.js?v=6.10.1','./js/cloudflare-sync.js?v=6.10.1','./js/study-sync.js?v=6.10.1','./js/auth-handoff.js?v=6.10.1','./js/legacy-migration.js?v=6.10.1','./js/migration-ui.js?v=6.10.1','./js/personal-cards.js?v=6.10.1','./js/shortcut-export.js?v=6.10.1','./js/data-model.js?v=6.10.1','./data/words.js?v=6.10.1','./data/zhuyin-dict.js?v=6.10.1','./js/zhuyin-lite.js?v=6.10.1','./js/speech-recognition.js?v=6.10.1','./manifest.json?v=6.10.1','./version.json','./CHANGELOG.md','./assets/icon.svg']);
     setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
   }catch(e){
     setOfflineStatus('保存更新に失敗しました。ネット接続がある時にもう一度試してね。');
@@ -712,7 +711,7 @@ async function refreshOfflineCache(){
 }
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./service-worker.js?v=6.10.0').then(async(reg)=>{
+    navigator.serviceWorker.register('./service-worker.js?v=6.10.1').then(async(reg)=>{
       await reg.update();
       await navigator.serviceWorker.ready;
       if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
@@ -775,7 +774,7 @@ searchWords=function(){let k=document.getElementById("searchInput").value.trim()
 window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
 
 // Ver.5.7.0 app update manager
-const CHENGCI_APP_VERSION = '6.10.0';
+const CHENGCI_APP_VERSION = '6.10.1';
 let pendingAppVersion = null;
 let updateReloading = false;
 
@@ -869,10 +868,8 @@ async function applyAppUpdate(){
     }else if(registration.active){
       registration.active.postMessage({type:'SKIP_WAITING'});
     }
-    if('caches' in window){
-      const keys=await caches.keys();
-      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-10-0-offline').map(k=>caches.delete(k)));
-    }
+    // The newly activated service worker owns old-cache cleanup.
+    // This running page must never delete the next release's verified cache.
     updateReloading=true;
     setTimeout(()=>location.replace(`./?updated=${Date.now()}`),900);
   }catch(error){

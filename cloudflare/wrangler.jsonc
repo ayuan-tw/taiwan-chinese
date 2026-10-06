@@ -22,5 +22,10 @@
   ],
   "observability": {
     "enabled": false
+  },
+  "vars": {
+    "APP_ORIGIN": "https://chengci-owner-sync.ayuannoa.workers.dev",
+    "GOOGLE_CLIENT_ID": "526792052093-3cpchc83orl8pb6rnadttl3n40gn0mei.apps.googleusercontent.com",
+    "SYNC_ENABLED": "true"
   }
 }

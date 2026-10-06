@@ -62,11 +62,13 @@ test('test-route config retains disabled previews, private settings, existing D1
   assert.equal(config.workers_dev, true);
   assert.equal(config.preview_urls, false);
   assert.equal(config.keep_vars, true);
-  assert.equal(config.vars, undefined);
+  assert.deepEqual(Object.keys(config.vars).sort(), ['APP_ORIGIN','GOOGLE_CLIENT_ID','SYNC_ENABLED']);
+  assert.equal(config.vars.SYNC_ENABLED, 'true');
+  assert.equal(config.vars.APP_ORIGIN, 'https://chengci-owner-sync.ayuannoa.workers.dev');
   assert.equal(config.assets.directory, './public');
   assert.equal(config.assets.run_worker_first, true);
   assert.equal(config.assets.binding, 'ASSETS');
   assert.equal(config.d1_databases.length, 1);
   assert.deepEqual(config.d1_databases[0], { binding: 'DB', database_name: 'chengci-personal', database_id: 'bce0a174-a115-44dd-a921-8a2d8daddf68', migrations_dir: 'migrations' });
-  assert.match(readFileSync(join(root, 'sync-config.js'), 'utf8'), /enabled:\s*false/);
+  assert.match(readFileSync(join(root, 'sync-config.js'), 'utf8'), /enabled:\s*true/);
 });
