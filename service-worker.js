@@ -1,10 +1,11 @@
-const CACHE_NAME = 'chengci-v6-11-0-offline';
-const APP_VERSION = '6.11.0';
+const CACHE_NAME = 'chengci-v6-12-0-offline';
+const APP_VERSION = '6.12.0';
 const OFFLINE_ASSETS = [
   './',
   './index.html',
   './css/style.css',
   './js/app.js',
+  './js/navigation.js',
   './js/recall-cards.js',
   './sync-config.js',
   './js/card-store.js',

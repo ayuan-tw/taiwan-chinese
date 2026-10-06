@@ -437,3 +437,19 @@ test('management category/search view survives model notifications and resets wi
   t.set('personalListSearch','');t.set('personalListFilter','all');t.e('personalListFilter').listeners.change();
   assert.equal(rendered.length,2);assert.equal(t.e('personalListCount').textContent,'2件');
 });
+
+
+test('reopening an interrupted dirty editor keeps fields, and cancel respects the confirmation', async()=>{
+  const routes=[];
+  const t=await harness({beforeLoad:context=>{
+    context.openPracticePanel=id=>routes.push(id);
+    context.jumpToStudyPanel=id=>routes.push(id);
+  }});
+  await t.action({personalEdit:'word-base'});t.set('personalMeaning','編集中の意味');
+  await t.action({personalEdit:'word-base'});
+  assert.equal(t.e('personalMeaning').value,'編集中の意味','same card reopens without resetting the draft');
+  t.options.confirm=false;await t.e('personalCancel').listeners.click();
+  assert.equal(t.e('personalMeaning').value,'編集中の意味');assert.notEqual(routes.at(-1),'wordListPanel');
+  t.options.confirm=true;await t.e('personalCancel').listeners.click();
+  assert.equal(routes.at(-1),'wordListPanel');assert.equal(t.e('personalMeaning').value,'');
+});

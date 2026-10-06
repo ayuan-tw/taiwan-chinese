@@ -25,7 +25,7 @@ const vm = require('node:vm');
   };
   const context = {
     self: {registration:{scope:base},location:{href:base+'service-worker.js'},addEventListener:(type, cb)=>handlers.set(type,cb),skipWaiting:async()=>{},clients:{claim:async()=>{}}},
-    caches: {open:async()=>cache,keys:async()=>['chengci-v6-9-4-offline','chengci-v6-10-0-offline','chengci-v6-10-1-offline','chengci-v6-10-2-offline','chengci-v6-11-0-offline','another-app'],delete:async key=>{deleted.push(key);}},
+    caches: {open:async()=>cache,keys:async()=>['chengci-v6-9-4-offline','chengci-v6-10-0-offline','chengci-v6-10-1-offline','chengci-v6-10-2-offline','chengci-v6-11-0-offline','chengci-v6-12-0-offline','another-app'],delete:async key=>{deleted.push(key);}},
     location: {origin:new URL(base).origin}, URL, Response,
     fetch:async()=>{networkCalls++;if(!online)throw Error('offline');return new Response('network body');}
   };
@@ -34,7 +34,7 @@ const vm = require('node:vm');
   handlers.get('install')({waitUntil:promise=>{work=promise;}});await work;
   assert.ok(precached.includes('./js/recall-cards.js'));
   handlers.get('activate')({waitUntil:promise=>{work=promise;}});await work;
-  assert.deepEqual(deleted,['chengci-v6-9-4-offline','chengci-v6-10-0-offline','chengci-v6-10-1-offline','chengci-v6-10-2-offline']);
+  assert.deepEqual(deleted,['chengci-v6-9-4-offline','chengci-v6-10-0-offline','chengci-v6-10-1-offline','chengci-v6-10-2-offline','chengci-v6-11-0-offline']);
   const dispatch = async (url, mode = 'cors', method = 'GET') => {
     let response;
     handlers.get('fetch')({request:{url,method,mode},respondWith(value){response=value;}});
@@ -42,11 +42,11 @@ const vm = require('node:vm');
   };
   saved.set(base+'js/recall-cards.js',new Response('recall script'));
   saved.set(base+'index.html',new Response('<html>app</html>'));
-  let response=await dispatch(base+'js/recall-cards.js?v=6.11.0');
+  let response=await dispatch(base+'js/recall-cards.js?v=6.12.0');
   assert.equal(await response.text(),'recall script','versioned requests use same-release unversioned precache');
-  response=await dispatch(base+'js/missing.js?v=6.11.0');
+  response=await dispatch(base+'js/missing.js?v=6.12.0');
   assert.equal(response,undefined,'unknown paths are not cached or answered with HTML');
-  response=await dispatch(base+'css/style.css?v=6.11.0');
+  response=await dispatch(base+'css/style.css?v=6.12.0');
   assert.equal(response.status,503,'missing known assets never receive HTML');
   assert.equal(await dispatch(base+'api/cards'),undefined,'private API reads bypass service worker caching');
   assert.equal(await dispatch(base+'cdn-cgi/access/login'),undefined,'auth endpoints bypass service worker caching');
@@ -56,13 +56,13 @@ const vm = require('node:vm');
   assert.equal(await response.text(),'<html>app</html>');
   assert.equal(await dispatch('https://another.example/data'),undefined,'other origins untouched');
   assert.equal(await dispatch(base+'data','cors','POST'),undefined,'writes untouched');
-  online=true;const before=networkCalls;response=await dispatch(base+'js/recall-cards.js?v=6.11.0');
+  online=true;const before=networkCalls;response=await dispatch(base+'js/recall-cards.js?v=6.12.0');
   assert.equal(await response.text(),'recall script');
   assert.equal(networkCalls,before,'normal app reload reads cached assets without redownloading');
   response=await dispatch(base+'version.json?t=123');
   assert.equal(await response.text(),'network body');
   assert.equal(networkCalls,before+1,'only small version info is refreshed');
   assert.ok(saved.has(base+'js/recall-cards.js'));
-  assert.ok(!saved.has(base+'js/recall-cards.js?v=6.11.0'),'queries are not persisted as cache keys');
+  assert.ok(!saved.has(base+'js/recall-cards.js?v=6.12.0'),'queries are not persisted as cache keys');
   console.log('Service-worker tests passed: asset precache, versioned offline lookup, navigation fallback, missing assets, cache isolation, online refresh.');
 })();

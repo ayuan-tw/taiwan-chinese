@@ -396,7 +396,7 @@ function renderTagButtons(){
   if(hotArea){
     const tags=[...new Set(allVocabularyWords().flatMap(getWordTags))];
     const hot=["何回も忘れた","声調注意","何度も質問した","就と才","又と再","台湾人よく使う","WOS","夜市"];
-    hotArea.innerHTML=hot.filter(tag=>tags.includes(tag)).map(tag=>`<button class="secondary small" onclick="filterByTag('${tag}');document.getElementById('wordList').scrollIntoView({behavior:'smooth'});">#${tag}</button>`).join("");
+    hotArea.innerHTML=hot.filter(tag=>tags.includes(tag)).map(tag=>`<button class="secondary small" onclick="filterByTag('${tag}');jumpToStudyPanel('wordListPanel');">#${tag}</button>`).join("");
   }
 }
 function setWordListView(transform,label){
@@ -470,9 +470,10 @@ function startAudioQuiz(mode='choice'){
     ${answerArea}
     <div id="audioQuizResult"></div>
   </div>`;
-  if(audioQuizMode==='typing')setTimeout(()=>document.getElementById('audioQuizInput')?.focus(),80);
+  if(audioQuizMode==='typing')setTimeout(()=>{if(!window.ChengciNavigation || window.ChengciNavigation.isPanelVisible('audioQuizPanel'))document.getElementById('audioQuizInput')?.focus();},80);
   const scheduledAudioQuiz=currentAudioQuiz;
-  setTimeout(()=>{if(currentAudioQuiz===scheduledAudioQuiz)speakText(scheduledAudioQuiz.word);},120);
+  const scheduledNavigation=window.ChengciNavigation?.generation();
+  setTimeout(()=>{if(currentAudioQuiz===scheduledAudioQuiz && (!window.ChengciNavigation || (window.ChengciNavigation.generation()===scheduledNavigation && window.ChengciNavigation.isPanelVisible("audioQuizPanel"))))speakText(scheduledAudioQuiz.word);},120);
 }
 function replayAudioQuiz(){
   if(!currentAudioQuiz){startAudioQuiz(audioQuizMode);return;}
@@ -678,40 +679,7 @@ searchWords=function(){
 const oldWindowLoad = window.onload;
 window.addEventListener("load",()=>{renderPatternTagButtons();renderPatternList(patterns);updateStats();});
 
-// Ver.5.0 tab navigation
-function showTab(name){
-  document.querySelectorAll('.tab-page').forEach(page=>page.classList.remove('active'));
-  const target=document.getElementById(`tab-${name}`);
-  if(target) target.classList.add('active');
-  document.querySelectorAll('.tab-btn').forEach(btn=>{
-    btn.classList.toggle('active', btn.dataset.tabTarget===name);
-  });
-  localStorage.setItem('chengciActiveTab', name);
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-function scrollToPanel(id){
-  showTab('home');
-  setTimeout(()=>{
-    const el=document.getElementById(id);
-    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
-  },80);
-}
-function jumpToStudyPanel(id){
-  showTab('study');
-  setTimeout(()=>{
-    const el=document.getElementById(id);
-    if(el){
-      el.scrollIntoView({behavior:'smooth', block:'start'});
-      el.classList.add('jump-highlight');
-      setTimeout(()=>el.classList.remove('jump-highlight'), 900);
-    }
-  },80);
-}
-window.addEventListener('load',()=>{
-  const saved=localStorage.getItem('chengciActiveTab')||'home';
-  showTab(saved);
-});
-
+// Navigation is handled by js/navigation.js. Panels keep their live DOM state.
 
 // Ver.5.1 PWA offline support
 function setOfflineStatus(message, ok=false){
@@ -730,10 +698,10 @@ async function refreshOfflineCache(){
   }
   setOfflineStatus('オフライン用データを更新中…');
   try{
-    const currentCache='chengci-v6-11-0-offline';
+    const currentCache='chengci-v6-12-0-offline';
     // Cache retirement belongs to service-worker activation, not this page.
     const cache=await caches.open(currentCache);
-    await cache.addAll(['./','./index.html?v=6.11.0','./css/style.css?v=6.11.0','./js/app.js?v=6.11.0','./js/recall-cards.js?v=6.11.0','./sync-config.js?v=6.11.0','./js/card-store.js?v=6.11.0','./js/cloudflare-sync.js?v=6.11.0','./js/study-sync.js?v=6.11.0','./js/auth-handoff.js?v=6.11.0','./js/legacy-migration.js?v=6.11.0','./js/migration-ui.js?v=6.11.0','./js/personal-cards.js?v=6.11.0','./js/shortcut-export.js?v=6.11.0','./js/data-model.js?v=6.11.0','./data/words.js?v=6.11.0','./data/zhuyin-dict.js?v=6.11.0','./js/zhuyin-lite.js?v=6.11.0','./js/speech-recognition.js?v=6.11.0','./manifest.json?v=6.11.0','./version.json','./CHANGELOG.md','./assets/icon.svg']);
+    await cache.addAll(['./','./index.html?v=6.12.0','./css/style.css?v=6.12.0','./js/app.js?v=6.12.0','./js/navigation.js?v=6.12.0','./js/recall-cards.js?v=6.12.0','./sync-config.js?v=6.12.0','./js/card-store.js?v=6.12.0','./js/cloudflare-sync.js?v=6.12.0','./js/study-sync.js?v=6.12.0','./js/auth-handoff.js?v=6.12.0','./js/legacy-migration.js?v=6.12.0','./js/migration-ui.js?v=6.12.0','./js/personal-cards.js?v=6.12.0','./js/shortcut-export.js?v=6.12.0','./js/data-model.js?v=6.12.0','./data/words.js?v=6.12.0','./data/zhuyin-dict.js?v=6.12.0','./js/zhuyin-lite.js?v=6.12.0','./js/speech-recognition.js?v=6.12.0','./manifest.json?v=6.12.0','./version.json','./CHANGELOG.md','./assets/icon.svg']);
     setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
   }catch(e){
     setOfflineStatus('保存更新に失敗しました。ネット接続がある時にもう一度試してね。');
@@ -741,7 +709,7 @@ async function refreshOfflineCache(){
 }
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./service-worker.js?v=6.11.0').then(async(reg)=>{
+    navigator.serviceWorker.register('./service-worker.js?v=6.12.0').then(async(reg)=>{
       await reg.update();
       await navigator.serviceWorker.ready;
       if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
@@ -804,7 +772,7 @@ searchWords=function(){let k=document.getElementById("searchInput").value.trim()
 window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
 
 // Ver.5.7.0 app update manager
-const CHENGCI_APP_VERSION = '6.11.0';
+const CHENGCI_APP_VERSION = '6.12.0';
 let pendingAppVersion = null;
 let updateReloading = false;
 
@@ -986,10 +954,10 @@ function showScopeEmpty(areaId,label){
   if(area)area.innerHTML=`<div class="empty">今の学習範囲には${label}がないよ。対象かタグを変えてね。</div>`;
 }
 function launchStudyQuiz(kind){
-  if(kind==="quiz"){startQuiz("mix");document.getElementById("quizPanel")?.scrollIntoView({behavior:"smooth",block:"start"});return;}
-  if(kind==="composition"){startComposition("mix");document.getElementById("compositionPanel")?.scrollIntoView({behavior:"smooth",block:"start"});return;}
+  if(kind==="quiz"){openPracticePanel("quizPanel");startQuiz("mix");return;}
+  if(kind==="composition"){openPracticePanel("compositionPanel");startComposition("mix");return;}
+  openPracticePanel("audioQuizPanel");
   startAudioQuiz(kind==="audio-typing"?"typing":"choice");
-  document.getElementById("audioQuizPanel")?.scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 function scopedCompositionPool(mode="mix"){
@@ -1006,7 +974,7 @@ startComposition=function(mode="mix"){
   const weighted=[...pool,...weakPool,...weakPool],queueName=`scope-composition-${mode}-${studyScopeSignature()}`;
   currentComposition=pickFromQueue(queueName,weighted,a=>`${a.type}:${a.source}:${a.ja}`)||pool[0];quizRuns++;saveAll();
   document.getElementById("compositionArea").innerHTML=`<div class="quiz-card composition-card"><div class="quiz-scope-badge">学習範囲：${pool.length}問</div><br><span class="tag">${typeLabel(currentComposition.type)}：${escapeHtml(currentComposition.category)}</span><p class="hint">日本語を見て、台湾華語で答えてみて。</p><div class="composition-label">問題</div><div class="composition-ja">${escapeHtml(currentComposition.ja)}</div><label class="composition-label" for="compositionInput">你的答案</label><textarea id="compositionInput" class="composition-input" rows="3" lang="zh-Hant-TW" inputmode="text" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="ここに中文で入力／音声入力"></textarea><div class="button-row"><button onclick="checkCompositionAnswer()">答え合わせ</button><button onclick="showCompositionAnswer()">答えを見る</button><button class="secondary" onclick="markCompositionMistake()">苦手にする</button><button class="secondary" onclick="startComposition('${mode}')">次の問題</button></div><div id="compositionResult"></div></div>`;
-  setTimeout(()=>document.getElementById("compositionInput")?.focus(),50);
+  setTimeout(()=>{if(!window.ChengciNavigation || window.ChengciNavigation.isPanelVisible("compositionPanel"))document.getElementById("compositionInput")?.focus();},50);
 };
 
 let currentQuizMode="mix";
@@ -1068,9 +1036,10 @@ startAudioQuiz=function(mode="choice"){
   currentAudioQuiz=pickFromQueue(`scope-audio-${studyScopeSignature()}`,pool,w=>wordStudyKey(w))||pool[0];quizRuns++;saveAll();
   const answerArea=audioQuizMode==="choice"?`<p class="audio-quiz-prompt">聞こえた單字はどれ？</p><div class="quiz-options audio-chinese-options">${buildScopedChineseChoices(currentAudioQuiz,pool).map((choice,index)=>`<button lang="zh-Hant-TW" onclick="checkAudioQuizChoice(${index})" data-choice="${encodeURIComponent(choice)}">${escapeHtml(choice)}</button>`).join("")}</div>`:`<p class="audio-quiz-prompt">聞こえた單字を中文で書いてね</p><form class="audio-typing-form" onsubmit="checkAudioQuizTyping(event)"><input id="audioQuizInput" class="audio-quiz-input" type="text" lang="zh-Hant-TW" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="中文を入力" aria-label="聞こえた単語を中文で入力" /><button type="submit">答える</button></form>`;
   document.getElementById("audioQuizArea").innerHTML=`<div class="quiz-card audio-quiz-card"><div class="quiz-scope-badge">学習範囲：單字 ${pool.length}件</div><br><span class="tag">${audioQuizMode==="choice"?"音 → 中文4択":"音 → 中文入力"}</span><button class="audio-quiz-play" type="button" onclick="replayAudioQuiz()" aria-label="単語を再生">🔊</button>${answerArea}<div id="audioQuizResult"></div></div>`;
-  if(audioQuizMode==="typing")setTimeout(()=>document.getElementById("audioQuizInput")?.focus(),80);
+  if(audioQuizMode==="typing")setTimeout(()=>{if(!window.ChengciNavigation || window.ChengciNavigation.isPanelVisible("audioQuizPanel"))document.getElementById("audioQuizInput")?.focus();},80);
   const scheduledAudioQuiz=currentAudioQuiz;
-  setTimeout(()=>{if(currentAudioQuiz===scheduledAudioQuiz)speakText(scheduledAudioQuiz.word);},120);
+  const scheduledNavigation=window.ChengciNavigation?.generation();
+  setTimeout(()=>{if(currentAudioQuiz===scheduledAudioQuiz && (!window.ChengciNavigation || (window.ChengciNavigation.generation()===scheduledNavigation && window.ChengciNavigation.isPanelVisible("audioQuizPanel"))))speakText(scheduledAudioQuiz.word);},120);
 };
 
 function migrateConsolidatedStudyHistory(){

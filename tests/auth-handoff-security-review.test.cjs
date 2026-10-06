@@ -19,7 +19,7 @@ async function page(storage, revision, meaning) {
     sessionStorage: { getItem:key=>storage.get(key)||null, setItem:(key,value)=>storage.set(key,value), removeItem:key=>storage.delete(key) },
     document: { getElementById:element, addEventListener(){}, body:{appendChild(){}}, createElement:()=>element('created') },
     addEventListener(type,fn){events.set(type,[...(events.get(type)||[]),fn]);}, dispatchEvent(){},
-    CustomEvent: class {constructor(type,opts={}){this.type=type;this.detail=opts.detail;}}, confirm:()=>true, setTimeout(){}, showTab(){},
+    CustomEvent: class {constructor(type,opts={}){this.type=type;this.detail=opts.detail;}}, confirm:()=>true, setTimeout(){}, showTab(){}, openPracticePanel(id){context.openPanel=id;},
     escapeHtml:text=>String(text||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),
     ChengciZhuyinLite:{convert:()=> 'ㄉㄢˋ'},
     ChengciCloudSync:{getState:()=>({configured:true,connected:false,status:'login-required'}),subscribe(){},async connect(){const e=new Error('Login');e.code='LOGIN_REQUIRED';throw e;},loginUrl:()=>'/auth/login'} };
@@ -37,10 +37,13 @@ test('draft restored after login cannot silently overwrite a card changed on ano
   before.context.ChengciPersonalCards.open('card-review');
   before.e('personalMeaning').value='my unsaved draft';
   await before.e('personalConnect').listeners.click();
+  assert.equal(before.e('personalLoginCheckpoint').hidden,false);
+  assert.match(before.e('personalSettingsStatus').textContent,/ログイン画面へ移動する前/,'checkpoint explanation is visible in settings');
   await before.e('personalLoginCheckpoint').listeners.click();
   assert.ok(storage.size>0);
   const after=await page(storage,2,'other device changed meaning');
   assert.equal(after.e('personalMeaning').value,'my unsaved draft','draft survives redirect');
+  assert.equal(after.context.openPanel,'personalCardsPanel','auth return reveals restored editor without resetting it');
   await after.e('personalCardForm').listeners.submit({preventDefault(){}});
   assert.equal(after.store.get('card-review').meaning,'other device changed meaning','unseen remote change must remain until explicitly compared');
   assert.ok(after.e('personalMeaning').value==='my unsaved draft'||after.store.list().some(record=>record.id!=='card-review'&&record.meaning==='my unsaved draft'),'draft is retained for comparison or as a separate card');

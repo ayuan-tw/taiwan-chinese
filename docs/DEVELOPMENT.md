@@ -1,7 +1,7 @@
 # 澄詞 開発管理
 
 ## このソースの版
-Ver.6.11.0（単語帳統合のCloudflareテスト公開用）
+Ver.6.12.0（単語帳統合のCloudflareテスト公開用）
 
 ## Ver.6のテーマ
 辞書エンジン分離＋リスニング強化
@@ -9,6 +9,7 @@ Ver.6.11.0（単語帳統合のCloudflareテスト公開用）
 ## 構成
 - `index.html`：画面
 - `js/app.js`：既存機能と学習ロジック
+- `js/navigation.js`：画面と一覧種別の切り替え・ブラウザ履歴（DOMと入力を保持）
 - `css/style.css`：見た目
 - `data/words.js`：単語の初期シード／移行前のオフライン表示、句型・慣用句・口ぐせ
 - `data/overrides.json`：注音表記の差分資料
@@ -36,6 +37,7 @@ Ver.6.11.0（単語帳統合のCloudflareテスト公開用）
 - `node tests/personal-cards.test.cjs`
 - `node --test tests/personal-cards-regression.test.cjs tests/card-store.test.cjs tests/cloudflare-sync.test.cjs`
 - `node tests/app-smoke.test.cjs`
+- `node --test tests/navigation.test.cjs`
 - `node tests/data-preservation.test.cjs`
 - `node tests/service-worker.test.cjs`
 - `node --check js/recall-cards.js`

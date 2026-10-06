@@ -113,6 +113,10 @@
     if (!area) return;
     area.textContent = text;
     area.classList.toggle('personal-error', error);
+    const settingsStatus=byId('personalSettingsStatus');
+    if(settingsStatus){settingsStatus.textContent=text;settingsStatus.classList.toggle('personal-error',error);}
+    // Settings and list actions must not send feedback to a hidden editor only.
+    if(typeof window.ChengciNavigation?.announce==='function')window.ChengciNavigation.announce(text,error);
   }
   function openEditor(id = '', force = false) {
     if (busy || (!force && dirty() && !window.confirm('編集中の内容を閉じますか？まだ保存されていません。'))) return false;
@@ -143,9 +147,11 @@
     return true;
   }
   function openPanel(id = '') {
-    if (!ready || !openEditor(id)) return;
-    showTab('home');
-    byId('personalCardsPanel').scrollIntoView({behavior:'smooth',block:'start'});
+    if (!ready) return;
+    // Reopening the same editor must keep its unsaved fields.
+    if (!(id === editingId && dirty()) && !openEditor(id)) return;
+    if(typeof window.openPracticePanel==='function')window.openPracticePanel('personalCardsPanel');
+    else {showTab('home');byId('personalCardsPanel').scrollIntoView({behavior:'smooth',block:'start'});}
     byId('personalWord').focus({preventScroll:true});
   }
   function suggest() {
@@ -271,6 +277,7 @@
     byId('personalRememberDevice').checked = persistence;
     byId('personalRememberDevice').disabled = cloud.status === 'connecting';
     byId('personalLocalStatus').textContent = persistence ? 'この端末に保存：オン。オフラインで追加しても次回へ残ります。' : 'この端末に保存：オフ。同期前の変更は、この画面を閉じると失われます。';
+    if(byId('personalEditorLocalStatus'))byId('personalEditorLocalStatus').textContent=byId('personalLocalStatus').textContent;
     const configured = cloud.configured === true;
     byId('personalConnect').disabled = !configured || cloud.status === 'connecting';
     byId('personalConnect').hidden = !!cloud.connected;
@@ -437,7 +444,7 @@
     byId('personalCardForm').addEventListener('submit',save);
     byId('personalSuggest').addEventListener('click',()=>{if((byId('personalZhuyin').value || byId('personalExampleZhuyin').value) && !window.confirm('入力済みの注音を辞書の候補に置き換えますか？'))return;byId('personalZhuyin').value='';byId('personalExampleZhuyin').value='';suggest();byId('personalDetails').open=true;});
     byId('personalSaveCopy').addEventListener('click',()=>{saveCopy=true;save();});
-    byId('personalCancel').addEventListener('click',()=>openEditor(''));
+    byId('personalCancel').addEventListener('click',()=>{if(openEditor('') && typeof window.jumpToStudyPanel==='function')window.jumpToStudyPanel('wordListPanel');});
     byId('personalWord').addEventListener('change',()=>{readingStatus='candidate';byId('personalReadingChecked').checked=false;byId('personalZhuyin').value='';});
     byId('personalExample').addEventListener('change',()=>{byId('personalExampleZhuyin').value='';});
     byId('personalZhuyin').addEventListener('input',()=>{readingStatus='candidate';byId('personalReadingChecked').checked=false;});
@@ -471,6 +478,7 @@
           const draft=savedDraft.fields;
           byId('personalWord').value=draft.word;byId('personalExample').value=draft.example;byId('personalZhuyin').value=draft.zhuyin;byId('personalMeaning').value=draft.meaning;byId('personalExampleZhuyin').value=draft.exampleZhuyin;byId('personalNote').value=draft.note;if(byId('personalCategory'))byId('personalCategory').value=draft.category || '';if(byId('personalTags'))byId('personalTags').value=(draft.tags || []).join('、');if(byId('personalConfuse'))byId('personalConfuse').value=draft.confuse || '';byId('personalReadingChecked').checked=draft.pronunciationStatus==='confirmed';
           byId('personalSaveCopy').hidden=!stale;
+          if(typeof window.openPracticePanel==='function')window.openPracticePanel('personalCardsPanel');
         }
         message(stale?'入力を復元しました。ログイン中に別の変更が届いています。最新のカードを比較するか、この入力を別カードとして保存してね。':'ログイン前のカードと入力を復元しました。',stale);
       }
