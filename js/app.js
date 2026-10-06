@@ -615,7 +615,7 @@ function startComposition(mode="mix"){
 function showCompositionAnswer(){
   if(!currentComposition)return;
   const user=getCompositionInput();
-  document.getElementById("compositionResult").innerHTML=`<div class="quiz-result"><span class="correct">答え</span>${user?`<br><span class="note">你的答案：</span><br><div class="user-answer">${user}</div>`:""}<br><div class="word">${currentComposition.answer}</div><div class="zhuyin">${currentComposition.zhuyin}</div><div class="audio-row">${audioButton(currentComposition.answer,"🔊 答え")}</div><span class="note">型：${currentComposition.source}</span></div>`;if(shouldAutoSpeak())speakText(currentComposition.answer);
+  document.getElementById("compositionResult").innerHTML=`<div class="quiz-result"><span class="correct">答え</span>${user?`<br><span class="note">你的答案：</span><br><div class="user-answer">${escapeHtml(user)}</div>`:""}<br><div class="word">${currentComposition.answer}</div><div class="zhuyin">${currentComposition.zhuyin}</div><div class="audio-row">${audioButton(currentComposition.answer,"🔊 答え")}</div><span class="note">型：${currentComposition.source}</span></div>`;if(shouldAutoSpeak())speakText(currentComposition.answer);
 }
 function checkCompositionAnswer(){
   if(!currentComposition)return;
@@ -624,9 +624,9 @@ function checkCompositionAnswer(){
   if(!user){result.innerHTML=`<div class="quiz-result"><span class="wrong">まだ入力されてないよ</span><br>キーボード入力でも🎤音声入力でもOK。</div>`;return;}
   const ok=normalizeCompositionText(user)===normalizeCompositionText(currentComposition.answer);
   if(ok){
-    result.innerHTML=`<div class="quiz-result"><span class="correct">⭕ ぴったり！</span><br><div class="user-answer">${user}</div><div class="zhuyin">${currentComposition.zhuyin}</div><div class="audio-row">${audioButton(currentComposition.answer,"🔊 答え")}</div><span class="note">この調子で次いこー</span></div>`;if(shouldAutoSpeak())speakText(currentComposition.answer);
+    result.innerHTML=`<div class="quiz-result"><span class="correct">⭕ ぴったり！</span><br><div class="user-answer">${escapeHtml(user)}</div><div class="zhuyin">${currentComposition.zhuyin}</div><div class="audio-row">${audioButton(currentComposition.answer,"🔊 答え")}</div><span class="note">この調子で次いこー</span></div>`;if(shouldAutoSpeak())speakText(currentComposition.answer);
   }else{
-    result.innerHTML=`<div class="quiz-result"><span class="wrong">△ 答えと違うかも</span><br><span class="note">你的答案：</span><br><div class="user-answer">${user}</div><br><span class="note">參考答案：</span><br><div class="word">${currentComposition.answer}</div><div class="zhuyin">${currentComposition.zhuyin}</div><div class="audio-row">${audioButton(currentComposition.answer,"🔊 答え")}</div><div class="button-row score-row"><button onclick="markCompositionCorrect()">これでOKにする</button><button class="secondary" onclick="markCompositionMistake()">苦手にする</button></div></div>`;
+    result.innerHTML=`<div class="quiz-result"><span class="wrong">△ 答えと違うかも</span><br><span class="note">你的答案：</span><br><div class="user-answer">${escapeHtml(user)}</div><br><span class="note">參考答案：</span><br><div class="word">${currentComposition.answer}</div><div class="zhuyin">${currentComposition.zhuyin}</div><div class="audio-row">${audioButton(currentComposition.answer,"🔊 答え")}</div><div class="button-row score-row"><button onclick="markCompositionCorrect()">これでOKにする</button><button class="secondary" onclick="markCompositionMistake()">苦手にする</button></div></div>`;
   }
 }
 function markCompositionCorrect(){
@@ -700,11 +700,11 @@ async function refreshOfflineCache(){
   }
   setOfflineStatus('オフライン用データを更新中…');
   try{
-    const currentCache='chengci-v6-9-4-offline';
+    const currentCache='chengci-v6-10-0-offline';
     const keys=await caches.keys();
     await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!==currentCache).map(k=>caches.delete(k)));
     const cache=await caches.open(currentCache);
-    await cache.addAll(['./','./index.html?v=6.9.4','./css/style.css?v=6.9.4','./js/app.js?v=6.9.4','./js/shortcut-export.js?v=6.9.4','./js/data-model.js?v=6.9.4','./data/words.js?v=6.9.4','./data/zhuyin-dict.js?v=6.9.4','./js/zhuyin-lite.js?v=6.9.4','./js/speech-recognition.js?v=6.9.4','./manifest.json?v=6.9.4','./version.json','./CHANGELOG.md','./assets/icon.svg']);
+    await cache.addAll(['./','./index.html?v=6.10.0','./css/style.css?v=6.10.0','./js/app.js?v=6.10.0','./js/recall-cards.js?v=6.10.0','./sync-config.js?v=6.10.0','./js/card-store.js?v=6.10.0','./js/cloudflare-sync.js?v=6.10.0','./js/study-sync.js?v=6.10.0','./js/auth-handoff.js?v=6.10.0','./js/legacy-migration.js?v=6.10.0','./js/migration-ui.js?v=6.10.0','./js/personal-cards.js?v=6.10.0','./js/shortcut-export.js?v=6.10.0','./js/data-model.js?v=6.10.0','./data/words.js?v=6.10.0','./data/zhuyin-dict.js?v=6.10.0','./js/zhuyin-lite.js?v=6.10.0','./js/speech-recognition.js?v=6.10.0','./manifest.json?v=6.10.0','./version.json','./CHANGELOG.md','./assets/icon.svg']);
     setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
   }catch(e){
     setOfflineStatus('保存更新に失敗しました。ネット接続がある時にもう一度試してね。');
@@ -712,8 +712,9 @@ async function refreshOfflineCache(){
 }
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./service-worker.js?v=6.9.4').then(async(reg)=>{
+    navigator.serviceWorker.register('./service-worker.js?v=6.10.0').then(async(reg)=>{
       await reg.update();
+      await navigator.serviceWorker.ready;
       if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
       setOfflineStatus('オフライン保存OK。初回読み込み後は電波なしでも使えます。', true);
     }).catch(()=>{
@@ -774,7 +775,7 @@ searchWords=function(){let k=document.getElementById("searchInput").value.trim()
 window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
 
 // Ver.5.7.0 app update manager
-const CHENGCI_APP_VERSION = '6.9.4';
+const CHENGCI_APP_VERSION = '6.10.0';
 let pendingAppVersion = null;
 let updateReloading = false;
 
@@ -870,7 +871,7 @@ async function applyAppUpdate(){
     }
     if('caches' in window){
       const keys=await caches.keys();
-      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-9-4-offline').map(k=>caches.delete(k)));
+      await Promise.all(keys.filter(k=>k.startsWith('chengci-')&&k!=='chengci-v6-10-0-offline').map(k=>caches.delete(k)));
     }
     updateReloading=true;
     setTimeout(()=>location.replace(`./?updated=${Date.now()}`),900);

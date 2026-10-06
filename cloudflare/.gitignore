@@ -1,0 +1,11 @@
+public/
+.wrangler/
+node_modules/
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+
+pages-public/
+public-*/
+pages-public-*/
