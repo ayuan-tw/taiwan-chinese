@@ -125,6 +125,43 @@ test('only the exact approved verified owner is admitted, with optional pinned s
   app.env.OWNER_SUB = ''; assert.equal((await callback(app, login, { claims: { sub: 'explicit-email-owner' } })).status, 303);
   app.DB.close();
 });
+test('Google JWKS uses a workerd-supported redirect mode and verifies the signed owner', async () => {
+  const requests = [];
+  const app = setup({ fetch: async (url, init) => {
+    requests.push({ url, init });
+    // Unlike Node's fetch, workerd rejects this option before making a request.
+    // https://github.com/cloudflare/workerd/blob/v1.20261006.1/src/workerd/api/http.c++
+    if (!['follow', 'manual'].includes(init.redirect)) throw new TypeError('Invalid redirect value, must be one of "follow" or "manual"');
+    return new Response(JSON.stringify({ keys: [JWK] }), { headers: { 'Cache-Control': 'public, max-age=3600' } });
+  } });
+  try {
+    const auth = await authenticate(app);
+    assert.equal(auth.session.user.uid, SUB);
+    assert.equal(auth.session.user.email, TEST_OWNER_EMAIL);
+    assert.equal(requests.length, 1);
+    assert.equal(requests[0].url, 'https://www.googleapis.com/oauth2/v3/certs');
+    assert.equal(requests[0].init.redirect, 'manual');
+    assert.equal(requests[0].init.headers.Accept, 'application/json');
+    assert.ok(requests[0].init.signal instanceof AbortSignal);
+  } finally { app.DB.close(); }
+});
+for (const status of [301, 302, 303, 307, 308]) test(`Google JWKS rejects HTTP ${status} without following its Location`, async () => {
+  const requests = [];
+  const app = setup({ fetch: async (url, init) => {
+    requests.push({ url, init });
+    return new Response(JSON.stringify({ keys: [JWK] }), { status, headers: { Location: 'https://untrusted.example.test/keys' } });
+  } });
+  try {
+    const login = await begin(app), response = await callback(app, login);
+    assert.equal(response.status, 503);
+    assert.deepEqual(await response.json(), { error: 'identity_provider_unavailable' });
+    assert.equal(requests.length, 1);
+    assert.equal(requests[0].url, 'https://www.googleapis.com/oauth2/v3/certs');
+    assert.equal(requests[0].init.redirect, 'manual');
+    assert.equal(app.DB.sqlite.prepare('SELECT count(*) AS n FROM sessions').get().n, 0);
+    assert.equal(setCookie(response, testing.SESSION_COOKIE), undefined);
+  } finally { app.DB.close(); }
+});
 test('Google JWKS fetch failure is safe and does not log or return tokens', async () => {
   const app = setup({ fetch: async () => { throw new Error('private-token-from-network'); } }); const login = await begin(app); const response = await callback(app, login);
   assert.equal(response.status, 503); assert.deepEqual(await response.json(), { error: 'identity_provider_unavailable' }); app.DB.close();

@@ -168,7 +168,7 @@ function createVerifier(fetcher, now) {
     if (!force && cached && cached.until > current) return cached.keys;
     if (pending) return pending;
     pending = (async () => {
-      const response = await fetcher(JWKS_URL, { redirect: 'error', headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(10000) });
+      const response = await fetcher(JWKS_URL, { redirect: 'manual', headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(10000) });
       if (!response.ok) fail(503, 'identity_provider_unavailable');
       const body = await response.json();
       if (!plain(body) || !Array.isArray(body.keys) || body.keys.length < 1 || body.keys.length > 20) fail(503, 'identity_provider_unavailable');

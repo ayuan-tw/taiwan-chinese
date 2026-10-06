@@ -1,7 +1,7 @@
 # 澄詞 開発管理
 
 ## このソースの版
-Ver.6.10.1（feature branchのCloudflareテスト公開版）
+Ver.6.10.2（feature branchのCloudflareテスト公開版）
 
 ## Ver.6のテーマ
 辞書エンジン分離＋リスニング強化

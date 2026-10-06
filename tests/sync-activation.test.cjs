@@ -9,7 +9,7 @@ const configuration = JSON.parse(read('cloudflare/wrangler.jsonc'));
 const version = JSON.parse(read('version.json')).version;
 
 test('activation changes the cache identity and every runtime asset reference together', () => {
-  assert.equal(version, '6.10.1');
+  assert.equal(version, '6.10.2');
   const cacheName = 'chengci-v' + version.replaceAll('.', '-') + '-offline';
   assert.ok(read('service-worker.js').includes("const CACHE_NAME = '" + cacheName + "'"));
   assert.ok(read('service-worker.js').includes("const APP_VERSION = '" + version + "'"));
@@ -51,7 +51,7 @@ for (const name of ['applyAppUpdate', 'refreshOfflineCache']) test(name + ' does
   const start = source.indexOf('async function ' + name + '(');
   const end = source.indexOf(name === 'applyAppUpdate' ? '\nasync function loadChangelog' : "\nif('serviceWorker' in navigator)", start);
   assert.ok(start > 0 && end > start);
-  const cachedReleases = new Set(['chengci-v6-10-0-offline', 'chengci-v6-10-1-offline', 'future-release', 'another-app']);
+  const cachedReleases = new Set(['chengci-v6-10-0-offline', 'chengci-v6-10-2-offline', 'future-release', 'another-app']);
   let filled = false;
   const cache = { addAll: async () => { filled = true; } };
   const caches = { keys: async () => [...cachedReleases], delete: async key => { cachedReleases.delete(key); }, open: async () => cache };
@@ -59,6 +59,6 @@ for (const name of ['applyAppUpdate', 'refreshOfflineCache']) test(name + ' does
   const context = { window: { caches }, caches, navigator: { serviceWorker: { getRegistrations: async () => [registration] } }, document: { getElementById: () => null }, setTimeout() {}, location: {}, setOfflineStatus() {}, setUpdateState() {}, showAppToast() {} };
   vm.runInNewContext(source.slice(start, end) + '; globalThis.runUpdate = ' + name, context);
   await context.runUpdate();
-  assert.deepEqual([...cachedReleases], ['chengci-v6-10-0-offline', 'chengci-v6-10-1-offline', 'future-release', 'another-app']);
+  assert.deepEqual([...cachedReleases], ['chengci-v6-10-0-offline', 'chengci-v6-10-2-offline', 'future-release', 'another-app']);
   if (name === 'refreshOfflineCache') assert.equal(filled, true);
 });
