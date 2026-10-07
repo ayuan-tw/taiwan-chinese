@@ -1,0 +1,20 @@
+// Produces a Pages Direct Upload Advanced Mode directory. Does not deploy.
+import {spawnSync} from 'node:child_process';
+import {cp,readFile,mkdir,rm,writeFile} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+import {vocabularySeed} from './vocabulary-seed.mjs';
+const tag=process.env.CHENGCI_BUILD_TAG || '';
+if(tag && !/^[a-z0-9-]{1,80}$/.test(tag))throw new Error('Invalid isolated build tag');
+const suffix=tag?'-'+tag:'';
+const built=spawnSync(process.execPath,[fileURLToPath(new URL('./build-assets.mjs',import.meta.url))],{stdio:'inherit'});
+if(built.status!==0)process.exit(built.status || 1);
+const destination=fileURLToPath(new URL('./pages-public'+suffix+'/',import.meta.url));
+await rm(destination,{recursive:true,force:true});
+await mkdir(destination,{recursive:true});
+await cp(fileURLToPath(new URL('./public'+suffix+'/',import.meta.url)),destination,{recursive:true});
+const workerSource=await readFile(new URL('./worker.mjs',import.meta.url),'utf8');
+const seedImport="import { vocabularySeed } from './vocabulary-seed.mjs';";
+if(!workerSource.includes(seedImport))throw new Error('Pages seed import needs review.');
+await writeFile(destination+'_worker.js',workerSource.replace(seedImport,'const vocabularySeed = '+JSON.stringify(vocabularySeed)+';'));
+await writeFile(destination+'_routes.json',JSON.stringify({version:1,include:['/*'],exclude:[]},null,2)+'\n');
+console.log('Prepared Pages Advanced Mode assets with _worker.js and all-route handling. Sync stays disabled until separately configured. No upload or deployment.');

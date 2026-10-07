@@ -161,7 +161,7 @@
     const freeText=document.getElementById("freeSpeakText");
     if(freeText&&value){freeText.value=value;if(typeof saveFreeSpeakText==="function")saveFreeSpeakText();}
     const {panel}=getElements();
-    if(panel)setTimeout(()=>panel.scrollIntoView({behavior:"smooth",block:"start"}),50);
+    if(panel)setTimeout(()=>{if(!window.ChengciNavigation || window.ChengciNavigation.isPanelVisible("speechPracticePanel"))panel.scrollIntoView({behavior:"smooth",block:"start"});},50);
     startRecognition(value);
   }
 
@@ -176,11 +176,12 @@
   }
 
   function releaseForPlayback(){
-    if(!recognition||!isListening)return false;
+    if(!recognition)return false;
     const session=recognition;
     recognition=null;
     setListeningState(false);
     if(session){
+      setStatus("音声認識を停止しました。続きを読むときは認識開始を押してね。");
       try{session.abort();}catch(error){}
       return true;
     }

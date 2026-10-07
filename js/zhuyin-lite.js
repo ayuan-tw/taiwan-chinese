@@ -13,6 +13,8 @@
   const chinese=/[\u3400-\u9fff]/;
   let phraseMap=null;
   let charMap=null;
+  let entrySignature=null;
+  let dictionarySource=null;
   function splitZhuyin(z){return String(z||"").trim().split(/\s+/).filter(Boolean);}
   function plainChinese(s){return String(s||"").replace(/[^\u3400-\u9fff]/g,"");}
   function addEntry(map, text, zh){
@@ -22,17 +24,24 @@
   }
   function collectEntries(){
     const entries=[];
-    try{ if(typeof words!=="undefined") words.forEach(w=>{entries.push([w.word,w.zhuyin]); entries.push([w.example,w.exampleZhuyin]);}); }catch(e){}
     try{ if(typeof patterns!=="undefined") patterns.forEach(p=>{entries.push([p.pattern,p.zhuyin]); entries.push([p.answer,p.answerZhuyin]); entries.push([p.example,p.exampleZhuyin]);}); }catch(e){}
     try{ if(typeof phrases!=="undefined") phrases.forEach(p=>entries.push([p.text,p.zhuyin])); }catch(e){}
+    // Saved vocabulary takes precedence over generic bundled examples. Once
+    // the canonical provider is ready, deleted/edited seed words cannot leak
+    // back through a separate lexical conversion cache.
+    const vocabulary=window.ChengciPersonalCards?.allWords?.() || (typeof words!=="undefined"?words:[]);
+    vocabulary.forEach(w=>{entries.push([w.word,w.zhuyin]);entries.push([w.example,w.exampleZhuyin]);});
     return entries;
   }
   function build(){
-    if(phraseMap&&charMap)return;
+    const entries=collectEntries();
+    const signature=JSON.stringify(entries);
+    if(phraseMap&&charMap&&entrySignature===signature&&dictionarySource===window.ChengciZhuyinDictionary)return;
     const dict=window.ChengciZhuyinDictionary||{phrases:{},chars:{}};
+    entrySignature=signature;dictionarySource=window.ChengciZhuyinDictionary;
     phraseMap=new Map(Object.entries(dict.phrases||{}));
     charMap=Object.assign({},dict.chars||{},manualCharMap);
-    collectEntries().forEach(([text,zh])=>{
+    entries.forEach(([text,zh])=>{
       addEntry(phraseMap,text,zh);
       const t=plainChinese(text); const z=splitZhuyin(zh);
       if(t&&z.length===t.length){

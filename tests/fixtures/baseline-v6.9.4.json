@@ -1,0 +1,29 @@
+{
+  "baselineCommit": "dc84fa47605c41a575916f87e1415bffa12559ff",
+  "collections": {
+    "words": {
+      "count": 149,
+      "sha256": "b0a539d9adf699b34a9d0ccadab628f8005d368f198a8670718cf4b0292ad093"
+    },
+    "patterns": {
+      "count": 97,
+      "sha256": "9097b01c3f4a07d86aa3138cc008e12818c13aa720dfe43edb00aa7a6c8f004f"
+    },
+    "phrases": {
+      "count": 11,
+      "sha256": "350138e441a102c7d0134fb2b8afced38772d1b57436d6ecddadde6b26b9909a"
+    },
+    "idioms": {
+      "count": 33,
+      "sha256": "3e668e5385127d26a892adefcb2f1eaa3cf015c29ad9ab5cbc4d4adf9e498a39"
+    },
+    "compositionPrompts": {
+      "count": 244,
+      "sha256": "09e3cb79948585ae8f429af5712cd1e908f5e440252a88d4df01e26555868c64"
+    }
+  },
+  "files": {
+    "data/zhuyin-dict.js": "3bb394ca800b9aca6641162d8c7a1b19cbad8e760e392debd8d1ff64f323b453"
+  },
+  "repository": "https://github.com/ayuan-tw/taiwan-chinese"
+}

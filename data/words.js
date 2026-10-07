@@ -1568,4 +1568,104 @@ const immediatePattern=patterns.find(p=>p.pattern==="一～就～");
 if(immediatePattern)immediatePattern.tags=[...new Set([...(immediatePattern.tags||[]),"一下就"] )];
 
 
+// Ver.6.10.0: 2026-10-03までの追加候補6件。指定された分類と例文を保つ。
+// 句型の追加は compositionPrompts の生成より前に行う。
+const v610Words = [
+  {
+    category:"会話", word:"很愛到處插一腳", zhuyin:"ㄏㄣˇ ㄞˋ ㄉㄠˋ ㄔㄨˋ ㄔㄚ ㄧˋ ㄐㄧㄠˇ",
+    meaning:"何にでも首を突っ込みたがる",
+    note:"插一腳は『加わる・一枚かむ』。很愛到處を付けると、あちこちのことに関わりたがる感じ。軽いツッコミにもなるが、言い方によっては批判的に響く。",
+    example:"就真的很愛到處插一腳。", exampleZhuyin:"ㄐㄧㄡˋ ㄓㄣ ㄉㄜ˙ ㄏㄣˇ ㄞˋ ㄉㄠˋ ㄔㄨˋ ㄔㄚ ㄧˋ ㄐㄧㄠˇ",
+    tags:["会話","カジュアル","驚き・ツッコミ"]
+  },
+  {
+    category:"意志・勇気", word:"敢", zhuyin:"ㄍㄢˇ",
+    meaning:"あえて～する／～する勇気・度胸がある",
+    note:"敢＋動詞で、怖がらずに・思い切ってすること。例文は『よくそんなこと言えるね～』という軽いツッコミ。妳は女性への『あなた』。",
+    example:"妳還真敢說耶～", exampleZhuyin:"ㄋㄧˇ ㄏㄞˊ ㄓㄣ ㄍㄢˇ ㄕㄨㄛ ㄧㄝ～",
+    tags:["会話","動詞","驚き・ツッコミ"]
+  },
+  {
+    category:"動作", word:"弄東弄西", zhuyin:"ㄋㄨㄥˋ ㄉㄨㄥ ㄋㄨㄥˋ ㄒㄧ",
+    meaning:"あれこれいじる／あれこれ作業する",
+    note:"何をしているか細かく言わず、いろいろ触ったり作業したりすること。東・西は具体的な方角ではなく『あれこれ』の感じ。弄はここではㄋㄨㄥˋ。",
+    example:"我一到週末就會一直弄東弄西。", exampleZhuyin:"ㄨㄛˇ ㄧˊ ㄉㄠˋ ㄓㄡ ㄇㄛˋ ㄐㄧㄡˋ ㄏㄨㄟˋ ㄧˋ ㄓˊ ㄋㄨㄥˋ ㄉㄨㄥ ㄋㄨㄥˋ ㄒㄧ",
+    tags:["会話","日常","カジュアル"]
+  }
+];
+for (const item of v610Words) { if (!words.some(w => w.word === item.word)) words.push(item); }
+
+const v610Patterns = [
+  {
+    category:"程度", pattern:"沒那麼～", zhuyin:"ㄇㄟˊ ㄋㄚˋ ㄇㄜ˙ ～",
+    meaning:"そんなに～じゃない／そこまで～ではない",
+    note:"予想や相手の言い方ほど程度が高くないことを表す。沒那麼難＝『そんなに難しくない』。後ろに形容詞などを置く。",
+    example:"其實沒那麼難。", exampleZhuyin:"ㄑㄧˊ ㄕˊ ㄇㄟˊ ㄋㄚˋ ㄇㄜ˙ ㄋㄢˊ",
+    tags:["程度","否定","会話"],
+    prompts:[
+      {ja:"実はそんなに難しくない",answer:"其實沒那麼難。",zhuyin:"ㄑㄧˊ ㄕˊ ㄇㄟˊ ㄋㄚˋ ㄇㄜ˙ ㄋㄢˊ"},
+      {ja:"今日はそこまで暑くない",answer:"今天沒那麼熱。",zhuyin:"ㄐㄧㄣ ㄊㄧㄢ ㄇㄟˊ ㄋㄚˋ ㄇㄜ˙ ㄖㄜˋ"}
+    ]
+  },
+  {
+    category:"選択・妥協", pattern:"只好＋V", zhuyin:"ㄓˇ ㄏㄠˇ ＋ V",
+    meaning:"仕方なく～する／～するしかない",
+    note:"本意ではないが、ほかに方法がなくそうする感じ。只能は可能な選択肢の制限に重点があり、只好は『仕方なく』という気持ちが出やすい。用下去なら『使い続ける』がはっきりする。",
+    example:"不行的話，我只好一直用了。", exampleZhuyin:"ㄅㄨˋ ㄒㄧㄥˊ ㄉㄜ˙ ㄏㄨㄚˋ，ㄨㄛˇ ㄓˇ ㄏㄠˇ ㄧˋ ㄓˊ ㄩㄥˋ ㄌㄜ˙",
+    tags:["会話","選択","妥協"],
+    prompts:[
+      {ja:"だめなら、ずっと使うしかないな",answer:"不行的話，我只好一直用了。",zhuyin:"ㄅㄨˋ ㄒㄧㄥˊ ㄉㄜ˙ ㄏㄨㄚˋ，ㄨㄛˇ ㄓˇ ㄏㄠˇ ㄧˋ ㄓˊ ㄩㄥˋ ㄌㄜ˙"},
+      {ja:"だめなら、仕方なく使い続けるしかないな",answer:"不行的話，就只好一直用下去了。",zhuyin:"ㄅㄨˋ ㄒㄧㄥˊ ㄉㄜ˙ ㄏㄨㄚˋ，ㄐㄧㄡˋ ㄓˇ ㄏㄠˇ ㄧˋ ㄓˊ ㄩㄥˋ ㄒㄧㄚˋ ㄑㄩˋ ㄌㄜ˙"}
+    ]
+  }
+];
+for (const item of v610Patterns) { if (!patterns.some(p => p.pattern === item.pattern)) patterns.push(item); }
+
+const v610Phrases = [
+  {
+    category:"返答", text:"才沒有！今天只是剛好啦。", zhuyin:"ㄘㄞˊ ㄇㄟˊ ㄧㄡˇ！ㄐㄧㄣ ㄊㄧㄢ ㄓˇ ㄕˋ ㄍㄤ ㄏㄠˇ ㄌㄚ˙",
+    meaning:"してないもん！今日はたまたまだって！",
+    note:"からかわれたり決めつけられたりした時のくだけた返し。才沒有は『そんなことない・してない』という強い否定。只是剛好は『たまたまそうなっただけ』。",
+    tags:["あゆあんの口ぐせ","会話","返答","カジュアル"]
+  }
+];
+for (const item of v610Phrases) { if (!phrases.some(p => p.text === item.text)) phrases.push(item); }
+
+// Small complement comparison: keep both forms together in the existing pattern cards.
+const complementPatterns = [
+  {
+    category:"補語", pattern:"記牢／記得很牢", zhuyin:"ㄐㄧˋ ㄌㄠˊ／ㄐㄧˋ ˙ㄉㄜ ㄏㄣˇ ㄌㄠˊ",
+    meaning:"しっかり覚える／しっかり覚えている",
+    note:"牢は「しっかり定着・固定する」イメージ。記＋牢は記憶が定着する結果、記＋得＋很牢は覚えている確かさに注目。時制の区別ではない。文法名：結果補語／状態・程度補語。抓牢（ㄓㄨㄚ ㄌㄠˊ）＝しっかりつかむ。組み合わせは表現ごとに覚える。",
+    example:"這句話，我記牢了。", exampleZhuyin:"ㄓㄜˋ ㄐㄩˋ ㄏㄨㄚˋ，ㄨㄛˇ ㄐㄧˋ ㄌㄠˊ ˙ㄌㄜ",
+    tags:["補語","牢","学習"],
+    prompts:[
+      {ja:"この一言はしっかり覚えた（記＋牢で）",answer:"這句話，我記牢了。",zhuyin:"ㄓㄜˋ ㄐㄩˋ ㄏㄨㄚˋ，ㄨㄛˇ ㄐㄧˋ ㄌㄠˊ ˙ㄌㄜ"},
+      {ja:"この一言はしっかり覚えている（記＋得＋很牢で）",answer:"這句話，我記得很牢。",zhuyin:"ㄓㄜˋ ㄐㄩˋ ㄏㄨㄚˋ，ㄨㄛˇ ㄐㄧˋ ˙ㄉㄜ ㄏㄣˇ ㄌㄠˊ"}
+    ]
+  }
+];
+for (const item of complementPatterns) { if (!patterns.some(p => p.pattern === item.pattern)) patterns.push(item); }
+
+// Organize existing complement patterns without changing their identities or examples.
+const complementPatternNotes = [
+  ["V 完了", "補語の完は「し終える」という結果を補う。了とは役割が別。"],
+  ["把 A 換成 B", ""],
+  ["V＋成＋結果", ""],
+  ["V 得到／V 不到", "V＋得＋到／V＋不＋到で、到が表す結果まで実現できるかを言う。"],
+  ["想不起來", "想＋不＋起來。思い出すという結果を実現できない形。"],
+  ["想不出來", "想＋不＋出來。考えても言葉や案を出せない形。"],
+  ["看起來～", "起來には、見た印象や判断を述べる補語の派生用法もある。"],
+  ["看起來像～", "看＋起來で見た印象を述べ、その後の像で「何に似ているか」を言う。"],
+  ["聽起來～", "起來には、聞いた印象や判断を述べる補語の派生用法もある。"],
+  ["動詞＋得＋程度", ""],
+  ["V＋個不停", "個が動詞と補語をつなぎ、不停が動作の続く様子を補う。"]
+];
+for (const [pattern, note] of complementPatternNotes) {
+  const item = patterns.find(p => p.pattern === pattern);
+  if (!item) continue;
+  item.tags = [...new Set([...(item.tags || []), "補語"])];
+  if (note) item.note += " " + note;
+}
+
 const compositionPrompts = patterns.flatMap(p => p.prompts.map(q => ({...q, type:"pattern", source:p.pattern, category:p.category})));

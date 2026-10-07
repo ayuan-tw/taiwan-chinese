@@ -1,0 +1,31 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "chengci-owner-sync",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-06",
+  "workers_dev": true,
+  "preview_urls": false,
+  "keep_vars": true,
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "not_found_handling": "none"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "chengci-personal",
+      "database_id": "bce0a174-a115-44dd-a921-8a2d8daddf68",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "observability": {
+    "enabled": false
+  },
+  "vars": {
+    "APP_ORIGIN": "https://chengci-owner-sync.ayuannoa.workers.dev",
+    "GOOGLE_CLIENT_ID": "526792052093-3cpchc83orl8pb6rnadttl3n40gn0mei.apps.googleusercontent.com",
+    "SYNC_ENABLED": "true"
+  }
+}
