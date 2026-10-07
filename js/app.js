@@ -698,10 +698,10 @@ async function refreshOfflineCache(){
   }
   setOfflineStatus('オフライン用データを更新中…');
   try{
-    const currentCache='chengci-v6-12-1-offline';
+    const currentCache='chengci-v6-12-2-offline';
     // Cache retirement belongs to service-worker activation, not this page.
     const cache=await caches.open(currentCache);
-    await cache.addAll(['./','./index.html?v=6.12.1','./css/style.css?v=6.12.1','./js/app.js?v=6.12.1','./js/navigation.js?v=6.12.1','./js/recall-cards.js?v=6.12.1','./sync-config.js?v=6.12.1','./js/card-store.js?v=6.12.1','./js/cloudflare-sync.js?v=6.12.1','./js/study-sync.js?v=6.12.1','./js/auth-handoff.js?v=6.12.1','./js/legacy-migration.js?v=6.12.1','./js/migration-ui.js?v=6.12.1','./js/personal-cards.js?v=6.12.1','./js/shortcut-export.js?v=6.12.1','./js/data-model.js?v=6.12.1','./data/words.js?v=6.12.1','./data/zhuyin-dict.js?v=6.12.1','./js/zhuyin-lite.js?v=6.12.1','./js/speech-recognition.js?v=6.12.1','./manifest.json?v=6.12.1','./version.json','./CHANGELOG.md','./assets/icon.svg']);
+    await cache.addAll(['./','./index.html?v=6.12.2','./css/style.css?v=6.12.2','./js/app.js?v=6.12.2','./js/navigation.js?v=6.12.2','./js/recall-cards.js?v=6.12.2','./sync-config.js?v=6.12.2','./js/card-store.js?v=6.12.2','./js/cloudflare-sync.js?v=6.12.2','./js/study-sync.js?v=6.12.2','./js/auth-handoff.js?v=6.12.2','./js/legacy-migration.js?v=6.12.2','./js/migration-ui.js?v=6.12.2','./js/personal-cards.js?v=6.12.2','./js/shortcut-export.js?v=6.12.2','./js/data-model.js?v=6.12.2','./data/words.js?v=6.12.2','./data/zhuyin-dict.js?v=6.12.2','./js/zhuyin-lite.js?v=6.12.2','./js/speech-recognition.js?v=6.12.2','./manifest.json?v=6.12.2','./version.json','./CHANGELOG.md','./assets/icon.svg']);
     setOfflineStatus('オフライン保存OK。次回から電波なしでも起動できます。', true);
   }catch(e){
     setOfflineStatus('保存更新に失敗しました。ネット接続がある時にもう一度試してね。');
@@ -709,7 +709,7 @@ async function refreshOfflineCache(){
 }
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./service-worker.js?v=6.12.1').then(async(reg)=>{
+    navigator.serviceWorker.register('./service-worker.js?v=6.12.2').then(async(reg)=>{
       await reg.update();
       await navigator.serviceWorker.ready;
       if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
@@ -772,7 +772,7 @@ searchWords=function(){let k=document.getElementById("searchInput").value.trim()
 window.addEventListener("load",()=>{renderIdiomTagButtons();renderIdiomList(idioms);updateStats();});
 
 // Ver.5.7.0 app update manager
-const CHENGCI_APP_VERSION = '6.12.1';
+const CHENGCI_APP_VERSION = '6.12.2';
 let pendingAppVersion = null;
 let updateReloading = false;
 

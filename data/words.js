@@ -1647,4 +1647,25 @@ const complementPatterns = [
 ];
 for (const item of complementPatterns) { if (!patterns.some(p => p.pattern === item.pattern)) patterns.push(item); }
 
+// Organize existing complement patterns without changing their identities or examples.
+const complementPatternNotes = [
+  ["V 完了", "補語の完は「し終える」という結果を補う。了とは役割が別。"],
+  ["把 A 換成 B", ""],
+  ["V＋成＋結果", ""],
+  ["V 得到／V 不到", "V＋得＋到／V＋不＋到で、到が表す結果まで実現できるかを言う。"],
+  ["想不起來", "想＋不＋起來。思い出すという結果を実現できない形。"],
+  ["想不出來", "想＋不＋出來。考えても言葉や案を出せない形。"],
+  ["看起來～", "起來には、見た印象や判断を述べる補語の派生用法もある。"],
+  ["看起來像～", "看＋起來で見た印象を述べ、その後の像で「何に似ているか」を言う。"],
+  ["聽起來～", "起來には、聞いた印象や判断を述べる補語の派生用法もある。"],
+  ["動詞＋得＋程度", ""],
+  ["V＋個不停", "個が動詞と補語をつなぎ、不停が動作の続く様子を補う。"]
+];
+for (const [pattern, note] of complementPatternNotes) {
+  const item = patterns.find(p => p.pattern === pattern);
+  if (!item) continue;
+  item.tags = [...new Set([...(item.tags || []), "補語"])];
+  if (note) item.note += " " + note;
+}
+
 const compositionPrompts = patterns.flatMap(p => p.prompts.map(q => ({...q, type:"pattern", source:p.pattern, category:p.category})));

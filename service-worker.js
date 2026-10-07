@@ -1,5 +1,5 @@
-const CACHE_NAME = 'chengci-v6-12-1-offline';
-const APP_VERSION = '6.12.1';
+const CACHE_NAME = 'chengci-v6-12-2-offline';
+const APP_VERSION = '6.12.2';
 const OFFLINE_ASSETS = [
   './',
   './index.html',

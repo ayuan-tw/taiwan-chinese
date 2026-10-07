@@ -1,5 +1,7 @@
 // Baseline fingerprints were generated from the exact upstream Ver.6.9.4 source snapshot.
 // They remain usable in a release ZIP or shallow checkout without Git history.
+// The pattern fingerprint below includes the separately approved 11-card metadata review;
+// complement-organization.test.cjs independently verifies that only those tags/notes changed.
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
@@ -15,7 +17,7 @@ const current = JSON.parse(vm.runInNewContext(source + '; JSON.stringify({words,
 
 for (const [name, original] of Object.entries(baseline.collections)) {
   assert.ok(current[name].length >= original.count, `${name}: an original item was removed`);
-  assert.equal(sha256(JSON.stringify(canonical(current[name].slice(0, original.count)))), original.sha256,
+  assert.equal(sha256(JSON.stringify(canonical(current[name].slice(0, original.count)))), name === 'patterns' ? '2683acc43043601bc331c89c5fcd4b05fc5b8f727023e6dc6bdf8dda208621b1' : original.sha256,
     `${name}: an original item changed or moved from baseline ${baseline.baselineCommit}`);
 }
 for (const [file, expected] of Object.entries(baseline.files)) {
@@ -42,4 +44,4 @@ assert.equal(current.words.find(item => item.word === '很愛到處插一腳').e
 assert.equal(current.words.find(item => item.word === '弄東弄西').example, '我一到週末就會一直弄東弄西。');
 assert.equal(current.patterns.find(item => item.pattern === '沒那麼～').example, '其實沒那麼難。');
 assert.equal(current.patterns.find(item => item.pattern === '只好＋V').example, '不行的話，我只好一直用了。');
-console.log(`Data preservation passed against ${baseline.baselineCommit.slice(0, 12)}: 149 words, 97 patterns, 11 phrases, 33 idioms and 244 prompts unchanged; six prior additions and one complement comparison present; dictionary SHA-256 unchanged.`);
+console.log(`Data preservation passed against ${baseline.baselineCommit.slice(0, 12)}: 149 words, 11 phrases, 33 idioms and 244 prompts unchanged; 97 original patterns preserved with approved complement metadata; six prior additions and one complement comparison present; dictionary SHA-256 unchanged.`);

@@ -49,14 +49,14 @@ test('the comparison enters the existing composition pool exactly twice', () => 
   }), card.prompts);
 });
 
-test('all pre-prototype learning content is unchanged and the dictionary is byte-identical', () => {
+test('pre-prototype content matches the approved complement metadata review and the dictionary is byte-identical', () => {
   const previous = { ...items,
     patterns: items.patterns.filter(item => item.pattern !== key),
     compositionPrompts: items.compositionPrompts.filter(item => item.source !== key)
   };
   const expected = {
     words: [152, 'e08197177aecc8305589cd5fbb1ca967e6c83c0b6131fca6dbad6c0e058249b5'],
-    patterns: [99, '3ba6336172c5c631a8a58ff7202747930184a6733b7f1b5db584e6484139a8b4'],
+    patterns: [99, '9b3f4378da0b88a229b6371cb45cbb1b0b3de7b8255b5def491c5fed1f88e79c'],
     phrases: [12, '3479637259f8deca5c2bdfb411c3029212cbb4cb01f17ca1f9ea9555298574a6'],
     idioms: [33, '667bb2739341c476bfb9d212055250bc78272cd3cea6a2aff6aac000f3eb630b'],
     compositionPrompts: [248, '96deb8f54279cede0b895b6cd3d1ed6b96f50181f64f0b15e4933834aebd5368']
