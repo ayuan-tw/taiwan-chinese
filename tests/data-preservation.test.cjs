@@ -24,22 +24,22 @@ for (const [file, expected] of Object.entries(baseline.files)) {
 
 const expectedAdditions = {
   words: ['word', ['很愛到處插一腳', '敢', '弄東弄西']],
-  patterns: ['pattern', ['沒那麼～', '只好＋V']],
+  patterns: ['pattern', ['沒那麼～', '只好＋V', '記牢／記得很牢']],
   phrases: ['text', ['才沒有！今天只是剛好啦。']]
 };
 for (const [name, [key, expected]] of Object.entries(expectedAdditions)) {
   const added = current[name].slice(baseline.collections[name].count);
-  assert.deepEqual(added.map(item => item[key]), expected, `${name}: the six approved additions changed`);
+  assert.deepEqual(added.map(item => item[key]), expected, `${name}: the approved additions changed`);
   for (const item of added) {
     assert.ok(item.zhuyin && item.meaning && item.note, `${item[key]}: learning content is incomplete`);
     assert.equal(current[name].filter(other => other[key] === item[key]).length, 1, `${item[key]}: duplicate card`);
   }
 }
 assert.equal(current.idioms.length, baseline.collections.idioms.count, 'No idiom additions were requested');
-assert.equal(current.compositionPrompts.length, baseline.collections.compositionPrompts.count + 4);
+assert.equal(current.compositionPrompts.length, baseline.collections.compositionPrompts.count + 6);
 assert.equal(current.words.find(item => item.word === '敢').example, '妳還真敢說耶～');
 assert.equal(current.words.find(item => item.word === '很愛到處插一腳').example, '就真的很愛到處插一腳。');
 assert.equal(current.words.find(item => item.word === '弄東弄西').example, '我一到週末就會一直弄東弄西。');
 assert.equal(current.patterns.find(item => item.pattern === '沒那麼～').example, '其實沒那麼難。');
 assert.equal(current.patterns.find(item => item.pattern === '只好＋V').example, '不行的話，我只好一直用了。');
-console.log(`Data preservation passed against ${baseline.baselineCommit.slice(0, 12)}: 149 words, 97 patterns, 11 phrases, 33 idioms and 244 prompts unchanged; six additions present; dictionary SHA-256 unchanged.`);
+console.log(`Data preservation passed against ${baseline.baselineCommit.slice(0, 12)}: 149 words, 97 patterns, 11 phrases, 33 idioms and 244 prompts unchanged; six prior additions and one complement comparison present; dictionary SHA-256 unchanged.`);

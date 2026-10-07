@@ -1631,4 +1631,20 @@ const v610Phrases = [
 ];
 for (const item of v610Phrases) { if (!phrases.some(p => p.text === item.text)) phrases.push(item); }
 
+// Small complement comparison: keep both forms together in the existing pattern cards.
+const complementPatterns = [
+  {
+    category:"補語", pattern:"記牢／記得很牢", zhuyin:"ㄐㄧˋ ㄌㄠˊ／ㄐㄧˋ ˙ㄉㄜ ㄏㄣˇ ㄌㄠˊ",
+    meaning:"しっかり覚える／しっかり覚えている",
+    note:"牢は「しっかり定着・固定する」イメージ。記＋牢は記憶が定着する結果、記＋得＋很牢は覚えている確かさに注目。時制の区別ではない。文法名：結果補語／状態・程度補語。抓牢（ㄓㄨㄚ ㄌㄠˊ）＝しっかりつかむ。組み合わせは表現ごとに覚える。",
+    example:"這句話，我記牢了。", exampleZhuyin:"ㄓㄜˋ ㄐㄩˋ ㄏㄨㄚˋ，ㄨㄛˇ ㄐㄧˋ ㄌㄠˊ ˙ㄌㄜ",
+    tags:["補語","牢","学習"],
+    prompts:[
+      {ja:"この一言はしっかり覚えた（記＋牢で）",answer:"這句話，我記牢了。",zhuyin:"ㄓㄜˋ ㄐㄩˋ ㄏㄨㄚˋ，ㄨㄛˇ ㄐㄧˋ ㄌㄠˊ ˙ㄌㄜ"},
+      {ja:"この一言はしっかり覚えている（記＋得＋很牢で）",answer:"這句話，我記得很牢。",zhuyin:"ㄓㄜˋ ㄐㄩˋ ㄏㄨㄚˋ，ㄨㄛˇ ㄐㄧˋ ˙ㄉㄜ ㄏㄣˇ ㄌㄠˊ"}
+    ]
+  }
+];
+for (const item of complementPatterns) { if (!patterns.some(p => p.pattern === item.pattern)) patterns.push(item); }
+
 const compositionPrompts = patterns.flatMap(p => p.prompts.map(q => ({...q, type:"pattern", source:p.pattern, category:p.category})));
